@@ -37,6 +37,10 @@
     flex-direction: column;
   }
 
+  .headingText {
+    font-size: 2rem;
+  }
+
   .secondHeading {
     margin-top: var(--gap-half);
   }
