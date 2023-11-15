@@ -1,0 +1,79 @@
+---
+title: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 5"
+tags: [Miscellaneous, Python]
+description: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 5"
+slug: solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-5
+date: 2022-05-11
+---
+
+It might be true that testing code sometimes seem like a waste of time to a novice programmer. It may seem that you have to put extra effort to write some tests for your code to see if it is working properly. Maybe you have already done some "testing" on your own, plugging different variables here and there. So, why should you even spend another slice of your time to write tests? Well, if you have such thoughts, get ready to appreciate the value of writing tests, because, on [this week on Unit Tests](https://cs50.harvard.edu/python/2022/weeks/5/), we have some exciting problems to solve. 
+
+As it is pointed out in the lecture, the earlier you get into the habit of testing your code, the better. Unit tests kind of tell a story about your program, and how it should work. Writing good tests not only makes your program more robust, but it is also an indication that you have precisely defined how your program should behave and what to expect. 
+
+This week, we are visiting some old problems we have solved throughout this course to write tests for them. Instead of using Python's [built-in unittest module](https://docs.python.org/3/library/unittest.html), we are going to use the beautiful [pytest library](https://docs.pytest.org/) to implement our tests. Actually, you are already given hints weeks ago to solve all the problems of this week, so, in this post, there will be shorter paragraphs under each problem's header — except for the first one, which we shall see the crux of this week's problem set. 
+
+As always, I assume you have read the problem explanations, and I have to give the **disclaimer** that these posts are intended as a guide, or, (like today) just musings about the problem sets. Let's begin.
+
+## Testing my twttr
+In [this problem](https://cs50.harvard.edu/python/2022/psets/5/test_twttr/), we are reimplementing [Setting up my twttr](https://cs50.harvard.edu/python/2022/psets/2/twttr/) from Problem Set 2 to write some tests for it. Since [we have already seen](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-2/) how that problem could be solved, there is no need to go over it again. We need to create two files, called `twttr.py` and `test_twttr.py`, inside a new directory called `test_twttr`. 
+We only need to restructure our code if it is different from what is given in the problem explanation, separating `shorten` and `main` functions. 
+
+It is kind of like you are writing `check50` for your own code, and, `check50` checks your own `check50`!
+
+Now, how can we go about thinking of what kinds of tests to implement? To be honest, the answer to that question is hidden inside the _original_ problem descriptions, specifically, the explanations of _how to test_ them. However, there might be an issue: the tests that you write must catch the same bugs that the staff version looks for. So, this week, `check50` is the kind of the hint itself: Its tests are actually the edge cases that you should be considering. It is the ultimate test to test your tests! Pretty sure, the CS50 staff wrote tests on their own to check `check50` as well... But, that is another thing to think about later. For this week, the main thing to consider is to implement the original tests from the original problems themselves. So, if that original problem's `check50` was testing certain inputs, you should create your tests similar to those tests that once tested your code for that problem.
+
+I know, it was painful to read and perhaps hard to wrap your mind around, but hopefully the idea is clear. It took me longer to figure that out!
+
+So, in the first problem, we know that the `shorten` function expects a `str`, so, we can test it by _asserting_ that for a given string, our function outputs the vowel-stripped version of it. I cannot outright give a hint of what other tests should look like, but you are already given the answer three weeks ago. 
+
+The main thing to do here is to write simple `assert` statements inside our test functions. Say, we want to test if a `cast_spell` function works:
+
+```python
+# 📁 spells.py
+
+def cast_spell(incantation):
+    return f'{incantation.upper()}!'
+```
+
+A test for it would be like:
+
+```python
+# 📁 test_spells.py
+
+from spells import cast_spell
+
+def test_cast_spell():
+    assert cast_spell('lumos') == 'LUMOS!'
+    assert cast_spell('expecto patronum') == 'EXPECTO PATRONUM!'
+```
+
+Also, we do not need any kind of `try...except`, because `pytest` generously takes care of that. Let's now take a look at the next one.
+
+## Back to the Bank
+Again, in [this problem](https://cs50.harvard.edu/python/2022/psets/5/test_bank/), we are reimplementing another past problem, namely [Home Federal Savings Bank](https://cs50.harvard.edu/python/2022/psets/1/bank/). It was an easy and fun problem to solve, as [we have done it before](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-1/). 
+
+We know that the `value` function should return an `int`. And, for the tests? Well, the original problem explanation literally tells you that. Three kinds of tests (_literally_ given to you before) — with two variations (for uppercase and lowercase) — should suffice. 
+
+## Re-requesting a Vanity Plate
+In [this problem](https://cs50.harvard.edu/python/2022/psets/5/test_plates/), we are visiting the good old [Vanity Plates](https://cs50.harvard.edu/python/2022/psets/2/plates/) from Problem Set 2. We have already [went through it before](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-2/). The main thing is to use the kinds of tests and inputs that the staff used to check our problem — which is also given in the _original_ problem explanation. If they are not enough, well, remember there was also a test for the full alphabetical string — which should be valid as long as its length is within the limits.
+
+## Refueling
+In [the last problem](https://cs50.harvard.edu/python/2022/psets/5/test_fuel/) of this week, we go back to [Fuel Gauge](https://cs50.harvard.edu/python/2022/psets/3/fuel/), which [we have seen before](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-3/) on the week on Exceptions. Again, we need to implement the same kind of tests as the `check50` for the original problem, and the cases to consider are clear in the _original_ problem explanation once more. The new thing here is handling the exceptions with `pytest`. As always, [the documentation](https://docs.pytest.org/en/latest/how-to/assert.html#assertions-about-expected-exceptions) itself clearly shows you how to do that. For example, we can look at how to handle a `ValueError` in our `cast_spell` function:
+
+```python
+# 📁 test_spells.py
+
+import pytest
+
+from spells import cast_spell
+
+def test_valid_type():
+    with pytest.raises(ValueError):
+        cast_spell(62442)
+```
+
+Now, `pytest` will make sure that passing `62442` as the input to `cast_spell` function results in a `ValueError`. And, that is pretty much it for this problem as well.
+
+I know, this week was a bit confusing. I cannot give many hints this week, but you have a better place to go for hints: `check50` itself for the original problems. The CS50 staff has already considered many edge cases, so, you do not even have to come up with your own examples. You are only implementing the same `check50` tests that once checked your own code! It is quite satisfying to think about.
+
+Next week, we are going to dive into the world of File I/O, and perhaps of some exciting libraries as well. Until then, happy coding!

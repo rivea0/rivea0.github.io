@@ -1,0 +1,147 @@
+---
+title: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 8"
+tags: [Miscellaneous, Python]
+description: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 8"
+slug: solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-8
+date: 2022-06-02
+---
+
+[This week](https://cs50.harvard.edu/python/2022/weeks/8/), we are solving [the last problem set](https://cs50.harvard.edu/python/2022/psets/8/) of the course. We have covered so much, solved many beautiful problems, and after this week, are ready to implement our very own final project! I know that is a bit emotional indeed, but let me give the **disclaimer** one last time, that this series was intended as a guide for thinking about the problems, instead of just providing the solutions. And, as always, it is assumed you have read the problem explanations already. You can find the previous posts in this series in [the archive](https://rivea0.github.io/blog/).
+
+So far, we have been writing our code [procedurally](https://en.wikipedia.org/wiki/Procedural_programming), but this time, we are going to make use of the Object-Oriented programming paradigm, which is definitely exciting as we will explore each problem. Let's dive in!
+
+## Seasons of Love
+For [the first problem](https://cs50.harvard.edu/python/2022/psets/8/seasons/) of this week, we are working with a `datetime` object, instead of writing our own classes from scratch. We need to convert days to minutes; 365 days for example, results in 525600 minutes.
+
+Many hints are given for this problem, but let's take a look. For starters, we want our code to be more modular this week as we learn to appreciate the importance of [modularity](https://en.wikipedia.org/wiki/Modularity) in programming. The things that we need to do, is to get an input (in the `YYYY-MM-DD` format), convert the input to a date object, calculate the difference of days between that given date and today, convert days to minutes, and finally convert minutes to words. Well, it may seem like a lot, but thinking this way actually makes our job easier. 
+First, as always we can _try_ to get an input, and if we have a `ValueError`, we can _exit_ the program with a string like `Invalid date` which will result in an exit status of 1. If we type `help(sys.exit)` to get information from the documentation in this case, it literally tells you that:
+
+```
+Help on built-in function exit in module sys:
+
+exit(status=None, /)
+    Exit the interpreter by raising SystemExit(status).
+
+    If the status is omitted or None, it defaults to zero (i.e., success).
+    If the status is an integer, it will be used as the system exit status.
+    If it is another kind of object, it will be printed and the system
+    exit status will be one (i.e., failure).
+```
+
+We have been doing this for many weeks, so, no problem.
+
+If the given format is okay (something like `2021-06-02`, for example), we calculate how many days have passed from _today_. Before that, remember that input returns a string, and we need integers to construct a date object, so _year_, _month_, and _day_ that are _split_ from the input should be integers. 
+To calculate how many days have passed, `datetime.date` has some methods that can come in handy here. It is already in the hints section, so if we _subtract_ the given date from _today_, we have a `timedelta` object returned, which has its own instance attributes like, say, _days_.
+After we have the days, we need to convert it to minutes, and how to do it is also given in the problem explanation. Literally, it is this:
+
+```python
+def days_to_minutes(days):
+    return days * 24 * 60
+```
+
+After we have our minutes, finally we need to convert it to a nice looking output. The `inflect` library, which I have come to fall in love with, is tremendously helpful. What we need to do is literally to convert a _number to words_, but we only want commas and _no "and words"_. 
+So, instead of looking like this:
+
+```python
+'five hundred and twenty-five thousand, six hundred'
+```
+
+Our output should look like this:
+
+```python
+'Five hundred twenty-five thousand, six hundred minutes'
+```
+
+Notice that we also want our output to be _capitalized_. Again, a way too obvious hint, but remember that the documentation is your friend. 
+
+After these, we have not much to do except writing our tests for our code. _How to Test_ is also given in the problem explanation, all the test specifications should be enough to implement. We are already familiar with testing, and have been used to it already for many weeks, so it should be quite easy as well. Now, let's check out the next one.
+
+## Cookie Jar
+Here we are, the time has come to write our first class in this course. In [this problem](https://cs50.harvard.edu/python/2022/psets/8/jar/), we are storing cookies in a jar. Simple, and really fun as it sounds.
+
+We are given a template already, and need to implement the functions `__init__`, `__str__`, `deposit`, `withdraw`, `capacity`, and `size`. First of all, remember that `__init__` function initializes our object construction. So, let's say you have just bought a cookie jar from the store, how many cookies are in it when you first bought it? It has a capacity (which in this case, we default to 12), but since there are no cookies in it, its _size_ is 0 when you initially buy it. As you deposit cookies into it, its size increases, and as you withdraw cookies, its size decreases. Therefore, for the initialization, our cookie jar has the capacity of whatever is given as capacity, and the size of 0.
+
+For `deposit` and `withdraw` functions, we need to be careful with some edge cases. For example, if the total number of cookies after you deposit is more than the capacity, we should _raise_ a `ValueError`. Otherwise, we increase the size. And, if the number to withdraw is more than the _size_, we also _raise_ `ValueError`. Otherwise, we decrease the size.
+
+Now, here is the interesting part. While working with capacity and size, you realize that we not only read their values, but also _set_ their values. As the template already indicates, we will use `@property` decorator for the _getter_ functions. How do we do the _setters_, then? Before answering that question, let's take a look at an example. Let's say we have created a class for a Hogwarts homework essay, and we are mainly concerned with the number of words in it. We have a default word limit of 2000 (which, I guess, would be nothing for Hermione), but it can be changed. We can add or remove words, but the important thing is how we handle the word limit and the number of words we have written already. It sounds complicated, but let's take a look at this:
+
+```python
+class HogwartsEssay:
+    def __init__(self, word_limit=2000):
+        self.word_limit = word_limit
+        self.words_written = 0
+
+    def __str__(self):
+        return f'Number of words written: {self.words_written}'
+
+    def add_words(self, number_of_words_to_add):
+        ...
+
+    def remove_words(self, number_of_words_to_remove):
+        ...
+
+    @property
+    def word_limit(self):
+        return self._word_limit
+
+    @word_limit.setter
+    def word_limit(self, word_limit):
+        if word_limit < 0:
+            raise ValueError
+        self._word_limit = word_limit
+
+    @property
+    def words_written(self):
+        return self._words_written
+
+    @words_written.setter
+    def words_written(self, words_written):
+        self._words_written = words_written
+```
+
+As you can see, `add_words` and `remove_words` functions are omitted so as not to be _way too close_ to the solution. But, the idea is simple. We can _get_ the word limit as well as the number of words written, we can also _set_ the word limit as long as it is not less than 0, and set the number of words written. It might be a weird example, but the idea is similar to the example given in the lecture. If you have seen the lecture, then you are already familiar with using getters and setters. This is really a fun problem, even though at a glance might seem complicated a bit. That is really all we need to do. And, for the tests, _How to Test_ section is again your friend, as it tells you what to do almost step-by-step. 
+
+And, before we go into the next one, how to print the cookies? Well, we print a cookie emoji for the number of cookies in the jar, and, [thank Guido](https://en.wikipedia.org/wiki/Guido_van_Rossum) that Python is an amazing language — and has a _string operator_ that helps us _repeat_ our strings.
+
+On to the next (and the last) problem!
+
+## CS50 Shirtificate
+The very [last problem](https://cs50.harvard.edu/python/2022/psets/8/shirtificate/) to solve, is kind of customizable. We are making our very own [I took CS50 shirts](https://cs50.harvardshop.com/collections/print/products/i-took-cs50-unisex-t-shirt), with the help of `fpdf2` library.
+
+Here, the mantra we have for weeks is realized, has taken shape, and stares at us in flesh: "When in doubt, read the documentation." The problem has only five specifications, and beyond them, you are free to use any methods, and create any kind of shirt that you want to.
+
+To be honest, though, this freedom may be a bit intimidating. Although, the bare minimum solution for this problem takes 15-20 lines of code, finding the right methods and attributes to use can be a bit of a pain. Let's see how we can manage to create a shirt with only the required specifications.
+
+As the hints section suggests, we can add a subclass that inherits `FPDF` class itself to write a header. In this case, our header will be the text "CS50 Shirtificate" that is centered horizontally.
+
+The code in the tutorial for header function _literally_ helps you with that, only we _do not need to render a logo_. Inside our function for header, we can just _set our font_, _move cursor to right_, _print title_ with _aligning it to center_ and without a border, and _perform a line break_. These are already given to you. After the line break, we can call the `image` method to insert our image (shirtificate.png). In order to do it properly, we can set its width to **e**ffective **p**age **w**idth (which is just the width of the page minus the horizontal margins) to make our job easier. Notice that [the documentation](https://pyfpdf.github.io/fpdf2/fpdf/fpdf.html#fpdf.fpdf.FPDF.image) has this to say for the width option for images:
+
+> **`w`** : `float`
+>
+> optional width of the image. If not specified or equal to zero, it is automatically calculated from the image size. Pass `pdf.epw` to scale horizontally to the full page width.
+
+We also need to put our text `{name} took CS50`, where `name` is the return value of `input`, on our shirt. We need to color our text white here. For that, you might have already checked the [documentation for text styling](https://pyfpdf.github.io/fpdf2/TextStyling.html); however, it might be still a bit confusing. 
+
+Now, not to deviate from the subject but, if you are really stuck (which was my experience at some point), the link to the documentation above has also a [link to a file](https://github.com/PyFPDF/fpdf2/blob/master/test/text/test_text_mode.py) called `test_text_mode.py` in the library's source code. Take a look at this:
+
+```python
+def test_text_modes(tmp_path):
+    pdf = FPDF(format=(350, 150))
+    pdf.add_page()
+    pdf.set_font("Helvetica", size=80)
+    with pdf.local_context(fill_color=(255, 128, 0)):
+        pdf.cell(txt="FILL default")
+    with pdf.local_context(text_color=(0, 128, 255)):
+        pdf.cell(txt=" text mode")
+    pdf.ln()
+
+    ...
+```
+
+And here it is, easy-to-use _text color_ for the local context! Remember that our color should be white, whose RGB value represents all the colors to the brim. _With local context_, we create a cell, this time for the text on the shirt. Its height, as the hints in the problem explanation suggest, can be _negative_ to adjust it properly, say, something like 250ish.  For the width, our old friend **e**ffective **p**age **w**idth is helpful. We also _align_ it to the center, of course.
+
+Now that our class seems to be done, it is time to create an instance, _add page_ with the appropriate _orientation_ and _format_, and _output_ the `shirtificate.pdf`. With that, that is the end of our problem and the problem sets! 
+
+It has been a really fun and delightful journey, but, now that the problem sets are actually over, it does not mean that we are done, yet. Next week, for the last installment in this series, we are going to think about things we have learned so far, what more to discover, and how to continue onward to the final project and beyond.
+
+Until then, happy coding.

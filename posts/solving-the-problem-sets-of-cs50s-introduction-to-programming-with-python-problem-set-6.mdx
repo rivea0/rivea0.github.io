@@ -1,0 +1,133 @@
+---
+title: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 6"
+tags: [Miscellaneous, Python]
+description: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 6"
+slug: solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-6
+date: 2022-05-17
+---
+
+This week on [File I/O](https://cs50.harvard.edu/python/2022/weeks/6/), we have exciting new problems to solve. Working with files programmatically is inevitable, and as always, Python makes our life easier — with many useful libraries. As always, I assume you have read the problem explanations on [this week's Problem Set](https://cs50.harvard.edu/python/2022/psets/6/), and have to give the **disclaimer** that you are not going to find any full solutions to these problems here, but rather gain some insights into how to think about them.
+
+You can find all the previous posts on past problem sets [here in the archive](https://rivea0.github.io/blog/). Now, let's dive into this week's problems!
+
+## Lines of Code
+[This one](https://cs50.harvard.edu/python/2022/psets/6/lines/) was really fun to solve, even if it might get a little complicated when we start to think about some edge cases. What we want to do here is to count valid lines of code to have an understanding about the complexity of the program. We have worked with the  `sys` module, and `try...except` blocks before, and know that they come in handy in this problem. Handling too many and too few command-line arguments is straightforward, as we have done that before; and we can also catch something like a `FileNotFoundError` at this point. The hints for the problem already tells you to consider checking if a string _ends with_ a certain substring — which is useful for checking if the filename we are given is indeed a Python file. The main thing to think about here is that considering the file is now valid, we need to count only the valid lines — that being, not blank lines or comments, but just the code itself. Let's say we want to do exactly that, ignore comments and blank lines, and count the lines of our code. So, let's say our code looks extremely silly like this:
+
+```python
+def get_names():
+    """
+    Prints each name in the golden trio.
+    Example output:
+      1: Harry
+      2: Hermione
+      3: Ron
+    """
+    # The names of the golden trio
+    the_golden_trio = ['Harry', 'Hermione', 'Ron']
+    
+    for index, name in enumerate(the_golden_trio):
+        print(f'{index + 1}: {name}')
+```
+
+The total number of valid lines to count should be four. Remember, we are ignoring the docstring altogether, as well as the comment (`# The names of the golden trio`), and the blank line just after `the_golden_trio`. A conditional is easy to implement in this case, we are counting lines as long as they do not _start with_ a hashtag, and _slice_ the lines between triple quotation marks. Or, we can calculate the number of lines of docstring and decrease it from the total value of valid lines at the end. However, we need to know the indices (or, indexes) for that job. To get the indices of lines in a file, I already have given the hint of _enumerating_, which might come in handy. 
+
+That is okay. However, it is easy to complicate things. Consider the example below:
+
+```python
+def summon_item(item):
+    result = f'Accio {item}!' # Do the Accio spell
+    return result 
+```
+
+If we were to look for a line with a hashtag in it to ignore it, in this example, we would be ignoring the line where we create the `result` variable. This is not good. And, although inline comments are [not very encouraged to use in Python](https://peps.python.org/pep-0008/#inline-comments), they exist nonetheless. The one way to get around that, of course, is to look if the _left_ side of the hashtag is _whitespace_ or not — which might look something like this:
+
+```python
+has_inline_comment = '#' in line and not line.split('#')[0].isspace()
+```
+
+In this case, `has_inline_comment` is a boolean variable that checks if the left side of the hashtag contains only whitespace characters. 
+
+Of course, this is just one way to do it for solving this specific little issue, there are surely better ways to do it. As always, there are many ways to solve a problem, and that is the beauty of programming and computer science in general. Again, at anytime in doubt, [the documentation](https://docs.python.org/3/index.html) is your friend.
+
+## Pizza Py
+[This problem](https://cs50.harvard.edu/python/2022/psets/6/pizza/) is easy to implement if you have already watched the lecture. This time we work with `csv` files, with a help from Python's own `csv` module. We have two files, `regular.csv` and `sicilian.csv` which we can download into our directory with `wget` command. We are still checking for the too few or too many command-line arguments, as well as checking if the file is in the right format and catching the `FileNotFoundError`. There is no reason to go over these since we have already done implemented them exactly in the previous problem. Throughout these posts, I constantly remind the importance of the reading the documentation correctly, and again, this problem is another example to remind us of it. The `tabulate` library's [documentation](https://pypi.org/project/tabulate/) _literally_ tells you how to solve this problem. Using a simple _reader_ object for our `csv` files — whose _first rows_ we can consider as _headers_ — is more than enough to tabulate it. Remember that we are using the grid _table format_, and specifying the _headers_. Enough with the hints, the solution is already _literally_ in the documentation itself. Let's look at the next problem.
+
+## Scourgify
+In [this problem](https://cs50.harvard.edu/python/2022/psets/6/scourgify/), we are casting a spell! Well, you may already be thinking that writing in Python is like magic itself — I mean, it even reads like English. However, let's not lose ourselves in the appreciation of Python, but take a look at this problem.
+
+We need to clean the data that we are given. In this case, we are again working with a `csv` file. We take an input file and need to create an output as a "cleaned" version of the input. We have two fields, `name` and `house`. The `name` field has the first and last name of the students all in one place inside a quotation mark, and we need to _split_ them. We have been splitting strings for a while, so we know what to do here. We also have been checking for similar edge cases for the previous problems this week, only remember that this time, our command-line arguments has the length of three — as we include both the input and output filenames. Now, let's think about it. How to go about creating an output file that has the clean data?
+
+The one thing we need to do is to _open_ up an output file to _write_ on it, create a `DictWriter` instance with the appropriate `fieldnames`, and _write the header_. These are, again, given in the "hints" section of the problem explanation, as well as _literally_ in [the documentation](https://docs.python.org/3/library/csv.html#csv.DictWriter). I mean, the documentation actually provides you with enough knowledge on how to do it, no more no less. At this point, we need to open up the input file in _reader_ mode, and read each _row_ so that we can split the names appropriately. But, as we read each row, we also need to _write a row_ to our output file — which is, again, shown to you in the example in the documentation link above. That is actually all that we need to do. Perhaps what might be tricky is when to open the files. You might already know that using `with open()` for files closes them automatically so that you do not have to be bothered with closing the files manually. So, at some point in this problem, you may have come across with this beautiful looking error:
+
+```shell
+ValueError: I/O operation on closed file.
+```
+
+Well, now that you can guess exactly the reason of that, you may consider using the `with open()` block inside another. Or, again, you can come up with many ways to solve it, this is just one way to do it. Perhaps with much more practice, we can refine our taste of solutions gradually. But now, let's take a look at the final problem of this week.
+
+## CS50 P-Shirt
+For [the last problem](https://cs50.harvard.edu/python/2022/psets/6/shirt/) of the week, we are to solve a fun problem, where we need to make Muppets wear [I took CS50](https://cs50.harvardshop.com/products/i-took-cs50-unisex-t-shirt) shirts. For those who are familiar with the CS50x itself, I am also a fan of [I finished Tideman shirts](https://cs50.harvardshop.com/collections/limited-run/products/i-finished-tideman-cs50-t-shirt), which speaks a lot about [that famous problem](https://cs50.harvard.edu/x/2022/psets/3/tideman/). Passing the tests of `check50` for it is a kind of spiritual experience which I recommend to anyone who is willing to go through it, but anyway, let's not digress, and look at our problem at hand.
+
+We are using the `Pillow` library, perhaps the most handy library for working with images in Python. It is vast, hence its documentation; but we are given pretty much all that we need to do in the hints of the problem explanation itself. Even if this problem looks daunting, fear not, because we are going to have fun, and only barely scratching the surface of the `Pillow` library.
+
+Since the hints are already quite extensive, let's take a look at mainly the trickiest part: pasting an image onto another.
+
+Consider this night sky image:
+
+![Night sky. Credit: Jack Weirick (@weirick) on Unsplash](https://images.unsplash.com/photo-1520034475321-cbe63696469a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80)
+
+Let's say we want to paste this `png` image representing Saturn onto our night sky:
+
+![Saturn png image. Credit: pixabay](https://cdn.pixabay.com/photo/2012/04/10/17/38/saturn-26618_960_720.png)
+
+Our code might look like this:
+
+```python
+from PIL import Image, ImageOps
+
+
+def main():
+    saturn = Image.open('saturn.png')
+    night_sky = Image.open('night-sky.jpg')
+    result = ImageOps.fit(night_sky, saturn.size)
+    result.paste(saturn, saturn)
+    result.save('result.jpg')
+
+
+if __name__ == '__main__':
+    main()
+```
+
+In this case, our `result.jpg` will look like this:
+
+![Result image with Saturn pasted on Night Sky](/blog/post-images/2022-05-17/result.jpg)
+
+Opening the images is straightforward. If you look in [the documentation](https://pillow.readthedocs.io/en/stable/reference/ImageOps.html#PIL.ImageOps.fit) for `ImageOps.fit()`, it is quite explanatory as well:
+
+> Returns a resized and cropped version of the image, cropped to the requested aspect ratio and size.
+
+And, the `paste()` [function](https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.paste), takes three arguments: `im` to paste, `box` for the region to paste into, and `mask` for mask image. Since we adjusted sizes to _fit_, we do not need to specify `box`. In `result.paste(saturn, saturn)`, the first `saturn` is the image to paste, and the second one is the mask image for updating only the specific pixels in this case. From the documentation: 
+
+> If a mask is given, this method updates only the regions indicated by the mask. (...) Where the mask is 255, the given image is copied as is. Where the mask is 0, the current value is preserved.
+
+Because our `png` image has [alpha channel](https://en.wikipedia.org/wiki/Alpha_compositing) for transparency — value of 0 usually indicates full transparency —, the original image to be pasted on will be preserved for these transparent pixels. Actually, why don't we look at some of these pixel values of our own Saturn image:
+
+```python
+print(list(saturn.getdata(band=3))[:100])
+```
+
+`band=3` indicates the alpha channel, and we are getting the first 100 values. We are also converting it into a `list` to see it.
+
+The output looks like this:
+
+```python
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 2, 0, 0, 0, 0, 0, 0, 3, 22, 42, 62, 82, 111, 135, 147, 160, 173, 186, 199, 211, 224, 237, 244, 242, 241, 239, 237, 236, 234, 233, 231, 230, 221, 206, 192, 179, 165, 150, 136, 122, 108, 94, 81, 67, 51, 35, 19, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 3, 2, 2, 1, 0, 0, 0, 0]
+```
+
+We have a bunch of zeroes! In this case, we know that the pixels of our original `jpg` image will not be lost when these transparent pixels are pasted onto it because the "mask" argument exactly takes care of that issue.
+
+Since we also need to implement the error-checking (which we have done a lot and know how to think about and do at this point), and the rest is again _literally_ given in the hints sections in the problem explanation, there is not much left to it at all. Now that we have even seen a little behind-the-scenes of the usage of `Pillow` library for this problem, there is nothing to stop us from being encouraged to pass the tests for this problem. You can also take a look at [this Real Python article](https://realpython.com/image-processing-with-the-python-pillow-library/#superimposition-of-images-using-imagepaste) to learn more about using `Pillow`.
+
+Next week, we are diving into the world of Regular Expressions, which is, admittedly, can be a bit of a nuisance for beginners. But, have no worries, it is actually a superpower in disguise, and it is going to be fun to use them in the next week's problem set. 
+
+Until then, happy coding.

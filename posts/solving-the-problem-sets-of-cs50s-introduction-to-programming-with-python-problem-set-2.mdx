@@ -1,0 +1,120 @@
+---
+title: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 2"
+tags: [Miscellaneous, Python]
+description: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 2"
+slug: solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-2
+date: 2022-04-19
+---
+
+Another week, another problem set. This time, we are focusing on loops.
+You can read the previous posts on [Problem Set 0](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-0/) and [Problem Set 1](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-1/). To remind you of the **disclaimer**, these are only walkthroughs to think about the problem itself instead of providing the solution right away. With that said, let's begin!
+
+## Camel Case
+In [this problem](https://cs50.harvard.edu/python/2022/psets/2/camel/), we need to turn a string given in camel case `likeThis` into a snake case `like_this` which is recommended in Python for variable names.
+
+Well, since this week is on loops, we can loop through each character one by one. You can think of concatenating each character to a result string, which you can initialize as empty at first. When it comes to an uppercase character —you can get help from the documentation to check if a character _is upper_—, instead of merely concatenating the character to our result string, you can add an underscore and that character in lowercase.
+
+One thing that Python makes it easier to write one-liners, is [list comprehensions](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions). Let's say we want to work with snake case, and turn it into a nice and readable title string. An easy way to do it would be something like this:
+
+```python
+snake_case_str = 'a_very_important_heading'
+
+result = snake_case_str.replace('_', ' ').title()
+
+print(result) # A Very Important Heading
+```
+
+Replacing the underscores with spaces, can also be done in a different way:
+
+```python
+snake_case_str = 'a_very_important_heading'
+
+result = ''.join([' ' if char == '_' else char for char in snake_case_str]).title()
+
+print(result) # A Very Important Heading
+```
+
+It is true that it looks uglier, but we can see how list comprehensions work. It is literally the same as this:
+
+```python
+snake_case_str = 'a_very_important_heading'
+result = []
+
+for char in snake_case_str:
+    if char == '_':
+        result.append(' ')
+    else:
+        result.append(char)
+
+result = ''.join(result).title()
+
+print(result) # A Very Important Heading
+```
+
+The code explains itself, in the list comprehension, we simply loop over the given string, if the character is an underscore we append a space character to our `result` list, else we append the character itself.  In the end, we use `join` with an empty string to turn the list into a readable string and use `title` to make it in title case.
+
+You can use a similar approach if you want to solve this one with a list comprehension. And that is all there is to it. 
+
+## Coke Machine
+[This one](https://cs50.harvard.edu/python/2022/psets/2/coke/) is reminiscent of the [Cash](https://cs50.harvard.edu/x/2022/psets/1/cash/) problem in CS50's own Introduction to Computer Science, only perhaps a simplified version of it. What to do is simple: we, as a machine, will only accept 25 or 10 or 5 cents for a bottle of Coke we sell for 50 cents.
+
+A `while` loop might sound more reasonable to use on this one, we can simply check if our amount —which is 50— is still more than 0, in this case we can keep asking the user for input and decreasing from the amount accordingly. One important thing to remember is to check for error handling; now that we are working with integers, it is better to remember that `input` returns a string, and we need to do type casting. Also, we need to check that the user should only insert either 25, or 10, or 5 cents. If that is the case, we can then decrease the given value from our amount. If they give in total 50 cents, our job is done, and we do not owe them any change. But what if the user gives more than 50 cents? In this case, you can see that if we keep decreasing the amount, we will reach a negative number. Well, since the value itself would still be the same, the _absolute value_ of it would enough to solve the problem.
+For example, if the user enters `25`, then `10`, then `25` again — we know that our change due would be `-10` if we keep decreasing the value. We need to output `Change owed: 10`, in this case, we can simply get the absolute value and be done with our work. And how to get the absolute value? Once again, when in doubt, _check the documentation_.
+
+## Just setting up my twttr
+The title of [this problem](https://cs50.harvard.edu/python/2022/psets/2/twttr/) comes from a [tweet](https://twitter.com/jack/status/20?s=20&t=EdMJ7PnkB6OXvd_M74qVdQ) from Jack Dorsey back in 2006. What we need to do is get an input string and drop any characters that are vowels. Instead of checking for each vowel though, using a vowels list, and checking if the character is in that list might result in a more elegant solution. Also, list comprehensions would be nice to use as well. Actually, let's see this elegance.
+
+Let's say that we do not like spaces and commas. I know it is nonsense, but, for the sake of this example, bear with it for a minute. So, we do not want to see any spaces or any commas in our string, but we are okay with everything else. And, who cares if our string looks squeezed anyway? Let's see what we can do:
+
+```python
+hated_ones = [' ', ',']
+
+input_str = 'Eye of rabbit, harp string hum, turn this water into rum'
+
+cleaned = ['' if char in hated_ones else char for char in input_str]
+
+result = ''.join(cleaned)
+
+print(result) # Eyeofrabbitharpstringhumturnthiswaterintorum
+```
+
+Yes, I know. Sorry, had to give that [reference](https://harrypotter.fandom.com/wiki/Eye_of_rabbit,_harp_string_hum,_turn_this_water_into_rum).
+
+Now that we have seen how to solve a similar looking problem, this one is quite easy as well. Next one.
+
+## Vanity Plates
+[This problem](https://cs50.harvard.edu/python/2022/psets/2/plates/) requires us to check some conditionals if the given string is valid to be a vanity plate.
+This one is slightly hard to explain without giving any spoilers. One thing I can tell you is that list comprehensions are a huge saver and makes it easier to solve the problem in a more clear way. Say, you want to see how many digits a string has. Easy:
+
+```python
+s = 'CS50'
+number_of_digits = len([char for char in s if char.isdigit()])
+
+print(number_of_digits) # 2
+```
+
+Of course, as David Malan would say, I only know the existence of `isdigit` because I _checked the documentation before_. 
+
+Another gem from the documentation for this problem specifically, is the checking for all the punctuation characters. While we still have not talked about libraries yet —it is coming in week 4—, if you want to go ahead, know that Python has a [built-in module specifically for strings](https://docs.python.org/3/library/string.html) which makes life a whole lot easier. 
+
+Now, we have four specific conditions to check. The length of the input string must be within the bounds of 2 and 6 — both included. That is easy as we have done that before with a one-liner in ["Meal Time" problem](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-1/) last week. Another condition is to check if the first two characters are _alphabetical_. It speaks of itself, if you have checked the documentation. Another thing to check is to see if the string is clear of spaces and punctuations. I believe, list comprehensions work pretty well here too. We have actually almost done the same thing in the last problem "Just setting up my twttr". And lastly, we need to check if the string ends with digits if it contains any — so that we know that the digits are not in the middle or the beginning. 
+
+Without giving away too much, one way to think about this would be something like this: We can get the length of the digits in our string, and check if the rest of the string from that index on is only digits. We have done that before, but it might be better understood with an example:
+
+```python
+s = 'CS50'
+number_of_digits = len([char for char in s if char.isdigit()])
+
+print(s[-number_of_digits:]) # 50
+```
+
+Using negative indexing, we can traverse the string backwards from that index which would be the length of the digit characters in this case.
+
+Checking these four cases is all we need to do. I know I have talked about list comprehensions a lot, but they go very well with loops. If that is still not clear, you can always use the normal expanded version as well, as in the Camel Case example. And, to be honest, more complicated loops makes list comprehensions much more complex. Being reasonable is way to go.
+
+## Nutrition Facts
+And, here is the perhaps easiest(?) [problem](https://cs50.harvard.edu/python/2022/psets/2/nutrition/) this week, in terms of implementing logic.
+A dictionary is the most obvious choice to use in this case. All we need to do is to create a dictionary — fruit names as keys, and their calories as values using [this poster](https://cs50.harvard.edu/python/2022/psets/2/nutrition/Nutrition-Information-for-Raw-Fruits---small-PDF-Poster.pdf), and return calories for a given fruit. The lecture video already shows how to do that, so that is it. Also, if we want to return literally nothing instead of `None`, we can return an empty string. And, this is the end of this problem as well as the end of the Problem Set 2.
+
+Next week's problem set is going to be on Exceptions, and it is really exciting to wait for what kinds of problems we will be solving. 
+See you next week, and happy coding.

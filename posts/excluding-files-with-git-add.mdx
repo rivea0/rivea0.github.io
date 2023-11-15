@@ -1,0 +1,33 @@
+---
+title: Excluding files (and folders) with `git add`
+tags: [Git]
+description: Excluding files (and folders) with git add.
+slug: excluding-files-with-git-add
+date: 2023-07-03
+---
+
+When you're using `git add`, there is a chance that you might be in a situation where you want to include a bunch of files (or folders) but exclude only some of them. Adding each file one by one manually is, of course, unthinkable, but thankfully there is a very short and sweet way to do it. 
+
+Here comes the magical command:
+
+```
+git add -A ':!<file_path>'
+```
+
+In my case, I had to rename a lot of folders, and wanted to `git add` them all at once, but exclude one of the untracked folders and a couple of other modified files. 
+
+Besides tons of other deleted files, `git status` was showing this:
+
+![Changes not staged for commit and untracked files](/blog/post-images/2023-07-03/git-add-screenshot0.png)
+
+Since I wanted to exclude only the `list-ops` folder and the `wordy` files, I had to use the command:
+
+```
+git add -A ':!list-ops' ':!wordy/wordy.py' ':!wordy/wordy_test.py'
+```
+
+And, it worked 🎉:
+
+![Changes to be commited with those not staged for commit and untracked files](/blog/post-images/2023-07-03/git-add-screenshot.png)
+
+All thanks to [Chirag Chhuchha's blog post](https://kodewithchirag.com/easy-way-to-exclude-files-during-git-add).

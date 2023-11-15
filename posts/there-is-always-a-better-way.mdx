@@ -1,0 +1,65 @@
+---
+title:  There is Always a Better Way, Most Likely Waiting as a Built-In Method in the Standard Library
+description: How Python's standard library is powerful, especially to a beginner.
+tags: [Python, Refactoring, Clean Code]
+slug: there-is-always-a-better-way
+date: 2022-02-17
+---
+
+I was reading Al Sweigart's *Beyond the Basic Stuff with Python* –which I would recommend if you're already finished *Automate the Boring Stuff*– when I had a realization.
+Consider the following terrible looking code:
+
+```python
+def check_holiday(season):
+    if season == 'Winter':
+        holiday = 'New Year\'s Day' 
+    elif season == 'Spring':
+        holiday = 'May Day' 
+    elif season == 'Summer':
+        holiday = 'Juneteenth' 
+    elif season == 'Fall':
+        holiday = 'Halloween' 
+    else:
+        holiday = 'Personal day off'
+
+    return holiday
+```
+
+It looks indeed not that good. Of course, what you would do if you are somewhat a beginner who simply wants to follow best practices, is to come up with a better and more elegant way of writing this same piece of code – even though it might be laughable and pitiable to your future self, and to anyone who would like to pity you anyway.
+
+What I've thought at first when I saw the code above was that I would simply use a dictionary to store the seasons as keys and corresponding holidays as their values, and that's it. And, I would loop over the whole dictionary to compare the seasons and assign the holiday. It would look like this:
+
+```python
+def check_holiday(season):
+    seasons = {'Winter': 'New Year\'s Day',  
+               'Spring': 'May Day',  
+               'Summer': 'Juneteenth',  
+               'Fall': 'Halloween'}
+
+    holiday = 'Personal day off'
+
+    for k, v in seasons.items():
+        if season == k:
+            holiday = v
+
+    return holiday
+```
+
+At first glance, it seemed okay. It is definitely cleaner than the one with bunch of if-else statements. But, as always, if you have come up with a better way of doing something, know that there is even a better way of doing it. Like this:
+
+```python
+def check_holiday(season):
+    holiday = {'Winter': 'New Year\'s Day',  
+               'Spring': 'May Day',  
+               'Summer': 'Juneteenth',  
+               'Fall': 'Halloween'}.get(season, 'Personal day off')
+    return holiday
+```
+
+It is obvious when you realize that you've already had that better tool in your toolkit that comes built-in for you all along, and that's embarrassing. 
+
+So, what this code does is the same thing, only that we use Python's built-in `get` method on a dictionary to simply return the season's value – assigning it to holiday if the season exists, if not, returning 'Personal day off' as the default value.
+
+Of course, there might be a better way of doing this, but what I've come to realize is that there is always a better choice, and it doesn't hurt to remember that –in the case of Python– you have already tons of built-in methods in the standard library to use, which would most likely be better and more efficient than what you would write anyway. 
+
+This might be a trivial thing, but it is nevertheless good food for thought. So, if you think you have found a better way of doing something, there's even a better way than that. And it might be under your nose all along, simply waiting for you to remember to use it.

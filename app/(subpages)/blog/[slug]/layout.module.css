@@ -1,0 +1,41 @@
+.wrapper .date {
+  color: var(--gray);
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.content {
+  overflow: auto;
+  color: var(--gray-alpha);
+  font-weight: 500;
+  margin-left: var(--gap-double);
+}
+
+.icon {
+  color: var(--gray) !important;
+  padding: var(--gap-half) !important;
+}
+
+.date {
+  color: var(--gray);
+}
+
+.title h1 {
+  margin-top: 0.75rem;
+  color: #4c4f69;
+  font-size: 2rem;
+}
+
+.tags {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.tags > li {
+  list-style: none;
+  background-color: rgba(156, 160, 250, 0.2);
+  color: var(--gray);
+  padding: 2px 8px;
+  font-size: 1rem;
+}

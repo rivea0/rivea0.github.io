@@ -1,0 +1,151 @@
+---
+title: "async and await: Promises Simplified"
+tags: [JavaScript]
+description: "async and await: Promises Simplified"
+slug: async-and-await-promises-simplified
+date: 2023-03-07
+---
+
+[Promises in JavaScript](https://rivea0.github.io/blog/javascript-promises/) were there to save the day from being stuck in callback hell. But the thing is, `.then()` chains could eventually turn into a hell of their own. Since the human mind works synchronously, it might be hard to grasp asynchronous code when it becomes too tangled. Luckily, we have yet another thing to save the day — `async` and `await`!
+
+We can write asynchronous functions that look like synchronous code with the keyword `async` in front of the `function` keyword:
+
+```javascript
+async function doStuff { /* body */ }
+```
+
+Async functions always return a promise implicitly, even if you do something like this:
+
+```javascript
+async function getTheMeaning() {
+  return 42;
+}
+```
+
+What is returned will be a promise with the resolved value of `42`.
+It might look similar to the piece of code below (there will come a "_but_"):  
+
+```javascript
+function getTheMeaning() {
+  return Promise.resolve(42);
+}
+```
+
+_But_, they are not equivalent. The subtlety lies in the references these two functions will point to for a given promise. For example, let's create a new promise that both the plain function and the async function will resolve:
+
+```javascript
+let theMeaning = new Promise((resolve, reject) => {
+  resolve(42);
+});
+
+function plainGetTheMeaning() {
+  return Promise.resolve(theMeaning);
+}
+
+async function asyncGetTheMeaning() {
+  return theMeaning;
+}
+```
+
+When we inspect if they are pointing to the same value, we see that they behave differently:
+
+```javascript
+console.log(theMeaning === plainGetTheMeaning()); // true
+console.log(theMeaning === asyncGetTheMeaning()); // false
+```
+
+So, in fact, maybe it is better to think of an `async` function as a function that returns a promise, and wrapped around our original function, like this one:
+
+```javascript
+function getTheMeaning() {
+  return new Promise(function(resolve, reject) {
+    try {
+      resolve((function() { return 42; } )()); 
+    }
+    catch(e) {
+      reject(e);
+    }
+  });
+}
+```
+
+Now in this case, we see that it is not like `plainGetTheMeaning()`, and much more like the `async` function itself when it comes to references:
+
+```javascript
+let theMeaning = new Promise((resolve, reject) => {
+  resolve(42);
+});
+
+function getTheMeaning() {
+  return new Promise(function(resolve, reject) {
+    try {
+      resolve((function() { return 42; } )());
+    }
+    catch(e) {
+      reject(e);
+    }
+  });
+}
+
+console.log(theMeaning === getTheMeaning()); // false
+```
+
+
+`async` functions can also have `await` expressions. In fact, `await` can only be used within `async` functions (as long as it is [not inside a module](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await)).
+
+`await` basically waits for a promise to settle, and returns the fulfillment value of that promise. A simple example:
+
+```javascript
+async function getToDo(toDoId) {
+  let response = await fetch(`https://jsonplaceholder.typicode.com/todos/${toDoId}`);
+  /*
+  toDo is going to be the json object:
+  { userId: 1, id: 1, title: 'delectus aut autem', completed: false }
+  */
+  let toDo = await response.json();
+  return toDo.completed;
+}
+```
+
+Here, the return value itself will be a promise, so it feels like we need to use `await` for it. Like this:
+
+```javascript
+let isCompleted = await getToDo(1); // Not really...
+```
+
+But remember, `await` can be used inside another `async` function! Now that we can't use `await`, we need to handle this thing with our good friends `.then()` and `.catch()`:
+
+```javascript
+getToDo(1)
+  .then(isCompleted => console.log(isCompleted))
+  .catch(e => { throw e });
+```
+
+The important thing to point out is that `await` just waits for its promise to settle and pauses the execution of the function. It is what `await` does, it just waits. So if there are multiple `await` expressions in succession, each of them will be executed sequentially, instead of running in parallel. It could be a good thing if each of them depends on the expression before it, but when it is not the case, it might create a performance issue where the execution of the code is slower.
+
+In the `getToDo()` example, `todo` needs `response`, so it makes sense to use `await` one after the other. But, let's say we have multiple URLs to fetch, multiple `toDos`, and they are all independent of each other. In that case, we want them to run in parallel. We can use `Promise.all()` with `await` to do that:
+
+```javascript
+async function getToDos(toDoIds) {
+  let responses = toDoIds.map(async (id) => await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`));
+  let [response1, response2, response3] = await Promise.all(responses);
+  let toDos = await Promise.all([response1.json(), response2.json(), response3.json()])
+  return toDos.map(toDo => toDo.completed);
+}
+
+let ids = [1, 2, 3];
+
+getToDos(ids)
+  .then(toDosCompletedStatus => console.log(toDosCompletedStatus))
+  .catch(e => { throw e });
+```
+
+Inside `getToDos()`, it seems like a lot going on, but it is actually simple to reason about. We take an array of `ids` as argument, and map them to their `fetch` responses of their corresponding URLs. Here, notice that we use an arrow function inside `.map()` that is defined as `async`.
+Then, we use `await Promise.all(responses)` to get the fulfillment values of `responses`. After that, we get each response's `.json()` value, since `.json()` returns a promise, we again use `Promise.all()` with `await`. At this point, what we have is the fulfillment values of `toDos`, and we map them to the `completed` property of each. 
+
+And, here is the beauty of `async` and `await`, our code looks like it is synchronous, hence easier to read and think about.
+
+Although using `async` and `await` is just a "better" way to use promises, and there is almost no difference between them, `async` and `await` might have a slight performance advantage when it comes to [V8 JavaScript engine](https://v8.dev/) as the stack trace is not captured and stored when using `await`. Read more about it here: [https://mathiasbynens.be/notes/async-stack-traces](https://mathiasbynens.be/notes/async-stack-traces)
+
+
+We have seen that promises were there to save us from callback hell, and that async functions make our code even better and simpler for us to read and write. Remember that there is always a "better" solution, depending on how you look at it, and of course, there is always the [spec](https://tc39.es/ecma262/) and perhaps the friendlier [docs](https://developer.mozilla.org/en-US/) to consult. 💜

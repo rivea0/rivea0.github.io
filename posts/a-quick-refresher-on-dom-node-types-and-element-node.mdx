@@ -1,0 +1,105 @@
+---
+title: A Quick Refresher on DOM Node Types and Element Node
+tags: [JavaScript]
+description: A quick refresher on DOM Node types and Element Node.
+slug: a-quick-refresher-on-dom-node-types-and-element-node
+date: 2023-01-03
+---
+
+DOM (Document Object Model) represents the structure of the HTML document in a tree-like model. It contains many types of nodes, _some_ of them are: 
+
+- `ELEMENT_NODE` — an HTML element, for example, a `<div>`.
+- `TEXT_NODE` — text content, for example, `Hey` in `<div>Hey</div>`.
+- `COMMENT_NODE` — a comment, for example, `<!-- comment -->`.
+- `DOCUMENT_NODE` — `document` itself.
+- `DOCUMENT_TYPE_NODE` — the document type, `<!DOCTYPE html>`.
+
+Other node types can be found [here](https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType).
+
+Node types also have values, such as `1` corresponding to `ELEMENT_NODE`, `3` corresponding to `TEXT_NODE`, `8` for `COMMENT_NODE`, `9` for  `DOCUMENT_NODE`, and so on.
+
+We can see the type of a node with its aptly named `nodeType` property. For example, let's say we have only one `<div>` inside the `<body>` of our document (I know, not _a real world example_, but bear with it):
+
+```html
+<body>
+  <div>Hey</div>
+</body>
+```
+
+```js
+document.querySelector('div').nodeType; // 1
+document.querySelector('div').firstChild.nodeType; // 3
+```
+
+Since it is an `ELEMENT_NODE`, the `nodeType` is `1`. 
+When we look at the `nodeType` of its `firstChild` which is the `Hey` text, we can see that it is `3`, which corresponds to a `TEXT_NODE`.
+
+<Note>
+  We can see the text node (which is not an element) because we use the `firstChild` property. If we were to see only the first element child, we could have used the `firstChildElement` property. But, in this case, it would be `null` as our `<div>` does not have any child elements.
+</Note>
+
+You can see the properties and methods list of a `Node` [here](https://developer.mozilla.org/en-US/docs/Web/API/Node).
+
+One thing to mention is that all documents have root nodes that even if the document is blank, they will be there. These root nodes are 
+`html` (`document.documentElement`), `head` (`document.head`), and `body` (`document.body`). And, of course, `document` itself is the root of all nodes.
+
+<Note>
+  `document` is a property of the `window` object. Take a look at MDN for more information: https://developer.mozilla.org/en-US/docs/Web/API/Window
+</Note>
+
+
+## Element Nodes
+
+`Element` represents all element objects. It would be pretty exhausting to list all its properties and methods, since it has a lot of them. You can always refer to [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Element).
+
+One interesting aspect is that each element is constructed with a unique constructor. HTML elements inherit from [`HTMLElement` interface](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) (as well as `Element`, `Node`, and `Object`). But, each has their own constructor. For example, `<form>` element is constructed with `HTMLFormElement`, `<img>` element with `HTMLImageElement`, and so on. Read more about them in [here](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API#html_element_interfaces_2).
+
+We can get all the elements in the document using `querySelectorAll` method:
+
+```js
+document.querySelectorAll('*');
+```
+
+It returns a [static `NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList#static_nodelists) containing all the elements in the page.
+
+To get all the child elements, we can use `children` property. Let's say our `body` now contains a `div` element with an `img` element inside of it:
+
+```html
+<body>
+  <div>Hey
+    <img src="https://unsplash.com/photos/LaNLiftpmQc" alt="Oxalis triangularis">
+  </div>
+</body>
+```
+
+If we look at the `children` of our `div`, it is an `HTMLCollection` that only contains the `img` element:
+
+```js
+document.querySelector('div').children;
+// -> HTMLCollection { 0: img, length: 1 }
+```
+
+An `HTMLCollection` is live, which means that if there is any change in the document, it will be reflected dynamically.
+
+Now, let's see what happens if we use `childNodes` property on our `div`:
+
+```js
+document.querySelector('div').childNodes;
+// -> NodeList(3) [ #text, img, #text ]
+```
+
+Now, it returns a `NodeList` which is live. It's clear that our first `#text` node is `Hey`,  our `img` is there, but what about the last `#text`?
+
+If we take a look at this `NodeList`, we can see what is going on:
+
+```js
+0: #text "Hey\n "
+1: <img src="https://images.unsplash.…f64?width=640&height=360" alt="Oxalis triangularis">
+2: #text "\n "
+```
+
+Whitespace are also text nodes, and because we use line breaks in our HTML document, it is obvious that they are also counted as text nodes.
+
+This is just a quick reminder of some differences between properties like `childNodes` and `children`, as their return values will have items depending on the types of nodes they include.
+
+As always, when in doubt, go to [the documentation](https://dom.spec.whatwg.org/).

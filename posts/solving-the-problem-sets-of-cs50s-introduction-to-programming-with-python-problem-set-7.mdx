@@ -1,0 +1,178 @@
+---
+title: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 7"
+tags: [Miscellaneous, Python]
+description: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 7"
+slug: solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-7
+date: 2022-05-25
+---
+
+We are at [week 7](https://cs50.harvard.edu/python/2022/weeks/7/), and this week's topic is everyone's absolute favorite. And, what is it? Regular expressions, of course!
+
+Well, excuse the sarcastic introduction, but indeed, it is pretty sure that regex can slightly be a bit of a nightmare — especially, for beginners. However, have no doubts, it is a superpower in disguise.
+
+![xkcd: Regular Expressions](https://imgs.xkcd.com/comics/regular_expressions.png)
+
+Before we start, I have to give the usual **disclaimer** that these posts are mostly about how to approach the problems instead of giving outright the solutions. I also assume you have read the problem explanations given in the course's website, so that the references I make are clear. And, you can find all the posts on previous problem sets [in the archive](https://rivea0.github.io/blog/).
+
+Without further ado, let's dive into this week's problems!
+
+## NUMB3RS
+The first [problem](https://cs50.harvard.edu/python/2022/psets/7/numb3rs/) that we need to solve is really fun. We are checking valid IPv4 addresses, which has the format `#.#.#.#` and has all its numbers in the range between 0 and 255, inclusive. The pattern is literally it; we are looking for a _digit_ that can occur _1 to 3 times_, then a _dot_, then another digit 1 to 3 times, then another dot, and then another digit, again 1 to 3 times, then a dot, and finally the last digit which can also occur 1 to 3 times. 
+
+One thing we should be careful is that this pattern should be the whole thing — there can be nothing before or after it. So, the input we are given should have this pattern only between the _start_ and the _end_ of it. Getting a digit character, and "1 to 3 times" part is easy if you have checked the documentation, or any other resource online. You are also familiar with the starting and ending restriction characters from the lecture as well. Since we also know how to put those digits into _each group_, we can check if each of them are within 0 to 255 range inclusive. This can be done with a simple for loop, but I want to show a Python function that can come in handy here.
+
+Let's say we have a tuple that has Hogwarts houses in it. 
+We want to check if _all_ of the items in it are Ravenclaw, because we do not want to be bothered with any other houses. We can try this:
+
+```python
+def check_all(houses):
+    return all([house == 'Ravenclaw' for house in houses])
+```
+
+It has the same idea as this:
+
+```python
+def check_all(houses):
+    result = []
+
+    for house in houses:
+        result.append(house == 'Ravenclaw')
+
+    if False in result:
+        return False
+    else:
+        return True
+```
+
+Maybe, not literally what is going on with `all`, but the idea is similar to this one as well, only that we are returning False early here (let's not call it `check_all`, but `check` instead):
+
+```python
+def check(houses):
+    for house in houses:
+        if house != 'Ravenclaw':
+            return False
+    return True
+```
+
+If `houses` look like `('Ravenclaw', 'Ravenclaw', 'Gryfindor', 'Ravenclaw')`, `check_all()` will return `False`!
+
+Notice that we have a list comprehension inside the `all` function, and appending to it a conditional. Then we check if that list has any False in it, if so we return False, but otherwise we return True if all the conditionals in our list are True. 
+
+Similar idea can be applied with checking if each number in the match _groups_ is within the range of 0 and 255 inclusive. 
+
+For the test file, considering only the cases we are given in the problem explanation and `check50` is sufficient. 
+
+This was quite fun. Let's take a look at the next one.
+
+## Watch on Youtube
+With a graceful Rickroll, in [this problem](https://cs50.harvard.edu/python/2022/psets/7/watch/), we are extracting and parsing YouTube URLs for being able to easily embed them. The template for our program is, again, already given, we have to implement the `parse()` function for it to be called on `main()`. For a given string, namely `s`, how can we start thinking about parsing a YouTube URL?
+
+For starters, we know that in this problem specifically, the link is going to be inside an `iframe` element. We know that it is going to be look like this in its simplest form:
+
+```html
+<iframe src="http://www.youtube.com/embed/xvFZjo5PgG0"></iframe>
+```
+
+We know that it has to _start_ with `<iframe`, followed by a _space character_, followed by `src="`. After that comes the link, as well as the closing quotation marks, closing angle bracket `>`, and the closing tag `</iframe>`.
+
+There is also one more thing, we might have `www` inside the link — which is to say that there can be _zero or more_ characters before 
+"youtube". 
+
+If you have been following this series, you might notice that I have already given some subtle hints. Finding the corresponding regex characters is up to you to find — which is more fun, and which you can find in [Python's documentation](https://docs.python.org/3/library/re.html). Also, there are a lot of ways to implement a regex, so how you come up with a solution will be eventually up to you. 
+
+Before going on, you should notice that it is an `http` link, which we should definitely turn into `https` for [encryption and security](https://www.eff.org/encrypt-the-web) reasons. If you have captured that part as a group, it is easy to do it with a conditional, or replacement, however you would like to do it.
+
+Let's say we have managed to get the URL `http://www.youtube.com/embed/xvFZjo5PgG0`, and everything is fine. Or, is it?
+
+That was simple for one [attribute](https://www.w3schools.com/tags/tag_iframe.asp), but what if you have more than one attributes like this:
+
+```html
+<iframe width="560" height="315" src="https://www.youtube.com/embed/xvFZjo5PgG0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+```
+
+You see that `src` occurs after `width` and `height`, and is followed by a bunch of other attributes. Now, if you do not do it in a non-greedy way, you might have something like this result as the URL you get:
+
+`https://www.youtube.com/embed/xvFZjo5PgG0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture`
+
+That is definitely not a URL, nor the thing we are looking for. Notice that I mentioned the term "non-greedy", what does that even mean?
+
+Let's say we have a string:
+
+```python
+s = '"A string", and "another string".'
+```
+
+We only want to get `"A string"`, not `"another string"`. We are literally looking for a quotation mark, one or more characters in it, and then another quotation mark. For, simplicity sake, let's do it with this pattern:
+
+```python
+import re
+
+
+if matches := re.search('(".+")', s):
+    print(matches.group(1))
+```
+
+(If you are not familiar with it, see [assignment expressions](https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions) for the "walrus operator").
+
+However, what we see in the terminal is not what we want: `"A string", and "another string"`.
+
+What happens is that, `.+` does a _greedy_ search. However, we can prevent this from turning it into a _lazy_ search with just appending the question mark to it:
+
+```python
+import re
+
+
+if matches := re.search('(".+?")', s):
+    print(matches.group(1))
+```
+
+Now we see `"A string"`, just like we want. You might be interested in seeing how [greedy and lazy matching that actually works](https://rivea0.github.io/blog/a-quick-behind-the-scenes-of-greedy-and-lazy-matching/).
+
+Using the lazy quantifier helps us get the URL in correct form. After that, we need to turn it into a shorter version. We do that by removing `www` _or_ `embed/`, _or_ `.com`. In other words, we replace — or, _substitute_ — these pieces of text with _nothing_. We also need to _substitute_ `youtube` with `youtu.be` for the resulting string. 
+
+How you go on to implement these little puzzle pieces is, again, up to you as there are lots of different ways for a solution. Perhaps, one of the important takeaways is knowing the difference between greedy and lazy matching, and how to work with them. Let's see what the next one has in store.
+
+## Working 9 to 5
+I think [this problem](https://cs50.harvard.edu/python/2022/psets/7/working/) has also many different ways for a solution that you might even have an analysis paralysis (at least, this was my experience). What we need to do here is to convert 12-hour input format to 24-hour format. Our input should be in a certain form, though. For example, it has to have the word "to" in it, something like `9 AM to 5 PM`. We may or may not be given minutes; our input can be `9 AM to 5 PM` or `9:00 PM to 5:00 PM`. Additionally, the input can imply a night shift, so that AM and PM given might be reverse, like `10 PM to 8 AM`. All of these seem like a lot, especially if you are absolutely new to regular expressions, but again, reading the documentation and poking around might give some insights. I am not extremely satisfied with the solution I came up with, and there is definitely a more elegant way to think about it. But, let's try to understand a potential approach.
+
+First, we know that we can capture not only the numbers for the hours and minutes, but also AM and PM, since their order matters for our resulting string. For the first number (that is the hour), we know that the number of digits it has can be either 1 or 2 (it could be `9` or `10`, for instance). We want a _digit_ that has _1 to 2_ repetitions. After that, _optionally_ we can have a _colon_ followed by another _digit_ that has _1 to 2_ repetitions as well. This second part is for the minutes so that if we are given `10:00` we can capture the `:00` part. After that we are supposed to have a _space character_ followed by either _AM or PM_. This is enough for describing `10:00 PM`. What we have after that, is another _space character_, followed by the string _"to"_, then another _space character_ followed by the pattern that we have just described for `10:00 PM`. If we capture the hour, minute, and AM/PM as _groups_, you might remember that we might also have an input where the minutes are not given — in this case, our minute group will result in `None`. However, we can clean it and replace it with a simple `:00`, since if the minutes are not given it is assumed 0. If there is no match, we should also _raise_ a `ValueError`. For determining the night shift (if PM comes before AM), we can check if the AM's index comes before PM in our cleaned groups list. In that case, we can have a flag variable where we can say that "night shift" is True or False. After that, we need to do the actual converting part. We can separate a conditional branch for "not night shift" (that is to say AM before PM), or night shift (PM before AM), and work our way with the appropriate hour and minute indices. The realization when converting is that, we do not consider minutes here, just the hours. And, for AM, if the hour is 12, we should convert it to 0 instead, otherwise, keep it like it is given. For the PM hour, if it is 12 it should stay 12, but for any other number we should _add_ 12 to it. Because there seem to be a lot of "if conditions", I like to mention a one-liner way to do it in Python. So, it might look something like this:
+
+```python
+hours_am = 0 if int(am_hour) == 12 else int(am_hour)
+hours_pm = 12 if int(pm_hour) == 12 else int(pm_hour) + 12
+```
+
+The same as this:
+
+```python
+if int(am_hour) == 12:
+    hours_am = 0
+else:
+    hours_am = int(am_hour)
+
+
+if int(pm_hour) == 12:
+    hours_pm = 12
+else:
+    hours_pm = int(pm_hour) + 12
+```
+
+Of course, if it starts to get complex and reduces readability, you should avoid over-using one-liners, but it makes sense here for a small implementation.
+
+We also need to check if the hours and minutes are valid — if the hours are within 0 and 12 inclusive, and the minutes are within 0 and 59 inclusive range. If either of them is invalid, we also need to _raise_ a `ValueError` here as well.
+
+One more thing, we also need to create a `test_working.py` file to test our code. Handling all the cases in "How to Test" section of the problem explanation is quite sufficient here, if not, we know that `check50` is our friend to guide us on which tests to cover. For testing if our code indeed raises  `ValueError` in the right cases, we might remember how to do that from the [Refueling problem](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-5/) from Week 5.
+
+This one was a bit challenging, and I left some gaps on some points intentionally, but that is really the point of it. The thinking process might differ, this one is just the thinking process of the solution I came up with and hopefully provided you some insight. Let's look at the next one. 
+
+## Regular, um, Expressions
+In [this one](https://cs50.harvard.edu/python/2022/psets/7/um/), we are checking if the input we are given has "um" in it, but not counting it inside words like "yummy". The important idea is that we are looking for a word, therefore it has to have some _boundaries_. As the problem explanation suggests, it has to be the boundary between a _word_ and a _non-word_ character. Or, it can also be at the beginning or the end of the sentence. But also, we can have an input like `um?`, which is followed by a _non-word_ character, so we can have that _optionally_ as well. We also need to take care of both uppercase and lowercase characters, and `re.IGNORECASE` flag takes care of that. 
+
+The hints section already mentions `re.findall()` function, since it returns a list of all the matches it finds, we can return the _length_ of that list from our `count()` function. For the tests, the edge cases to consider are already given in the problem explanation page, which will be sufficient as well. It looks daunting at first, but really, that is all there is to it. Let's look at the last problem of this week. 
+
+## Response Validation
+[This problem](https://cs50.harvard.edu/python/2022/psets/7/response/) emphasizes an important habit to have: relying on _well-trusted_ libraries —no need to mention the importance of reading their documentation— when the time comes. And, that time might come when you need to validate an email address. In this problem, we can choose from two libraries, [validator-collection](https://pypi.org/project/validator-collection/) or [validators](https://github.com/kvesteri/validators). We do not even have to use `re` module ourselves, because these libraries handle everything for us.
+
+Since this problem's solution depends on which library you use, there is nothing much that I can give a hint about. Documentation really helps you out for each of the libraries, we also do not need to write our own tests for this one as well. It is, of course, a good habit to handle errors, and that is pretty much it. 
+
+Dealing with regular expressions might indeed be challenging if you have never used them before. Nevertheless, we have seen that it is a superpower that comes in handy with all kinds of problems. Next week, we are going to take a look at Object-Oriented Programming. Until then, happy coding.

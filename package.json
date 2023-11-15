@@ -1,0 +1,45 @@
+{
+  "name": "rivea0",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "next dev",
+    "build": "next build",
+    "build-rss": "ts-node --project ./node.tsconfig.json scripts/rss",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@mdx-js/loader": "^2.3.0",
+    "@mdx-js/react": "^2.3.0",
+    "@next/mdx": "^13.4.19",
+    "@types/mdx": "^2.0.6",
+    "bright": "^0.8.4",
+    "clsx": "^2.0.0",
+    "eslint-config-next": "^13.5.2",
+    "gray-matter": "^4.0.3",
+    "next": "^13.5.2",
+    "next-themes": "^0.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rehype-katex": "^7.0.0",
+    "remark-frontmatter": "^4.0.1",
+    "remark-gfm": "^3.0.1",
+    "remark-math": "^6.0.0",
+    "rss": "^1.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "20.5.1",
+    "@types/react": "18.2.20",
+    "@types/rss": "^0.0.31",
+    "marked": "^9.1.5",
+    "ts-node": "^10.9.1",
+    "typescript": "5.1.6"
+  }
+}

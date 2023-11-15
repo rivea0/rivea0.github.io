@@ -1,0 +1,154 @@
+---
+title: JavaScript Promises
+tags: [JavaScript]
+description: Introduction of promises in JavaScript.
+slug: javascript-promises
+date: 2023-03-05
+---
+
+Pour a hot cup of coffee, and find a comfy chair, because it is time for learning about promises in JavaScript!
+First off, let's take a look at the _shape_ of the code below: 
+
+```javascript
+fs.readdir(source, function (err, files) {
+  if (err) {
+    console.log('Error finding files: ' + err)
+  } else {
+    files.forEach(function (filename, fileIndex) {
+      console.log(filename)
+      gm(source + filename).size(function (err, values) {
+        if (err) {
+          console.log('Error identifying file size: ' + err)
+        } else {
+          console.log(filename + ' : ' + values)
+          aspect = (values.width / values.height)
+          widths.forEach(function (width, widthIndex) {
+            height = Math.round(width / aspect)
+            console.log('resizing ' + filename + 'to ' + height + 'x' + height)
+            this.resize(width, height).write(dest + 'w' + width + '_' + filename, function(err) {
+              if (err) console.log('Error writing file: ' + err)
+            })
+          }.bind(this))
+        }
+      })
+    })
+  }
+})
+```
+
+This is an example of [callback hell](http://callbackhell.com/) ― in fact, taken directly from that site. No one certainly wants to read, let alone write, such code. One clean way to deal with situations like these is through using promises. But, what is a _promise_ in the first place?
+
+Let's take a look at [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises):
+
+> A [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) is an object representing the eventual completion or failure of an asynchronous operation.
+
+Sounds clear enough. But, is it?
+
+Imagine for a second the everyday promises that you make to someone. It could be anything; let's say that you have promised your friend to call them as soon as you are available.
+
+Now, one of three things can happen. They might still hold on to your promise, waiting for your call. Or, you might actually call them and fulfill your promise, showing how good of a friend you are. Or, you might outright reject to call them back, breaking your promise. 
+
+Well, how your friendships go in terms of promises is up to you, but the idea is similar with using promises in JavaScript; a promise has one of three states:
+
+-   **pending**: the initial state.
+-   **fulfilled**: a successful operation.
+-   **rejected**: a failed operation.
+
+Let's take a look at this example:
+
+```js
+let isCloseFriend = true;
+
+let goingToCallFriend = new Promise((resolve, reject) => {
+  if (isCloseFriend) {
+    resolve('Hello, friend!');
+  } else {
+    reject(new Error('I don\'t want to talk.'));
+  }
+});
+
+goingToCallFriend
+  .then((fulfilled) => { console.log(fulfilled); })
+  .catch((error) => { console.log(error); });
+
+```
+
+Here, we define a global variable (for this example) called `isCloseFriend`, and a `Promise` object `goingToCallFriend`. It takes a function as an argument, an _executor_ function. It accepts two arguments, `resolve` and `reject` ― each of which is a function. 
+Inside the body of the _executor_ function, we check if they are a close friend of ours, if so, we resolve the promise with the `resolve` function, passing it the _value_ `'Hello, friend!'`. This is the fulfillment value that we want. This is what the docs say about it:
+
+> The argument passed to the resolve function represents the eventual value of the deferred action and can be either the actual fulfillment value or another promise which will provide the value if it is fulfilled.
+
+Otherwise, if they are not a close friend, we call the `reject` function to reject it, passing it an error that has a message of `'I don\'t want to talk.'` (the backslash here is for escaping the quote). 
+
+Also from the documentation:
+
+> The argument passed to the reject function is used as the rejection value of the promise. Typically it will be an Error object.
+
+
+<Note>
+  You can always refer to the docs about [the Promise constructor](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-promise-executor).
+</Note>
+
+Here is the more interesting part, after defining `goingToCallFriend`, we can invoke other methods on it, like `.then()` and `.catch()`. 
+
+`.then()` needs a function as argument which itself takes two arguments `onFulfilled` and `onRejected`. This might be a bit confusing because we usually see examples of `.then()` with one argument, the fulfilled value. It is the value that was passed to `resolve()`. Notice that `.then()` returns another promise, so we can chain many more methods.
+
+`.catch()` is just a syntactic sugar for  `.then()` with the first argument `undefined`, and the second being the reason of error. 
+
+```js
+goingToCallFriend
+  .then((fulfilled) => { console.log(fulfilled); })
+  .catch((error) => { console.log(error); });
+
+// ^ the shorthand for:
+goingToCallFriend
+  .then((fulfilled) => { console.log(fulfilled); })
+  .then((undefined, error) => { console.log(error); });
+```
+
+Finally, there is another instance method called `.finally()` that will be called no matter what is the state of the promise.
+
+There is one thing to point out that a resolved promise does not necessarily mean a fulfilled promise. A promise can be resolved, but it does not mean that it is fulfilled. Just like life itself.
+
+The famous [States and Fates](https://github.com/domenic/promises-unwrapping/blob/master/docs/states-and-fates.md) from the original Promises proposal details the terminology, and there is a very helpful [Stack Overflow answer](https://stackoverflow.com/a/56850392) that explains this. Here is the table that the author uses in the answer that illustrates it clearly:
+
+<Table>
+| action | dependency | state | resolved? | settled? |
+| --- | --- | --- | --- | --- | 
+| `new Promise((resolve, reject) => ...)` | autonomous | pending | no | no |
+| ...`resolve(thenable)` | locked-in | pending* | yes | no |
+| ...`resolve(other)` | autonomous | fulfilled | yes | yes |
+| ...`reject(any)` | autonomous | rejected | yes | yes |
+</Table>
+
+<br />
+
+> * The thenable is now in control over the future state of our promise object.
+
+Oh, and a thenable is just what it sounds like — you can think of it as an object that has a `.then()` method that accepts two callbacks, `onFulfilled` and `onRejected`.
+
+There are a lot more things to consider when it comes to promises, such as [the static methods](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#static_methods) like `Promise.all()`, `Promise.any()`, but they are kind of self-explanatory and clear in the docs.
+
+One more thing that I want to mention is that _promises are guaranteed to be asynchronous_. Take a look at the code below:
+
+```js
+let theMeaning = new Promise((resolve, reject) => {
+  resolve(42)
+});
+
+theMeaning.then(value => console.log('From inside .then()'));
+
+console.log('Hello from the outside');
+
+// > Hello from the outside
+// > From inside .then()
+```
+
+`'Hello from the outside'` gets logged first, even though the promise is already settled. 
+The reason for this has to do with the [microtask queue](https://javascript.info/microtask-queue). What it is might be slightly confusing for absolute beginners, but to very simply put it, a `.then()` function goes inside the microtask queue and waits for the stack to be cleared. Only after the stack is cleared, it is pushed on to the stack and runs. In this case, `theMeaning.then(value => console.log('From inside .then()'));` can't run before `console.log('Hello from the outside');` and everything else is popped off the stack.
+
+While we are here, it is important to note that learning about the [event loop](https://javascript.info/event-loop) makes everything much clear when it comes it asynchronicity.
+[Philip Roberts's excellent talk](https://www.youtube.com/watch?v=8aGhZQkoFbQ) is a good starting point, as well as [the JavaScript Visualized article from Lydia Hallie](https://dev.to/lydiahallie/javascript-visualized-event-loop-3dif).
+
+There is even more delicious way to work with promises —[async and await](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises#async_and_await)— but, that is for another article.
+Until then, happy coding.

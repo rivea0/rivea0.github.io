@@ -1,0 +1,152 @@
+---
+title: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 4"
+tags: [Miscellaneous, Python]
+description: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 4"
+slug: solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-4
+date: 2022-05-03
+---
+
+It is time for another problem set, and this time, we are diving into a very delicious topic: libraries.
+
+When I say delicious, I mean it because of our ability to have a plethora of quality choices when it comes to modules and third-party libraries in Python. Let alone third-parties, Python itself comes with a bunch of [built-in modules](https://docs.python.org/3/library/index.html) that are pretty useful for the problems you are trying to solve. With the package manager as well, these days there is a library almost for anything, and I mean, _anything_.
+
+![xkcd: Python (import antigravity)](https://imgs.xkcd.com/comics/python.png)
+
+Well, maybe you cannot actually import antigravity and fly —yet—, you can at least find a lot of helpful stuff with [the Python Package Index](https://pypi.org/). (And, by the way, `antigravity` module is an easter egg. So you can actually [import it](https://pypi.org/project/antigravity/)).
+
+Before we start, you can find the posts on previous problem sets [here in the archive](https://rivea0.github.io/blog/). And I have to give the usual **disclaimer**, I do not provide full solutions here, so if you are scrolling down trying to find the code block that will make you pass the tests, you are wasting your time, and that is a bit sad, my friend. It is a much stronger dopamine rush when it is _you_ who investigate and find the solutions. I am here to talk about the problem sets and to be a guide along the way.
+
+With all that talk, let's take a look at the problems we need to tackle this week.
+
+## Emojize
+In each post, I assume you have read the problem explanations already. If you did, [this one](https://cs50.harvard.edu/python/2022/psets/4/emojize/) is very easy, considering you already know how to import libraries and use them. And, explanation hints out the library you are going to use, namely `emoji`. It provides [some examples](https://pypi.org/project/emoji/) on how to use it. So in this case, you do not need to hunt for a specific usage, but it is literally in front of you. The main thing not to forget here, is to provide _aliases_ as well.
+
+## Frank, Ian and Glen’s Letters
+As we will see throughout the other problems this week, clear documentation is a very important thing to have when it comes to using third-party libraries. Without the hints that the [problem explanation](https://cs50.harvard.edu/python/2022/psets/4/figlet/) gives, you have to look for the usage of the library `pyfiglet` reading [the project description](https://pypi.org/project/pyfiglet/0.7/). (By the way, I think the reason why CS50 put the link to an older version of the package on PyPI is that the project description is provided there. If you click on the newer version, there is no description given, but you can find [here on GitHub](https://github.com/pwaller/pyfiglet/blob/master/README)).
+
+We need to render an input text into a cool ASCII art version. Again, the explanation page gives a lot of hints, but let's see.
+
+Before everything else, we need to do something _only if_ we have zero or two command line arguments. Since the name of the program is also an argument, we have 1 command line argument by default. Such that:
+
+```shell
+$ python something.py # len(sys.argv) == 1
+```
+
+```shell
+$ python something.py --someflag # len(sys.argv) == 2
+```
+
+In case of 1 argument —which is just the name of the file—, we need to make a _random choice_ to get a font from all the fonts provided. Getting all the fonts is simple as we are given the hint:
+
+```python
+f = Figlet()
+fonts = f.getFonts() 
+```
+
+Here, `fonts` is a list that we can make a _random choice_ out of. As to making that _choice_, I think I have given enough of a hint already. If you did not get it, remember that [the documentation](https://docs.python.org/3/library/random.html) is always there to look things up.
+
+After we have a random font and an input text as well, we just need to instantiate a Figlet, set its font, and render text (which you can just `print` to see it in terminal):
+
+```python
+f = Figlet()
+f.setFont(font=random_font)
+print(f.renderText(text))
+```
+
+This was for the random font if the user does not provide a font themselves. If they do, we need to do these exact steps with the given font instead of `random_font` here (which you can get with something like `sys.argv[2]`). But we do it _only if_ the length of the arguments is 3 (remember the filename also counts), and `sys.argv[1]` is actually either `-f` or `--font`; also as long as `sys.argv[2]` is _in_ the `fonts`. You can just do it with one line of conditional, using `and` and `or` operators. I cannot give any more hints without giving outright the answer. After all that is done (if the command-line arguments do not fit into these two conditional branches), we just exit the program with `sys.exit('Invalid argument')`. 
+
+That was actually fun. Now let's take a look at the next one.
+
+## Adieu, Adieu
+I cannot believe I have not heard of [this library](https://pypi.org/project/inflect/) before. You know, it is just things like these that make you fall in love with Python again, and again. Thank you CS50 for introducing me to it in [this problem](https://cs50.harvard.edu/python/2022/psets/4/adieu/). 
+
+These kinds of problems — like joining all names and adding `, and` for the last item — can be solved in many ways, including recursion. But here, with Python, it is just one line of code. Forget antigravity, this is another kind of superpower. 
+
+Borrowing from the ideas of last week's problem sets, we also need to keep getting input until the user hits control-d. This is an implication of using an infinite loop and handling `EOFError` exception. And, that is really it. Considering you have looked at the project description for `inflect`, everything you need is provided for you. Just remember to start the engine for the program like this:
+
+```python
+import inflect
+
+p = inflect.engine()
+```
+
+And, all you need to do is to _join_ the names you have been collecting from the inputs. All the methods you can use from the `inflect` library are in front of you. As always, learn to love the documentation. 
+
+## Guessing Game
+The only thing we need to import for [this problem](https://cs50.harvard.edu/python/2022/psets/4/game/) is Python's built-in `random` module. To be honest, I do not think the solution I came up with was an elegant one. Elegant or not, if we think about it, we need to continually get one input for the level, another one for the guess. When it comes to level, we should keep asking as long as it is not a positive integer; and when it comes to guess, we should keep asking as long as it is not the correct number. There are different ways to implement the solution, the certain thing is that we need to get a _random integer_ between 1 and level — which can be solved easily with Python's `random` module. One way to do it is to use a loop and `try...except` block to ensure our input is of correct value. After we generate a random integer, we can use another loop to keep asking the user for a guess. If the guess matches that number generated, we simply print `Just right!` and return or break out of the loop. For the cases that guess is less than or more than the number, we provide the appropriate outputs `Too small!` or `Too large!`, and keep asking. One thing to keep in mind is that, we need to compare the guess and that randomly generated number as long as the guess is a positive number, or just more than 0. And, that is it.
+By the way, guessing game has a deep relationship with [binary search algorithm](https://en.wikipedia.org/wiki/Binary_search_algorithm), with which you can guess the answer correctly in [log(n) time](https://en.wikipedia.org/wiki/Time_complexity#Logarithmic_time).
+
+## Little Professor
+I believe, with [this one](https://cs50.harvard.edu/python/2022/psets/4/professor/), this is the time the curve becomes steeper, and the problem sets we will see from now on will become slightly heavier than what we have been seen so far. But, let's not get caught up in this, and take a look at this problem.
+We have four specifications to consider. For the first one, we should get an input for level only if it is 1, 2, or 3. Say, we have a `valid_inputs` tuple, we can check if the input value is in that collection:
+
+```python
+valid_inputs = (1, 2, 3)
+level = int(input('Level: ')) # Let's say it is 4
+print(level in valid_inputs) # False
+```
+
+And what do we do with it? After getting the valid level, we need to generate an integer with _level_ number of digits. Like this:
+
+```
+-> level = 1:
+-> 0 <= integer <= 9
+
+-> level = 2:
+-> 10 <= integer <= 99
+
+-> level = 3:
+-> 100 <= integer <= 999
+```
+
+If the level is 1, the number we need to generate should be between 0 and 9 inclusive, and if the level is 2, the number should be between 10 and 99, and finally if the level is 3, the number should be between 100 and 999. All inclusive of course. Now, it is enticing to use conditionals, but there is always another approach. Let's try something different.
+
+We want these levels to correspond with these ranges. One data structure that comes to mind for this kind of usage is a dictionary. Something like this, perhaps:
+
+```python
+range_levels = {
+    1: (0, 9),
+    2: (10, 99),
+    3: (100, 999)
+}
+```
+
+That is alright. When we print `range_levels[1]` it should output `(0, 9)`. But what if we want to pass these two values, 0 and 9, separately inside a function. A function that will help us get a _random integer_. Instead of giving you the answer, I am going to mention a cool thing you can do with Python — namely, [unpacking operators](https://geekflare.com/python-unpacking-operators/). The idea is basically that you can use `*` operator to unpack an iterable, and `**` to unpack a key-value pair. Like this:
+
+```python
+values = [0, 5, 2]
+print(*values) # 0 5 2
+
+# Prints 0, 2, 4 respectively
+for i in range(*values):
+    print(i)
+
+
+houses = {
+    'Gryffindor': 'courage',
+    'Ravenclaw': 'intelligence',
+    'Hufflepuff': 'loyalty',
+    'Slytherin': 'ambition'
+}
+
+people = {
+    'Harry Potter': 'Gryffindor',
+    'Hermione Granger': 'Gryffindor',
+    'Luna Lovegood': 'Ravenclaw'
+}
+
+print({**houses, **people}) # {'Gryffindor': 'courage', 'Ravenclaw': 'intelligence', 'Hufflepuff': 'loyalty', 'Slytherin': 'ambition', 'Harry Potter': 'Gryffindor', 'Hermione Granger': 'Gryffindor', 'Luna Lovegood': 'Ravenclaw'}
+```
+
+(As you can see, we cannot unpack a dictionary to a single variable, but rather we can use it to merge dictionaries!)
+
+To be honest, you do not need to know about the unpacking feature for this problem. It is just a cool thing to use. And look at how we can use this feature inside the `range` function for our `for` loop. `range` expects three arguments as start, end, and step. In that case, as we see in the example, `for i in range(*values)` will be the same as `for i in range(0, 5, 2)`. Amazing!
+
+In the problem, we also need to print `EEE` for wrong answers, and provide the user with 3 choices in total to get a right answer. But overall, we need to ask 10 questions. So, a double loop might be reasonable to use here. If the outer loop keeps track of 10 questions, the inner loop can keep track of 3 times of the same question asked. If the user gives the correct answer, we can break out of the inner loop. If the inner loop is completely done (which means asked the same question three times), we need to print the correct answer before moving on to another question. Accordingly, we also keep the score of the user. Simply increasing a score count variable when given the correct answer is sufficient. And, there is really nothing much to it if you correctly implement `get_level` and `generate_integer`, and are careful with the loops and when you break out of them. The unpacking examples I give here are simply fun to know, even if that is not necessary to use for this problem. Now, finally, on to the last one.
+
+## Bitcoin Price Index
+[This one](https://cs50.harvard.edu/python/2022/psets/4/bitcoin/) seems daunting at first, but it is really easy. If the number of command-line arguments is not 2, we need to exit the program with `Missing command-line argument`. If we cannot convert the second argument into float, we exit with `Command-line argument is not a number`. After that, using the `requests` library, we get a response from [the URL](https://api.coindesk.com/v1/bpi/currentprice.json) provided in the problem explanation. Since it is in JSON format, it will be reasonable to use just the right method for that. Here is the tricky part: how to convert the _rate_ string, something like 37,769.6060 into float? Well, perhaps getting rid of the comma might help us. And, how to do that? If we think of removing a character as simply _replacing_ it with _nothing_, we are on the right track. Afterwards, simply calculating the amount with number of bitcoins that are provided as a command-line argument and printing the formatted result is enough to finish this problem. And how to do that is _literally_ given as a hint in the problem explanation.
+
+Finally, this week on libraries has come to an end as well. We have seen somewhat heavier problems this time, and to be honest, I expect the problems in the upcoming weeks to become gradually harder. But it is actually something to be excited for. I hope you have learned lots of new things this week, and —if you are like me— have fallen in love with Python once again. 
+
+See you next week for the problem set of Unit Tests. Happy coding!

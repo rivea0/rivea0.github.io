@@ -1,0 +1,310 @@
+---
+title: Learning React's `useReducer` with a Very Basic Example
+tags: [React]
+description: "Learning React's useReducer with a Very Basic Example"
+slug: learning-reacts-useReducer-with-a-very-simple-example
+date: 2023-04-08
+---
+
+If you are setting the value of a state variable in multiple places in your React application, the state hook `useReducer` might be another option to consider.
+
+The first example that I'm going to use is an extremely basic and somewhat stupid one, nevertheless, I think we need the simplest examples when learning something new. And, this is by no means how `useReducer` should be used — **quite the opposite**, for simple state management, `useState` is more than enough, and you absolutely don't even need a reducer at all. This is just for _"explain me like I'm five" kind of_ demonstration purposes.
+
+With that said, now let's say we have this piece of code:
+
+```jsx
+import { useState } from 'react';
+
+export default function App() {
+  const [text, setTextValue] = useState('');
+
+  function handleChange(e) {
+    setTextValue(e.target.value);
+  }
+
+  function handleClearClick() {
+    setTextValue('');
+  }
+
+  return (
+    <div>
+      <InputForm
+        text={text}
+        handleChange={handleChange}
+        handleClearClick={handleClearClick}
+      />
+    </div>
+  );
+}
+
+function InputForm({ text, handleChange, handleClearClick }) {
+  return (
+    <form onClick={e => e.preventDefault()}>
+      <input type="text" name="text" value={text} onChange={handleChange} />
+      <ClearButton onClick={handleClearClick} />
+    </form>
+  );
+}
+
+function ClearButton({ onClick }) {
+  return (
+    <button onClick={onClick} type="button">
+      Clear
+    </button>
+  );
+}
+```
+
+What it is, is obvious, the `App` component renders the `InputForm`, which returns a form element that has an `<input>` field, and a `ClearButton` component as a button. 
+
+Now imagine for a moment that you've read about [extracting state logic into a reducer](https://react.dev/learn/extracting-state-logic-into-a-reducer) for the first time, and are still a little confused. Let's see how we might use it for our code above.
+
+```jsx
+import { useReducer } from 'react';
+
+export default function App() {
+  const [text, dispatch] = useReducer(textReducer, '');
+
+  function handleChange(e) {
+    dispatch({
+      type: 'changed',
+      text: e.target.value,
+    });
+  }
+
+  function handleClearClick() {
+    dispatch({
+      type: 'clear_click',
+    });
+  }
+
+  return (
+    <div>
+      <InputForm
+        text={text}
+        handleChange={handleChange}
+        handleClearClick={handleClearClick}
+      />
+    </div>
+  );
+}
+
+function InputForm({ text, handleChange, handleClearClick }) {
+  return (
+    <form onClick={e => e.preventDefault()}>
+      <input type="text" name="text" value={text} onChange={handleChange} />
+      <ClearButton onClick={handleClearClick} />
+    </form>
+  );
+}
+
+function ClearButton({ onClick }) {
+  return (
+    <button onClick={onClick} type="button">
+      Clear
+    </button>
+  );
+}
+
+function textReducer(state, action) {
+  switch (action.type) {
+    case 'changed': {
+      return action.text;
+    }
+    case 'clear_click': {
+      return '';
+    }
+    default:
+      throw new Error('error: this shouldn\'t have happened');
+  }
+}
+```
+
+_Note that components usually have to be on their own files, but we use all of them together in this example for simplicity's sake._
+
+You can see how unpleasant this is, especially with the unused variable `state` inside `textReducer()`. It is because we're missing the point, the purpose of a reducer is to accumulate actions over time. From the React docs:
+
+> [a reducer] takes the _result so far_ and the _current item,_ then it returns the _next result._
+
+The example above has nothing to do with the previous state, each time it is set anew. But, you can understand the idea, after all. We used the `dispatch` function inside our handler functions, and give it an [_action object_](https://react.dev/reference/react/useReducer#dispatch-parameters) that has information about what happened. And, inside `handleChange`, we also provided `e.target.value` as the value of `text` property.
+
+Maybe a better example could be a simple counter that actually needs the previous state. Let's see how we can do it with `useState` first:
+
+```jsx
+import { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  function increment() {
+    setCount(prevCount => prevCount + 1);
+  }
+
+  function decrement() {
+    setCount(prevCount => prevCount - 1);
+  }
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={increment}>+</button>
+      <button onClick={decrement}>-</button>
+    </div>
+  );
+}
+```
+
+It is self-explanatory. Now let's see how we might do it with `useReducer`:
+
+```jsx
+import { useReducer } from 'react';
+
+export default function Counter() {
+  const [count, dispatch] = useReducer(countReducer, 0);
+
+  function increment() {
+    dispatch({
+      type: 'increment',
+    });
+  }
+
+  function decrement() {
+    dispatch({
+      type: 'decrement',
+    });
+  }
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={increment}>+</button>
+      <button onClick={decrement}>-</button>
+    </div>
+  );
+}
+
+function countReducer(state, action) {
+  switch (action.type) {
+    case 'increment': {
+      return state + 1;
+    }
+    case 'decrement': {
+      return state - 1;
+    }
+    default: {
+      throw new Error('error: this shouldn\'t have happened');
+    }
+  }
+}
+```
+
+Realize that we don't have to separately define `increment` and `decrement` functions, we can pass them directly to `onClick`:
+
+```jsx
+<button onClick={() => dispatch({ type: 'increment' })}>+</button>
+```
+```jsx
+<button onClick={() => dispatch({ type: 'decrement' })}>-</button>
+```
+
+Let's now compare both versions. This is the `useState` version:
+
+```jsx
+import { useState } from 'react';
+
+export default function CounterWithState() {
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(prevCount => prevCount + 1)}>+</button>
+      <button onClick={() => setCount(prevCount => prevCount - 1)}>-</button>
+    </div>
+  );
+}
+```
+
+And, this is the `useReducer` one:
+
+```jsx
+import { useReducer } from 'react';
+
+export default function CounterWithReducer() {
+  const [count, dispatch] = useReducer(countReducer, 0);
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => dispatch({ type: 'increment' })}>+</button>
+      <button onClick={() => dispatch({ type: 'decrement' })}>-</button>
+    </div>
+  );
+}
+
+function countReducer(state, action) {
+  switch (action.type) {
+    case 'increment': {
+      return state + 1;
+    }
+    case 'decrement': {
+      return state - 1;
+    }
+    default: {
+      throw new Error('error: this shouldn\'t have happened');
+    }
+  }
+}
+```
+
+Inside `countReducer`, returning something like `state + 1` is a bit ambiguous, so let's define our state as an object instead. In that case, the final code should look like this:
+
+```jsx
+import { useReducer } from 'react';
+
+export default function CounterWithReducer() {
+  const initialState = { count: 0 };
+  const [state, dispatch] = useReducer(countReducer, initialState);
+
+  return (
+    <div>
+      <p>Count: {state.count}</p>
+      <button onClick={() => dispatch({ type: 'increment' })}>+</button>
+      <button onClick={() => dispatch({ type: 'decrement' })}>-</button>
+    </div>
+  );
+}
+
+function countReducer(state, action) {
+  switch (action.type) {
+    case 'increment': {
+      return { count: state.count + 1 };
+    }
+    case 'decrement': {
+      return { count: state.count - 1 };
+    }
+    default: {
+      throw new Error('error: this shouldn\'t have happened');
+    }
+  }
+}
+```
+
+
+Even though `useState` and `useReducer` [are equivalent](https://react.dev/learn/extracting-state-logic-into-a-reducer#comparing-usestate-and-usereducer), `useReducer` can be used especially when you have to update the state in a lot of places, and for refactoring, but in the most simple cases, `useState` might be a better option. 
+
+Lastly, if we try to implement the `useReducer` hook ourselves, this is how it might look like: 
+
+```jsx
+import { useState } from 'react';
+
+export function useReducer(reducer, initialState) {
+  const [state, setState] = useState(initialState);
+
+  function dispatch(action) {
+    setState(s => reducer(s, action));
+  }
+
+  return [state, dispatch];
+}
+```
+
+There are a lot of places where you can learn about `useReducer`, but as always, the first place to go is [the official docs](https://react.dev/reference/react/useReducer) when learning about something new. I've found [Dmitri Pavlutin's blog post](https://dmitripavlutin.com/react-usereducer/) very helpful as well. As he also points out, `useReducer` introduces a lot more complexity, so, you're probably good with `useState` for simple state management.

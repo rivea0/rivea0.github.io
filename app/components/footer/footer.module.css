@@ -1,0 +1,8 @@
+.footer {
+  color: var(--gray);
+  opacity: 0.5;
+  text-align: center;
+  font-size: smaller;
+  position: sticky;
+  top: 100vh;
+}

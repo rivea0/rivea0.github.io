@@ -1,0 +1,22 @@
+.socials {
+  display: inline-flex;
+  align-items: center;
+}
+
+.icon {
+  user-select: none;
+  display: inline-flex;
+  border-radius: var(--radius);
+  padding: var(--gap);
+  color: var(--gray-alpha) !important;
+  line-height: 50%;
+  background-color: transparent;
+  cursor: pointer;
+  border: none;
+}
+
+.icon:hover {
+  color: var(--fg) !important;
+  box-shadow: none !important;
+  background: var(--lightest-gray) !important;
+}

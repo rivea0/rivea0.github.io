@@ -1,0 +1,43 @@
+.wrapper {
+  position: relative;
+  height: 100%;
+  padding-bottom: var(--small-gap);
+}
+
+.main {
+  max-width: var(--main-content);
+  margin: 0 auto;
+  padding: 0 var(--gap);
+}
+
+.heading {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--header-height);
+}
+
+.headingText > * {
+  margin: 0;
+}
+
+.headingText h1 {
+  color: var(--link);
+  font-size: 2.2rem;
+  font-weight: 600;
+}
+
+.footer {
+  margin-top: var(--small-gap);
+  display: flex;
+  justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+  .heading {
+    flex-direction: column;
+  }
+
+  .secondHeading {
+    margin-top: var(--gap-half);
+  }
+}

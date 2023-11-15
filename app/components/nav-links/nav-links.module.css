@@ -1,0 +1,17 @@
+.nav {
+  display: flex;
+  gap: 12px;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--nav-link);
+}
+
+.nav a:hover {
+  background-color: var(--fg);
+  color: var(--bg);
+}

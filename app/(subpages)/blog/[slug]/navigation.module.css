@@ -1,0 +1,38 @@
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4rem;
+}
+
+.navigation a {
+  color: var(--gray);
+}
+
+.previous, .next {
+  font-weight: 500;
+  flex: 0 0 45%;
+}
+
+@media (min-width: 768px) {
+  .previous {
+    text-align: left;
+  }
+  .next {
+    text-align: right;
+  }
+}
+
+.next {
+  text-align: right;
+}
+
+.title {
+  font-weight: normal;
+  /* margin-bottom: var(--gap-quarter); */
+  color: var(--link)
+}
+
+.previous:hover, .next:hover,
+.previous:focus, .next:focus {
+  color: var(--fg);
+}

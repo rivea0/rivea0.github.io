@@ -1,0 +1,289 @@
+---
+title: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Final Project and Beyond"
+tags: [Miscellaneous, Python]
+description: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Final Project and Beyond"
+slug: solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-final
+date: 2022-06-08
+---
+
+The final week has arrived, and today we do not have any problem sets. Before anything, give yourself a pat on the back for coming this far! 
+It has been quite a delightful journey. We have started with the basic blocks of programming, [variables and functions](https://cs50.harvard.edu/python/2022/weeks/0/), dealt with flow control using [conditionals](https://cs50.harvard.edu/python/2022/weeks/1/), iterated with [loops](https://cs50.harvard.edu/python/2022/weeks/2/), handled [exceptions](https://cs50.harvard.edu/python/2022/weeks/3/), scratched the surface of the world of Python [libraries](https://cs50.harvard.edu/python/2022/weeks/4/), written [tests](https://cs50.harvard.edu/python/2022/weeks/5/) for our programs to make sure that they work as we intend them to do, worked with [files](https://cs50.harvard.edu/python/2022/weeks/6/), learned to love [regular expressions](https://cs50.harvard.edu/python/2022/weeks/7/), and last week, peeked into the realm of [object-oriented programming](https://cs50.harvard.edu/python/2022/weeks/8/). Today in [et cetera](https://cs50.harvard.edu/python/2022/weeks/9/) we will be looking at some other tools in our toolkit. Phew! If you have started this journey from absolute zero, you have indeed come far! Even if you already have some knowledge before starting the course, congratulations to you as well! It is not easy to dedicate oneself through all these weeks. You can always find the posts on previous problem sets in [the archive](https://rivea0.github.io/blog/) as well. 
+
+The theme of this series, as well as the course, has been one important point: _when in doubt, read the documentation_. Even though [the official Python documentation](https://docs.python.org/3/) might not seem as friendly at first, you have been using it for many weeks and must be familiar with it already. There are lots more to discover, of course, and it is our number-one friend. Some of these things to discover are already shown in the lecture, so, let's remember them with very simple examples. (And, get ready for a bunch of Harry Potter references.)
+
+## Sets
+A set is, at the very basic level, a data structure that has no duplicates. So, let's say you want to look at the distinct broomsticks that Harry Potter used for Quidditch. Easy to do it with a set:
+
+```python
+broomsticks = [
+    'Nimbus 2000', 
+    'Nimbus 2000', 
+    'Firebolt',
+    'Firebolt', 
+    'Firebolt',
+    'Firebolt',
+]
+
+print(set(broomsticks)) # {'Firebolt', 'Nimbus 2000'}
+```
+
+## Globals
+Global variables are usually frowned upon; especially, using the `global` keyword is something you must avoid unless you are absolutely sure what you are doing. You can think of a global variables as simply variables outside a function. They cannot just be changed right away inside a function, but are read only in that sense. To change the value of a global variable inside a function, you use the `global` keyword. Let's say we are completing the title of our favorite book in the Harry Potter series:
+
+```python
+half_title = 'Chamber of Secrets'
+
+def change_half_title():
+    half_title = 'Goblet of Fire'
+
+change_half_title()
+
+print(f'Harry Potter and the {half_title}')
+# -> Harry Potter and the Chamber of Secrets
+```
+
+Of course, it did not change as we expected. However, with the `global` keyword, it works:
+
+```python
+half_title = 'Chamber of Secrets'
+
+def change_half_title():
+    global half_title
+    half_title = 'Goblet of Fire'
+
+change_half_title()
+
+print(f'Harry Potter and the {half_title}')
+# -> Harry Potter and the Goblet of Fire
+```
+
+Again, it is not very nice to look at, so avoid this kind of implementation as much as you can.
+
+## Constants
+If you have seen the lecture, you already know that Python do not have constant types. A "constant" variable, though, is indicated with capital letters:
+
+```python
+SCHOOL_NAME = 'Hogwarts School of Witchcraft and Wizardry'
+
+
+def invite_student():
+    return f'We are pleased to inform you that you have been accepted at {SCHOOL_NAME}.'
+
+
+print(invite_student())
+# -> We are pleased to inform you that you have been accepted at Hogwarts School of Witchcraft and Wizardry.
+```
+
+## Type Hints
+Python is a dynamically-typed language, however, we can still use type hints to make sure we avoid `TypeError`s.
+
+For example, as you can find the similar example in the [documentation for typing](https://docs.python.org/3/library/typing.html), we can indicate the expected types for arguments and return values of a function:
+
+```python
+def greeting(name: str) -> str:
+    return f'Hello, {name}!'
+```
+
+Also, as mentioned in the lecture, `mypy` is a popular [library](https://mypy.readthedocs.io/en/stable/) that you can use for type hinting.
+
+## Docstrings
+Docstrings can occur in a module, a function, or a class. The simplest one-line docstring looks like this:
+
+```python
+def add(n, n1):
+    """Add two numbers."""
+    return n + n1
+```
+
+The conventions on how to use docstrings can be found here in [this PEP](https://peps.python.org/pep-0257/).
+
+## argparse
+`argparse` is a [module](https://docs.python.org/3/library/argparse.html) that comes built-in with Python, literally a "parser for command-line options, arguments and sub-commands". 
+
+There is a [great tutorial](https://docs.python.org/3/howto/argparse.html#id1) on the official documentation already, so, we are not going to dive deep into it here. The simplest thing you can do might look like this. Say, we have a file called `spell.py`, and we want to pass in the argument `-s` to our program to indicate the type of spell we want to create. We want the proper incantation printed on our terminal. Let's see:
+
+```python
+# 📁 spell.py
+
+import argparse
+
+
+incantations = {
+    'patronus': 'Expecto Patronum!',
+    'summon': 'Accio!',
+    'unlock': 'Alohomora!',
+    'explode': 'Bombarda!',
+    'levitate': 'Wingardium Leviosa!',
+    'stun': 'Stupefy!'
+}
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-s')
+args = parser.parse_args()
+
+print(incantations[args.s])
+```
+
+We can see it with the right command:
+
+```shell
+$ python spell.py -s unlock
+Alohomora!
+```
+
+## \*args, \*\*kwargs
+We have mentioned the unpacking operators briefly in a previous post on [problem set 4](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-4/). The example looked like this:
+
+```python
+values = [0, 5, 2]
+print(*values) # 0 5 2
+
+# Prints 0, 2, 4 respectively
+for i in range(*values):
+    print(i)
+
+
+houses = {
+    'Gryffindor': 'courage',
+    'Ravenclaw': 'intelligence',
+    'Hufflepuff': 'loyalty',
+    'Slytherin': 'ambition'
+}
+
+people = {
+    'Harry Potter': 'Gryffindor',
+    'Hermione Granger': 'Gryffindor',
+    'Luna Lovegood': 'Ravenclaw'
+}
+
+print({**houses, **people}) # {'Gryffindor': 'courage', 'Ravenclaw': 'intelligence', 'Hufflepuff': 'loyalty', 'Slytherin': 'ambition', 'Harry Potter': 'Gryffindor', 'Hermione Granger': 'Gryffindor', 'Luna Lovegood': 'Ravenclaw'}
+```
+
+They are super handy for many kinds of problems you encounter, so, another great tool in our toolkits.
+
+## map
+With the `map` function, we can _map_ a function to each item of an iterable. Creating a list of the squares of each number in a "numbers" list might look like this:
+
+```python
+numbers = [3, 5, 7, 11, 13]
+
+squared = list(map(lambda n: n**2, numbers))
+
+print(squared) # [9, 25, 49, 121, 169]
+
+```
+
+Notice that we also convert the return value of `map` to a `list`, as the `map` function returns a `Map` object.
+
+## List comprehensions
+If you have been following the series, you already know about the list comprehensions way [back in Problem Set 2](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-2/). It is a Pythonic way to _append_ to a list, so instead of doing something like this:
+
+```python
+word = 'CS50'
+
+digits_in_word = []
+
+for char in word:
+    if char.isdigit():
+        digits_in_word.append(char)
+
+print(digits_in_word) # ['5', '0']
+```
+
+Just write a one-liner that achieves the same result:
+
+```python
+word = 'CS50'
+
+digits_in_word = [char for char in word if char.isdigit()]
+
+print(digits_in_word) # ['5', '0']
+
+```
+
+## filter
+We can also filter an iterable, returning only the values we are interested in. 
+
+The same example above in list comprehensions can also be solved like this:
+
+```python
+word = 'CS50'
+
+digits_in_word = list(filter(str.isdigit, word))
+
+print(digits_in_word) # ['5', '0']
+```
+
+Also, just like in `map`, notice we also convert the return value to a `list`. We also do not call the `str.isdigit` inside `filter`, we only pass a reference to that function.
+
+## Dictionary comprehensions
+Similar to list comprehensions, dictionary comprehensions are also another —sometimes elegant, sometimes not— way to create dictionaries. To implement a very simple one, let's initialize all the Hogwarts house points to 0 for the start of the term:
+
+```python
+houses = ['Gryffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']
+
+house_points = {house: 0 for house in houses}
+
+print(house_points) # {'Gryffindor': 0, 'Hufflepuff': 0, 'Ravenclaw': 0, 'Slytherin': 0}
+```
+
+It works as intended, and initializes all the house points 0.
+
+## enumerate
+Here is a Pythonic way to iterate over an iterable. Similar to the lecture example, let's say that this time we want to print the names of the houses, also indicated with the first value of '1', instead of '0'. We do not have to write something like this:
+
+```python
+houses = ['Gryffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']
+
+for i in range(len(houses)):
+    print(i + 1, houses[i])
+
+# ->
+# 1 Gryffindor
+# 2 Hufflepuff
+# 3 Ravenclaw
+# 4 Slytherin
+```
+
+There is a more elegant way to do it:
+
+```python
+houses = ['Gryffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']
+
+for index, house in enumerate(houses, start=1):
+    print(index, house)
+
+# ->
+# 1 Gryffindor
+# 2 Hufflepuff
+# 3 Ravenclaw
+# 4 Slytherin
+```
+
+Notice that the `enumerate` function also takes a `start` argument to start from the number that is passed.
+
+## Generators
+Finally, also mentioned in the lecture, a generator function is a "function that returns a generator iterator". With a generator function that _yields_ as opposed _returns_ a value, we can save memory with [lazy evaluation](https://en.wikipedia.org/wiki/Lazy_evaluation). The Python documentation also has a [tutorial on generators](https://docs.python.org/3/howto/functional.html#generators), and similar to the example in the lecture, the very simplest implementation might look like this:
+
+```python
+def main():
+    for _ in gen(1000000):
+        print(_)
+
+def gen(n):
+    for _ in range(n):
+        yield _
+
+if __name__ == '__main__':
+    main()
+```
+
+These are all the topics we have explored this week. From now on, we are left with our very own [Final Project](https://cs50.harvard.edu/python/2022/project/) to implement. For this, you are free to create anything that excites you, any kind of problem that you want to solve — of course, following the given specifications for the project. And, after that, you might think that is all, and that we are finished, but, are we?
+
+## Conclusion
+Now, looking back, we have gathered many useful tools in our toolkit to do whatever we want to do. But, should we do whatever we want to do just because we can?
+You probably have ideas for the answer to that question. It is easy to get excited about all kinds of things you can create once you know how to do them. But, once you start to create things, always remember that using and trusting technology as a solution to all problems is not always the case. Now that you have the power and knowledge to do so, remember that it is absolutely _vital_ to create software that respects users' freedom, that is open and trustworthy. Remember that [privacy is a human right](https://www.privacyinternational.org/explainer/56/what-privacy), even if there might have already been much talk about it — yet, usually without honesty. Do not underestimate your current level of knowledge, you have tremendous power in your hands with the tools you can use. And, yes, one more thing to remember — [code is speech](https://www.britannica.com/event/Bernstein-vs-the-US-Department-of-State). 
+These all might sound like out of context, why should you even bother to think about them? After all, assuming you only have taken this introductory course, and are still at the beginning of your programming journey, and have a long way to go. But, hopefully, you undoubtedly agree that we need good things in life — good software that respects human dignity and helps the progress of humanity is one of them. If you think these are some grand ideologies for a "beginner" like you —which, honestly, I also consider myself a "beginner" in many things at this point—, remember that each piece of knowledge will eventually add up to another, so, even if you are not going to pursue a programming path in your life at all; that is fine, because at least this will be how you look at things, have a stronger sense of self-agency, and a more educated opinion in the decisions that affects us all.
+
+With that in mind, that is the end of the series! 
+If you have read so far, thank you. And, as always, happy coding. 💜

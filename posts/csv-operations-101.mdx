@@ -1,0 +1,250 @@
+---
+title: CSV Operations 101 — with Python's Own `csv` Module
+tags: [Python]
+description: CSV operations 101 in Python.
+slug: csv-operations-101
+date: 2022-08-28
+---
+
+There is a great chance that you have come across, or have to work with a CSV (comma-separated values) file. A CSV file holds data similar to a spreadsheet. It separates the values with a _delimiter_ character, so it does not always have to be a comma. However, since it is a _comma-separated values_ file, let's see an example as such:
+
+```
+# 📁 students.csv
+
+first,last,house
+Harry,Potter,Gryffindor
+Hermione,Granger,Gryffindor
+Luna,Lovegood,Ravenclaw
+Draco,Malfoy,Slytherin
+
+```
+
+As in the example above, the very first row (`first,last,house`) can be used for headers as column names.
+
+Python conveniently has a built-in `csv` module to work with CSV files in an efficient way. The two basic operations are reading and writing; with Python, we can do these operations using lists (or, more generally, any iterable), or dictionaries.
+
+## `csv.reader()`
+To read a CSV file, one option is to use `csv.reader()` method. Let's see an example for our simple `students.csv` file:
+
+```python
+import csv
+
+with open('students.csv') as csvfile:
+    reader = csv.reader(csvfile)
+    for row in reader:
+        if row == ['first', 'last', 'house']:
+            continue
+        print(f'{row[0]} {row[1]} is in {row[2]}.')
+
+
+# Harry Potter is in Gryffindor.
+# Hermione Granger is in Gryffindor.
+# Luna Lovegood is in Ravenclaw.
+# Draco Malfoy is in Slytherin.
+```
+
+We use a [context manager](https://docs.python.org/3/glossary.html#term-context-manager) to open our file. (Note that we do not need to specify the `'r'` argument as the mode for the reading operation because it is the default; see [the official docs](https://docs.python.org/3/library/functions.html#open).)
+When we use `csv.reader()`, it returns a reader object, which we store in the `reader` variable. Then, with a `for` loop, we iterate through each row, which is a list — and, because our first row is actually the headers, we pass that iteration and continue. Actually, `csv.DictReader()` has better usability for this, which we will see later on. One important point here is that each row is a `list` containing three elements, and we access them with indexing (`row[0]`, `row[1]`, `row[2]`). This is not the most elegant implementation, but a simple enough example to see how `csv.reader()` works.
+
+## `csv.writer()`
+Let's say we want to add Ron Weasley to our CSV file, because we want our Golden Trio to be together. Let's see how we can go about doing it:
+
+```python
+import csv
+
+with open('students.csv', 'a') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(['Ron', 'Weasley', 'Gryffindor'])
+```
+
+Here, we are again using a context manager to open our CSV file, this time with the `'a'` argument as the mode for appending to it. After that, we use `csv.writer()`, passing into it our file object. It returns a writer object, which we store in the `writer` variable. Then, we call `writerow()` method to add Ron Weasley. One important thing is that we pass a `list` as an argument, although it does not have to be a `list` — we could have used an iterable like a tuple, but using lists is more common.
+
+Now, our file looks like:
+
+```
+# 📁 students.csv
+
+first,last,house
+Harry,Potter,Gryffindor
+Hermione,Granger,Gryffindor
+Luna,Lovegood,Ravenclaw
+Draco,Malfoy,Slytherin
+Ron,Weasley,Gryffindor
+
+```
+
+## `csv.DictReader()`
+We can improve on our last example for reading our CSV file. Let's use `csv.DictReader()` this time:
+
+```python
+import csv
+
+with open('students.csv') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        print(f'{row["first"]} {row["last"]} is in {row["house"]}.')
+
+
+# Harry Potter is in Gryffindor.
+# Hermione Granger is in Gryffindor.
+# Luna Lovegood is in Ravenclaw.
+# Draco Malfoy is in Slytherin.
+# Ron Weasley is in Gryffindor.
+```
+
+Like `csv.reader()`, `csv.DictReader()` returns a reader object, but this time, as the documentation says, it "maps the information in each row to a `dict` whose keys are given by the optional _fieldnames_ parameter."
+If you have realized already, we have not specified the _fieldnames_ parameter, so the first row is used as default fieldnames instead. We can see it with looking at the `fieldnames` attribute of our reader object:
+
+```python
+import csv
+
+with open('students.csv') as csvfile:
+    reader = csv.DictReader(csvfile)
+    print(reader.fieldnames) # ['first', 'last', 'house']
+```
+
+`csv.DictReader()` definitely made the code more readable than the previous method before. Let's see how we can use a dictionary again, this time for writing to our file.
+
+## `csv.DictWriter()`
+We have added Ron Weasley to our `students.csv` before, let's add another Weasley this time, Ginny. Let's see how we can do it with `csv.DictWriter()`:
+
+```python
+import csv
+
+with open('students.csv', 'a') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=['first', 'last', 'house'])
+    writer.writerow({'first': 'Ginny', 'last': 'Weasley', 'house': 'Gryffindor'})
+```
+
+We are again appending to our file, like we did with `csv.writer()`. We create a writer object with `csv.DictWriter()`, of course passing into it the file object itself, then assigning the writer object returned to the variable `writer`. Notice here that we pass an argument called `fieldnames` as well, which is a list containing, well, the fieldnames. It is not an optional argument, so we have to provide it each time we use `csv.DictWriter()`. 
+We use the `writerow()` method again, but this time, we pass it a dictionary whose keys are the fieldnames we have just specified.
+Now our file looks like this:
+
+```
+# 📁 students.csv
+
+first,last,house
+Harry,Potter,Gryffindor
+Hermione,Granger,Gryffindor
+Luna,Lovegood,Ravenclaw
+Draco,Malfoy,Slytherin
+Ron,Weasley,Gryffindor
+Ginny,Weasley,Gryffindor
+
+```
+
+Now, what if inside `writerow()` you pass in a key that is not in fieldnames? Obviously, we will have a `ValueError`, but let's see with an example. They say a house is not a home, but imagine that we mistakenly write Gryffindor as Ginny's `home`, instead of her `house` as we have in the _fieldnames_. Let's see:
+
+```python
+import csv
+
+with open('students.csv', 'a') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=['first', 'last', 'house'])
+    writer.writerow({'first': 'Ginny', 'last': 'Weasley', 'home': 'Gryffindor'})
+    
+
+# ValueError: dict contains fields not in fieldnames: 'home'
+```
+
+This actually comes from the optional `extrasaction` parameter inside `csv.DictWriter()`. Its default value is `'raise'`, so when the key is not found in the _fieldnames_, it raises a `ValueError`. However, we can force it to ignore it with passing the value `'ignore'`. So, if we do it:
+
+```python
+import csv
+
+with open('students.csv', 'a') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=['first', 'last', 'house'], extrasaction='ignore')
+    writer.writerow({'first': 'Ginny', 'last': 'Weasley', 'home': 'Gryffindor'})
+```
+
+In that case, we would have ignored the key altogether, resulting in our file looking like this:
+
+```
+# 📁 students.csv
+
+first,last,house
+Harry,Potter,Gryffindor
+Hermione,Granger,Gryffindor
+Luna,Lovegood,Ravenclaw
+Draco,Malfoy,Slytherin
+Ron,Weasley,Gryffindor
+Ginny,Weasley,
+
+```
+
+This is not the wisest decision, though, it is better to have an error in such cases, unless we somehow have a reason to do otherwise.
+
+We can also use the `writerows()` method, to pass write more than one row. It takes an iterable as argument, so let's say we have two dictionaries in a list for the Weasley twins, we can add them both at once:
+
+```python
+import csv
+
+with open('students.csv', 'a') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=['first', 'last', 'house'])
+    twins = [
+        {'first': 'Fred', 'last': 'Weasley', 'house': 'Gryffindor'},
+        {'first': 'George', 'last': 'Weasley', 'house': 'Gryffindor'}
+    ]
+    writer.writerows(twins)
+```
+
+Now, our file looks like:
+
+```
+# 📁 students.csv
+
+first,last,house
+Harry,Potter,Gryffindor
+Hermione,Granger,Gryffindor
+Luna,Lovegood,Ravenclaw
+Draco,Malfoy,Slytherin
+Ron,Weasley,Gryffindor
+Ginny,Weasley,Gryffindor
+Fred,Weasley,Gryffindor
+George,Weasley,Gryffindor
+
+```
+
+## Quote constants
+Especially when working with writer objects, we may need to specify how to quote fields — for example, to handle a situation where our fields might include the delimiter character itself. For this, we can use the optional `quoting` parameter for the writer methods, along with `quotechar` parameter to specify which character to use for quotes.
+
+The `csv` module has four constants to use for `quoting`:
+
+- `csv.QUOTE_ALL`: To quote all fields.
+
+- `csv.QUOTE_MINIMAL`: To quote the fields which have special characters (such as the delimiter itself).
+
+- `csv.QUOTE_NONNUMERIC`: To quote all non-numeric fields.
+
+- `csv.QUOTE_NONE`: To never quote fields. If the delimiter character occurs in one of the fields, then the `escapechar` character is used. If `escapechar` is not provided, it will raise an error.
+
+Let's see a simple example with `csv.QUOTE_ALL` using `csv.DictWriter()`. As you can imagine, it is going to quote all the fields:
+
+```python
+import csv
+
+with open('students.csv', 'a') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=['first', 'last', 'house'], quotechar='"', quoting=csv.QUOTE_ALL)
+    writer.writerow({'first': 'Cho', 'last': 'Chang', 'house': 'Ravenclaw'})
+```
+
+Now, Cho Chang's field is all in quotes:
+
+```
+# 📁 students.csv
+
+first,last,house
+Harry,Potter,Gryffindor
+Hermione,Granger,Gryffindor
+Luna,Lovegood,Ravenclaw
+Draco,Malfoy,Slytherin
+Ron,Weasley,Gryffindor
+Ginny,Weasley,Gryffindor
+Fred,Weasley,Gryffindor
+George,Weasley,Gryffindor
+"Cho","Chang","Ravenclaw"
+
+```
+
+## Conclusion
+The convenience that Python provides with its built-in modules is really valuable, and it is no different with the `csv` module, too. This article explored very simple operations for reading and writing CSV files, but there is always a lot more to explore, and the first stop is always [the official documentation](https://docs.python.org/3/library/csv.html). Hopefully, you now understand some of the basics of dealing with CSV files.
+Happy coding.

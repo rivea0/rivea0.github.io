@@ -1,0 +1,209 @@
+---
+title: Custom endsWith and startsWith Functions
+tags: [Python, JavaScript, C]
+description: Implementing custom endsWith and startsWith functions.
+slug: custom-endswith-and-startswith-functions
+date: 2022-02-22
+---
+
+When working with strings, there might come a time that you might want to check if the string starts with or ends with another given string. Luckily, JavaScript and Python have their own built-in function to do the job, aptly named `startsWith()` & `endsWith()` in JavaScript, and `startswith()` & `endswith()` in Python. However, not to reinvent the wheel, but let's say we want to implement them our own way. Because, why not?
+
+## Negative Indexing
+One thing that might be helpful, before we start off, is the concept of negative indexing. For example, not in all languages, but the last character of a string can be accessed with the index number -1. The second to last character will be -2, and so on. Python allows the use of negative indexes for strings (and for most [iterables](https://docs.python.org/3.9/glossary.html#term-iterable)), and JavaScript's `slice` method also allows negative indexing. These will come in handy.
+
+Python example:
+
+```python
+name = 'David'
+name[-1] # d
+name[-2] # i
+```
+
+We cannot access the character directly with negative indexes in JavaScript as it will return `undefined`, but we can use `slice`:
+
+```javascript
+let name = 'David';
+name[-1] // undefined
+name.slice(-1) // d
+name.slice(-2) // id
+```
+
+## Implementing endsWith
+Now, let's check if a string ends with another given string. Now that we know that negative indexes start from the end of the string, we can try something like this:
+
+Python example:
+
+```python
+name = 'David'
+target = 'vid'
+
+name[-len(target):] == target # True
+```
+
+JavaScript example:
+
+```js
+let name = 'David';
+let target = 'vid';
+
+name.slice(-target.length) === target // true
+```
+
+We can take a look at what we did one by one, so that it's more clear. The first thing we see is that we get `target`'s length, which will be in our example's case, 3 (the length of `'vid'`). And, with negative indexing, we started from -3rd index of our original string and just compared the two. `name.slice(-target.length)` will start from the -3rd index of `name` up to the end of the string, which will be `'vid'` and voilà! — they're the same.
+
+It is a nice, one-liner way to do it. Now let's try our hand at `startsWith`, which will be easier than this one.
+
+## Implementing startsWith
+
+We'll use the same components, slicing and using the target string's length. Let's do it.
+
+Python example:
+
+```python
+name = 'David'
+target = 'Dav'
+name[:len(target)] == target # True
+```
+
+JavaScript example:
+
+```js
+let name = 'David';
+let target = 'Dav';
+name.slice(0, target.length) === target // true
+```
+
+Slicing the original string from the start to the length of the target string, gives us the string with the same length of `target`. So, `name.slice(0, target.length)` in this case, starts from the start of the string and goes up to the 3rd index (length of `'Dav'`). We only check if the two strings are the same, and that's it.
+
+## Dissecting the Implementations
+We have written great one-liners, and just implemented our own way to do `startsWith` and `endsWith`. Here are the functions (let's write the function names in [snake case](https://en.wikipedia.org/wiki/Snake_case) so as not to confuse ourselves with the built-in ones):
+
+In Python:
+
+```python
+def starts_with(string, target):
+    return string[:len(target)] == target
+```
+```python
+def ends_with(string, target):
+    return string[-len(target)] == target
+```
+
+In JavaScript:
+
+```js
+function starts_with(string, target) {
+  return string.slice(0, target.length) === target;
+}
+```
+```js
+function ends_with(string, target) {
+  return string.slice(-target.length) === target;
+}
+```
+
+These are fine, but what about implementing the same logic another way?  Maybe, with another language? One that will help us think in lower-level.
+
+My initial thought was that it would be something like this in C (spoiler: it was naive.):
+
+```c
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+
+bool starts_with(char *string, char *target) {
+  int target_length = strlen(target);
+  for (int i = 0; i < target_length; i++) {
+    if (string[i] != target[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ends_with(char *string, char *target) {
+  int target_length = strlen(target);
+  int starting_index = strlen(string) - target_length;
+  for (int i = 0; i < target_length; i++) {
+    if (string[starting_index + i] != target[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+```
+
+However, I was [corrected](https://web.archive.org/web/20221225204544/https://dev.to/pauljlucas/comment/1mj0d) that this is indeed problematic.
+
+Here is the simpler and correct versions of `starts_with` and `ends_with`:
+
+```c
+bool starts_with(char const *string, char const *target) {
+  for ( ; *target != '\0' && *target == *string; ++target, ++string );
+  return *target == '\0';
+}
+```
+
+```c
+bool ends_with(char const *string, char const *target) {
+  char const *const t0 = target;
+  for ( ; *target != '\0'; ++string, ++target ) {
+    if ( *string == '\0' ) return false;
+  }
+  for ( ; *string != '\0'; ++string );
+  size_t const t_len = (size_t)(target - t0);
+  return strcmp( string - t_len, t0 ) == 0;
+}
+```
+
+What we do in `starts_with` is the same idea, only that we compare each character of our original string and the target string until `target` ends; also handling the case if `target` is longer than `string` — in which case it would return false.
+
+In `ends_with`, we first check to see if `target` is longer than `string` (in that case, we would immediately return false). Then, using the `target`'s length (`t_len`), we compare the `string`'s end of `t_len` characters with our target string (`t0`).
+
+Here's the whole code:
+
+```c
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
+// Function prototypes
+bool starts_with(char const *string, char const *target);
+bool ends_with( char const *string, char const *target );
+
+int main(void) {
+  char const *str = "David";
+  char const *target_end = "vid";
+  char const *target_start = "D";
+
+  // prints "true"
+  printf("%s\n", starts_with(str, target_start) ? "true" : "false");
+
+  // prints "true"
+  printf("%s\n", ends_with(str, target_end) ? "true" : "false");
+}
+
+bool starts_with(char const *string, char const *target) {
+  for ( ; *target != '\0' && *target == *string; ++target, ++string );
+  return *target == '\0';
+}
+
+bool ends_with( char const *string, char const *target ) {
+  char const *const t0 = target;
+  for ( ; *target != '\0'; ++string, ++target ) {
+    if ( *string == '\0' ) return false;
+  }
+  for ( ; *string != '\0'; ++string );
+  size_t const t_len = (size_t)(target - t0);
+  return strcmp( string - t_len, t0 ) == 0;
+}
+```
+
+And now, time for some introspection.
+
+Did we reinvent the wheel? Maybe.
+
+Was it a problem that already been solved? That's what it was.
+
+But, have we had some fun along the way? Well, depends on you, but I certainly did.

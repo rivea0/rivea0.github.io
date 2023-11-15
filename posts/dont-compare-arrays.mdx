@@ -1,0 +1,47 @@
+---
+title: Don't Compare Arrays with == in JavaScript
+tags: [JavaScript]
+description: A reminder to not compare arrays with equality operator in JavaScript.
+slug: dont-compare-arrays
+date: 2022-02-19
+---
+
+I used to think that if we define two arrays with the same values in the same order, we could compare their equality of value in JavaScript (the vanilla one, that is) using `==`.
+
+How wrong I was.
+
+What I mean is, when you do something like this:
+
+```javascript
+let x = [1, 3];
+let y = [1, 3];
+```
+
+You expect something like `x == y` to be true (remember we're not using the strict equality yet as we know that they are not the same object —yes, [*arrays are objects*](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)—, we're only looking if they are equal value-wise). For example, in Python, while they are not the same object in memory, these two lists would equal true:
+
+```python
+x = [1, 3]
+y = [1, 3]
+x == y # True 
+x is y # (or `id(x) == id(y)`) False
+```
+
+Using `===` in JavaScript for both arrays would, of course, return false as they are not the same objects in memory. That's expected, but there is also not a special treatment for array comparison by value as there is no item-by-item comparison behind the scenes for `==` — so, stay away from using it to compare arrays' value equality.
+
+We can use, however, something like this function (as defined in *JavaScript: The Definitive Guide* by David Flanagan), to compare two arrays for equality:
+
+```javascript
+function equalArrays(a, b) {
+  if (a === b) return true; // Identical arrays are equal
+  if (a.length !== b.length) return false; // Different-size arrays are not equal
+  for (let i = 0; i < a.length; i++) { // Loop through all elements
+    if (a[i] !== b[i]) return false; // If any differ, arrays are not equal
+  } return true; // Otherwise they are equal
+}
+```
+
+Of course, this would not work recursively, so it would mostly be useful for simple and one-dimensional arrays.
+
+Quite simple, but, something to keep in mind nonetheless.
+
+Also, to learn more about how the equality operator works with objects, reading about [object to primitive conversion](https://javascript.info/object-toprimitive) is a great way to spend some time learning what's going on behind the scenes.

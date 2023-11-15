@@ -1,0 +1,67 @@
+.container {
+  max-width: var(--main-content);
+  /* remove ul margins */
+  margin: 0;
+  padding: 0;
+}
+
+.button {
+  margin-top: var(--gap-half);
+  width: 100%;
+  cursor: pointer;
+  border-radius: var(--radius);
+  color: var(--gray);
+  font-weight: 500;
+  background: var(--lighter-gray);
+  border: none;
+  padding: var(--gap-half) var(--gap);
+  transition: background-color var(--transition), color var(--transition);
+  outline: none;
+}
+
+.button:hover,
+.button:focus {
+  color: var(--fg);
+}
+
+.button:active {
+  background-color: var(--lightest-gray);
+}
+
+.filters {
+  background-color: var(--bg);
+  text-decoration: underline var(--link);
+  padding: 0;
+  text-align: right;
+}
+
+.filterList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.filterList > li > button, .clearFilter {
+  background-color: var(--bg);
+  border: 1px solid var(--fg);
+  padding: 6px;
+  border-radius: 4px;
+  font-size: smaller;
+  cursor: pointer;
+}
+
+.clearFilter {
+  margin-top: 1rem;
+  border-radius: 4px;
+
+}
+
+.clearActive {
+  border: 1px solid var(--link);
+}
+
+
+.filterList > li > button.activeBtn {
+  border: 1px solid var(--link);
+}

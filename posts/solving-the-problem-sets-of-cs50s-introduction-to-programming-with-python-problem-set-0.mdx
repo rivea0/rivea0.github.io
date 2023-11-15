@@ -1,0 +1,88 @@
+---
+title: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 0"
+tags: [Miscellaneous, Python]
+description: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 0"
+slug: solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-0
+date: 2022-04-05
+---
+
+Being one of the biggest online courses (and, [one of the most popular courses of Harvard](https://www.newyorker.com/news/our-local-correspondents/how-harvards-star-computer-science-professor-built-a-distance-learning-empire)) is not the only thing that defines CS50. Having absolutely zero knowledge on anything related to computer science beforehand, when I finished the course last year with a [final project](https://www.youtube.com/watch?v=atriZIc7y8c) that surprisingly exceeded my expectations, and managed to create a [demo site](https://heap.pythonanywhere.com/) for it, it was a big dopamine rush. If you literally start taking the course without any prior experience, understanding and finally being able to solve the problem sets of the course is almost like a spiritual experience. David J. Malan is a phenomenal lecturer who helps you internalize concepts that seem difficult for a beginner.
+
+CS50 is now not a single course on Introduction to Computer Programming, but has turned into a bigger ecosystem for different courses with various flavors, be it Web Programming, Artificial Intelligence, or, Mobile App Development.
+Its latest, Introduction to Programming with Python, does not exactly focus on theoretical computer science concepts, but is a more general programming course using Python. I love Python, and I was really excited to see the new problems that CS50 would provide for us to solve in this new course.
+
+Before I start, here is a disclaimer: **I am not going to provide full solutions to Problem Sets**. See [academic honesty](https://cs50.harvard.edu/python/2022/honesty/). 
+
+I am planning to write about how to start thinking about a given problem, maybe as a kind of guidance, and how one might go about solving it. I assume you already read the problem set explanations, as I might allude to them. Generally, the problems start easy and perhaps more friendly, then the curve becomes steeper. It is a nice challenge, though, that is how you realize that you are actually learning.
+
+## Indoor Voice
+[The first problem](https://cs50.harvard.edu/python/2022/psets/0/indoor/) seems pretty straightforward. Our given input just has to be "quiet" instead of being in "yelling case". What that means is, if `'THIS IS YELLING'`, then `'this is not yelling'`. And, here is the importance of reading the documentation of the tool that you are using, in this case, Python. Because we work with `str` data types in the problem, we simply have to look up if Python comes with built-in `str` methods — and, it does. A lot of them. For example, it has `capitalize()`, `lower()`, `upper()` among many others. Let's see how these would work:
+
+```python
+s = 'This is CS50.'
+
+print(s.capitalize()) # This is CS50.
+print(s.lower()) # this is cs50.
+print(s.upper()) # THIS IS CS50.
+```
+ 
+With that example, you might already see how to totally "quiet down" a given string. As for the `input()`, again, the documentation helps. In the Python interpreter, for example, typing `help(input)` enlightens you on how to use it.
+
+## Playback Speed
+[This problem](https://cs50.harvard.edu/python/2022/psets/0/playback/) wants us to simulate a slower playback, replacing spaces with `...` (three dots). What we want to do is to split a given input string into words, and to join them back again with three dots. Or, we can simply _replace_ the space characters with three dots. As with all kinds of problems, there are different ways for a solution. Here, the documentation again is important. We are working with `str` types again, there are methods named for _exactly_ what we want to do in this case, no matter which method you choose to implement. Simply seek, and you will find them.
+
+## Making Faces
+With [this one](https://cs50.harvard.edu/python/2022/psets/0/faces/), we need to replace any occurrence of `:)` with the emoji `🙂` and `:(` with 🙁. One of the most important things to realize here is that the emojis are also `str` type in this case. What we want to do is, well, literally _replace_ characters of a given string with other characters. Again, consulting the documentation helps with what we exactly want to do.
+
+This problem set also emphasizes the concept of modularity, splitting code into functions. For example, instead of doing everything on a `main()` function like this:
+
+```python
+def main():
+    incantation = 'Expecto Patronum'
+    print(f'{incantation.upper()}!')
+
+main() # EXPECTO PATRONUM!
+```
+
+There is a slightly better way to do it:
+
+```python
+def say_incantation(incantation):
+    return f'{incantation.upper()}!'
+
+def main():
+    incantation = 'Expecto Patronum'
+    print(say_incantation(incantation))
+
+main() # EXPECTO PATRONUM!
+```
+
+And similarly in this problem, we have to split the implementation using a `convert` function to convert emoticons to emojis, and a `main` function to call `convert` inside of it.
+
+## Einstein
+This [problem set](https://cs50.harvard.edu/python/2022/psets/0/einstein/) uses Einstein's mass-energy equivalence formula `E = mc^2`. For a given mass, we need to output the energy in Joules. 
+`c` in the formula, is the constant speed of light that is measured approximately as 300000000 (meters per second). The main thing to do is to plug in the variables to their equivalents in the formula, but one thing to remember is how the `input` function works. Because, in this problem we do not mostly do operations with `str` types this time, but rather with the `int` data type. So, for any kind of string in our program, [type casting](https://en.wikipedia.org/wiki/Type_conversion) is a helpful thing to do as we only want integers. For example:
+
+```python
+# This would not work
+year = '2022'
+print(year - 22) # TypeError
+```
+```python
+# But this would work
+year = int('2022')
+print(year - 22) # 2000
+```
+
+Perhaps, why the `int` type is great and not a slight headache like `float`s can be appreciated more in later problem sets.
+
+## Tip Calculator
+The last [problem](https://cs50.harvard.edu/python/2022/psets/0/tip/) is mostly done, only the remaining two functions are waiting for us to be implemented. 
+
+What `dollars_to_float` and `percents_to_float` expect as inputs are similar in terms of formatting. The first one expects an input like `$50.00` and the second one needs an input like `15%`, of course, both being strings. Just like in the Einstein problem, type casting is a useful thing to do in this problem. But, before that, we need to get rid of `$` (the dollar sign) and `%` (the percent sign). Realize that what we need to do in the first case is to _remove a prefix_ (leading characters from the left), and in the second case, to _remove a suffix_ (ending characters from the right). There are more than one way to do these things, we can even slice the string ourselves instead of using any built-in method. And, there is really not much to the solution except these. We do not need to think about edge cases yet, as the explanation says that the input values are assumed to be given in expected formats.
+
+I do not want to give away too much, because the crux of these problems is that _you_ should be the investigator. And, I guess the moral of the story for this problem set is a phrase that might sound annoying to some, but it is what it is: _read the documentation_. Or, simply, look for the thing that you need and learn to find it in the documentation. For the Problem Set 0, looking up built-in `str` methods, and some type casting would suffice.
+
+We will see what the next problem set will bring. 
+
+Until then, happy coding. 💜

@@ -1,0 +1,67 @@
+---
+title: A reminder to use single quotes when writing commit messages
+tags: [Shell, Git]
+description: A reminder to use single quotes when writing commit messages.
+slug: a-reminder-to-use-single-quotes-when-writing-commit-messages
+date: 2023-07-13
+---
+
+Using backticks in the shell results in _command expansion_, for example:
+
+```
+echo `which cp`
+```
+
+is the same as 
+
+```
+echo $(which cp)
+```
+
+It finds the directory the `cp` command is in (executes the `which` command), and then prints it to the screen.
+
+Normally, when using double quotes, many types of expansions do not work (like word-splitting and brace expansions), but with command expansion, this is not the case.
+
+Commands inside backticks are executed if they are inside double quotes.
+
+When writing a message to `git commit`, rendering the name of a function in monospace, for example, is easy to do using backticks.
+
+So, my hypothesis is that when I do something like
+
+```
+git commit -m "Add `doThis` function"
+```
+
+If `doThis` is a command, it will be executed.
+
+So, if we write something like:
+
+```
+git commit -m "Add `which cp` thing"
+```
+
+It will replace it with the directory that `cp` is in, so that our commit message will look like:
+
+```
+Add /bin/cp thing
+```
+
+In fact, after trying it, it turns out to be true, and this [Stack Overflow answer](https://stackoverflow.com/a/71155997) has a nice short explanation.
+
+Single quotes, on the other hand, suppress all expansions, so if written like this:
+
+```
+git commit -m 'Add `which cp` thing'
+```
+
+It won't execute `which cp`, but write it as it is: 
+
+```
+Add `which cp` thing
+```
+
+So, I think it is safer to use single quotes, whether you want to use a code block a la markdown styling or not.
+
+---
+
+*This enlightenment is thanks to the "Seeing the World as the Shell Sees It" chapter from William E. Shotts' book [The Linux Command Line: A Complete Introduction](https://archive.org/details/tlcl-19.01/page/76/mode/2up).*

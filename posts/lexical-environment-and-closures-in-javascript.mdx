@@ -1,0 +1,129 @@
+---
+title: Lexical Environment and Closures in JavaScript
+tags: [JavaScript]
+description: Exploring the lexical environment and clousures in JavaScript.
+slug: lexical-environment-and-closures-in-javascript
+date: 2022-03-09
+---
+
+When it feels like this is the [*worst of times* and *the age of foolishness*](https://www.gutenberg.org/files/98/98-h/98-h.htm#link2H_4_0001), and you're almost certainly sure that there are darker times ahead, you might as well have a certain desire to understand how things work on a deeper level beneath the surface. 
+
+One of those things that are beneath the surface of JavaScript is the concept of Lexical Environment. If you're familiar with closures, it is something that helps you internalize what is really going on.
+
+We can think of the Lexical Environment as an object that every function, code block, even the whole script itself, has. It not only contains the local variables and their values, but also has a reference to an **outer lexical environment**. 
+
+When you create a variable, let's say, something like this:
+
+```js
+let book = 'Harry Potter and the Prisoner of Azkaban';
+```
+
+Think of the `book` as a property of the Lexical Environment, with the value `'Harry Potter and the Prisoner of Azkaban'`. Since it is inside the global Lexical Environment now, the outer reference is `null`. Maybe another way to think about this is that the global Lexical Environment is the environment of the whole script, and it has not any reference to anything *outer* than itself. 
+
+How the global Lexical Environment behaves is different for variables and declared functions. Let's try to understand what we mean by that.
+
+The global Lexical Environment is filled with all the variables, but initially, the variables are "uninitialized" — which means that the engine knows about them, but they cannot be referenced until they've been declared. So, let's say this is our script for now:
+
+```js
+let book; // (1)
+book = 'Harry Potter and the Prisoner of Azkaban'; // (2)
+book = 'Harry Potter and the Goblet of Fire'; // (3)
+```
+
+What happens when the execution starts, is that the (global) Lexical Environment knows about the variable `book`, but it is uninitialized. 
+On line (1), `book` is now `undefined`.
+On line (2), `book` is assigned a value, `'Harry Potter and the Prisoner of Azkaban'`.
+On (3), the value of `book` is changed to `'Harry Potter and the Goblet of Fire'`.
+
+However, we said that the case is different for function declarations. It also shines light on the "hoisting" aspect of JavaScript. Let's take a look at it.
+
+When a function is declared (we're not using a function expression), it is instantly initialized so that it is ready to be used. That's why it does not matter if we declare the function after we use them — that's why something like this works:
+
+```js
+console.log(add(30, 3)); // 33
+
+function add(num, num2) {
+  return num + num2;
+}
+```
+
+When we say that JavaScript "hoists" a function, what actually happens is this: declared functions are instantly initialized when the Lexical Environment is created. But, let's look at this now:
+
+```js
+let broomstick = 'Firebolt';
+
+function summonItem(spell) {
+  return `${spell} ${broomstick}!`;
+}
+
+console.log(summonItem('Accio')); // Accio Firebolt!
+```
+
+When the execution of the above code starts, the Lexical Environment knows both `broomstick` and `summonItem`; however, `broomstick` is uninitialized at this stage while `summonItem` is initialized and ready to use.
+To visualize, think of the Lexical Environment as an object with properties like below:
+
+```js
+{
+  broomstick: <uninitialized>,
+  summonItem: function
+}
+```
+
+Also, of course, **its `outer` references `null`** because this is the global Lexical Environment.
+
+When a function starts running, a new Lexical Environment is created for it. So, when we call `summonItem` (inside the `console.log`), the Lexical Environment of that call only stores `spell` having the value `'Accio'`. And, it also has its `outer` referencing the global Lexical Environment itself, which stores `broomstick` and `summonItem`, with its own `outer` referencing `null`. The Lexical Environment of our function call (`summonItem('Accio')`)—the **Inner Lexical Environment**— references the *outer* one, the global Lexical Environment. That is, `spell` is found locally, but to reach `broomstick`, the `outer` reference is followed, and it is found there.
+
+So, it is true to say that:
+
+> **When the code wants to access a variable – the inner Lexical Environment is searched first, then the outer one, then the more outer one and so on until the global one.** 
+
+Now, it's time to catch our breath.
+
+It may be a lot at first, but, that's learning 💁🏻.
+
+This time, consider this one:
+
+```js
+function powersOfTwo() {
+  let start = 2;
+  let count = 0;
+  return function() {
+    return start ** count++;
+  }
+}
+
+let twoToThePower = powersOfTwo();
+
+console.log(twoToThePower()); // 1 (2 ** 0)
+console.log(twoToThePower()); // 2 (2 ** 1)
+console.log(twoToThePower()); // 4 (2 ** 2)
+console.log(twoToThePower()); // 8 (2 ** 3)
+console.log(twoToThePower()); // 16 (2 ** 4)
+console.log(twoToThePower()); // 32 (2 ** 5)
+```
+
+When the `powersOfTwo` is called, a Lexical Environment is created for it. It now has `start` and `count`, and `outer` referencing the global Lexical Environment which has `powersOfTwo` and `twoToThePower`, as well as its own `outer` referencing `null`.
+
+When we call `twoToThePower` inside `console.log`, what happens is — you guessed it, a new Lexical Environment is created. Since `start` and `count` are not inside this local Lexical Environment, it follows the `outer` reference (which is the Lexical Environment of `powersOfTwo`). When it updates the `count`, it is updated inside the Lexical Environment of `powersOfTwo`. Another way to put it:
+
+> **A variable is updated in the Lexical Environment where it lives.**
+
+Again, `start` and `count` lives inside the Lexical Environment of `powersOfTwo`. When we update `count`, it is updated there, not inside the Lexical Environment of the returned function which we bind to `twoToThePower`.
+
+In the first call of `twoToThePower`, `start` is 2 and `count` is 0. In the second call, `start` is still 2, but `count` is updated and is now 1. And, it keeps being updated inside the Lexical Environment where it lives (`powersOfTwo`) as long as we call `twoToThePower`. 
+
+So, `twoToThePower` has the "power" to access and modify the variables inside of a Lexical Environment that its `outer` references.
+
+This is what *closures* are about, a function that has access to its `outer` scope.
+
+Here comes the enlightenment: Then, *are not all functions closures in JavaScript*?
+
+I guess the answer is [mostly yes, with an exception](https://javascript.info/new-function#closure).
+
+If you remember the `summonItem` example, it also accesses a variable (`broomstick`) from its `outer` scope, so based on the definition, we can say that it is theoretically a closure. Though, it might be better if we don't confuse ourselves a lot because when you look up closures, most basic examples you see would be similar in spirit to `powersOfTwo`. It is nevertheless a nice thing to internalize, as it was our goal all along — to see how things work beneath the surface. It is an abstract surface of course, but good to dive into.
+
+### References
+
+- [javascript.info](https://javascript.info/closure) was my main resource while writing this article, and the quotations are taken from there. It also has great visuals to help you understand Lexical Environments better.
+- [MDN article for closures](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures). Because, what's a resources section without MDN?
+- [Closures in 100 Seconds and Beyond](https://www.youtube.com/watch?v=vKJpN5FAeF4) for a quick take.

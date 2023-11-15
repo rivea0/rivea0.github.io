@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.profile {
+  border-radius: 8px;
+}
+
+.paragraphDiv > p {
+  margin-top: 0;
+}
+
+.ul > li {
+  list-style: none;
+  margin-bottom: 2px;
+}
+
+.ul > li::before {
+  content: '⁃\0020';
+  display: inline-block;
+  white-space: pre;
+  margin-left: -1rem;
+}
+
+.span {
+  font-size: small;
+  font-style: italic;
+}
+
+@media (orientation: portrait) {
+  .container {
+    flex-direction: column-reverse;
+  }
+}

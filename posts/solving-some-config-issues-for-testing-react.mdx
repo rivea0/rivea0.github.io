@@ -1,0 +1,141 @@
+---
+title: "Solving Some Config Issues for Testing React"
+tags: [React, JavaScript, Testing]
+description: "Solving Some Config Issues for Testing React"
+slug: solving-some-config-issues-for-testing-react
+date: 2023-04-03
+---
+
+Now that the [Create React App is already dead](https://github.com/reactjs/react.dev/pull/5487#issuecomment-1409720741) (and, [the new React docs](https://react.dev/) don't even mention it), when using a great tool like [Vite](https://vitejs.dev/), you might realize that it does not come with the usual testing libraries included as opposed to Create React App. While there is [Vitest](https://vitest.dev/guide/) that is powered by Vite itself for unit testing, let's take a look at solving some basic configuration problems for Vite using [Jest](https://jestjs.io/) and [Testing Library](https://testing-library.com/).
+
+_Note that this post is written assuming that you already have a working app, but want to try using Jest and Testing Library. This is of course not the way of test-driven development, but hey, we're just learning._
+
+The very first thing is to install Jest:
+
+```shell
+npm install --save-dev jest
+```
+
+Since we are using Testing Library, we need to install it as well:
+
+```shell
+npm install --save-dev @testing-library/react
+```
+
+Of course, we need to add `"test": "jest"` to `"scripts"` in our `package.json` so that we can use `npm run test` command:
+
+```package.json
+"scripts": {
+  "test": "jest"
+}
+```
+
+Note that if you are using `eslint`, we need to add the piece below to our `.eslintrc.json` (or, your choice of `eslint` config file) so that you don't get any `undefined` errors:
+
+```.eslintrc.json
+"env": {
+  "jest": true
+}
+```
+
+Considering that we already have an `App.jsx`, and created an `App.test.jsx` with the most basic form of something like this:
+
+```App.test.jsx
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+
+import App from './App';
+
+describe('App', () => {
+  it('renders App component', () => {
+    render(<App />);
+    screen.getByRole('heading', { level: 1, name: 'This is a heading' });
+  });
+});
+```
+
+If we are quick to run `npm run test`, we might get some errors related to encountering an "unexpected token." Such as this one:
+
+![Jest error: Jest encountered an unexpected token](/blog/post-images/2023-04-03/jest-unexpected-token.png)
+
+The hint might be related to Babel, indeed, we need to install Babel to get things working:
+
+```shell
+npm install --save-dev babel-jest @babel/core @babel/preset-env @babel/preset-react
+```
+
+Also, we need to create a `babel.config.json` and include this in it:
+
+```babel.config.json
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
+    ],
+    ["@babel/preset-react", {"runtime": "automatic"}]
+  ]
+}
+```
+
+Now, everything is almost okay, but not quite. Let's run `npm run test` again, and take a look at what we might see this time:
+
+![Jest error: Consider using the "jsdom" test environment.](/blog/post-images/2023-04-03/jest-jsdom.png)
+
+Now, for versions previous to 28, adding this to `package.json` would have been enough:
+
+```package.json
+"jest": {
+  "testEnvironment": "jsdom"
+}
+```
+
+But, we need to install `jest-environment-jsdom` explicitly in order for this to work because [Jest removed it from the default package](https://jestjs.io/blog/2022/04/25/jest-28#breaking-changes).  See [this Stack Overflow answer](https://stackoverflow.com/a/69228464) for a better explanation.
+
+So, let's install it as well:
+
+```shell
+npm install --save-dev jest-environment-jsdom
+```
+
+Now, everything is alright. 
+Perhaps.
+
+If you have an `import` statement for, say, a CSS file like the one below in one of your files, you might encounter yet another `Jest encountered an unexpected token` error:
+
+```js
+import 'katex/dist/katex.min.css'; // Or, any kind of css file
+```
+
+We can use a proxy to mock CSS modules. And yes, we can install yet another package for that:
+
+```shell
+npm install --save-dev identity-obj-proxy
+```
+
+We also need to update our config. You can add the below in our `package.json`'s `jest` configuration (depending on the files you have, you might add additional extensions):
+
+```package.json
+moduleNameMapper: {
+  "\\.(css|less)$": "identity-obj-proxy"
+}
+```
+
+It is what the [Jest docs say about mocking CSS modules](https://jestjs.io/docs/webpack#mocking-css-modules) as well.
+
+If you don't like your Jest configs being in `package.json`, you can create a whole new `jest.config.json` as its own configuration file. This is how it looks like for now:
+
+```jest.config.json
+{
+  "testEnvironment": "jsdom",
+  "moduleNameMapper": {
+    "\\.(css|less)$": "identity-obj-proxy"
+  }
+}
+```
+
+And, for now, it is enough to get going. Of course, there is never a catch-all solution for all kinds of problems, but it works for my current setting, and I hope someone might find it helpful as well.

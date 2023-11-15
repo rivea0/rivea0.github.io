@@ -1,0 +1,205 @@
+---
+title: Simple Implementation of Stacks and Queues with Deque in Python
+tags: [Python]
+description: Simple implementation of stacks and queues with deque in Python.
+slug: simple-implementation-of-stacks-and-queues-with-deque-in-python
+date: 2022-08-06
+---
+
+Two of the [abstract data types](https://en.wikipedia.org/wiki/Abstract_data_type) that you are most likely to have encountered before are [stacks](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)) and [queues](https://en.wikipedia.org/wiki/Queue_(abstract_data_type)). One important aspect is that each of them has different principles when it comes to their behavior when inserting and removing elements — LIFO (last in, first out) for stacks, FIFO (first in, first out) for queues. With a stack, the last item inserted is the first to go out, so, we _push_ and _pop_ from one end of the stack. With a queue, the first item inserted is going to be removed first, similar to a queue in real life, so, _enqueue_ and _dequeue_ operations are done from the opposite ends of the queue.
+
+With a "double-ended queue", or a [deque](https://en.wikipedia.org/wiki/Double-ended_queue)—pronounced as "deck"—, we can enqueue or dequeue, or, push and pop items from both ends at any time. Implemented as a [doubly-linked list](https://en.wikipedia.org/wiki/Doubly_linked_list) under the hood, insertion and deletion operations will take _O(1)_, constant time. This is also another reason why a deque is great — you can imagine that we can also use a Python `list` for the same goal, but in that case, if we want to insert and remove from the beginning (say, from the left end), the operation will take _O(n)_ time, which is, well, not so good.
+
+Let's take a look at it. Using a `list`, you might have seen a stack as implemented as such\*:
+
+```python
+class Stack:
+    """Stack implementation as a list."""
+
+    def __init__(self):
+        """Create new stack."""
+        self._items = []
+
+    def is_empty(self):
+        """Check if the stack is empty."""
+        return not bool(self._items)
+
+    def push(self, item):
+        """Add an item to the stack."""
+        self._items.append(item)
+
+    def pop(self):
+        """Remove an item from the stack."""
+        return self._items.pop()
+
+    def peek(self):
+        """Get the value of the top item in the stack."""
+        return self._items[-1]
+    
+    def size(self):
+        """Get the number of items in the stack."""
+        return len(self._items)
+```
+
+And, a queue like this:
+
+```python
+class Queue:
+    """Queue implementation as a list."""
+
+    def __init__(self):
+        """Create new queue."""
+        self._items = []
+
+    def is_empty(self):
+        """Check if the queue is empty."""
+        return not bool(self._items)
+
+    def enqueue(self, item):
+        """Add an item to the queue."""
+        self._items.insert(0, item)
+
+    def dequeue(self):
+        """Remove an item from the queue."""
+        return self._items.pop()
+
+    def size(self):
+        """Get the number of items in the queue."""
+        return len(self._items)
+```
+
+Since we want to use a `deque` here instead of a list, let's take a simple look at it.
+
+We can initialize a `deque` object with optionally passing an iterable as argument. It is in the `collections` module, so we also have to import it:
+
+```python
+from collections import deque
+
+d = deque([7, 3, 0, 1])
+print(d) # deque([7, 3, 0, 1])
+
+empty_d = deque()
+print(empty_d) # deque([])
+```
+
+Also, remember that strings are sequences, in that case, our `deque` would look like this:
+
+```python
+d = deque('hey')
+print(d) # deque(['h', 'e', 'y'])
+```
+
+We can also provide a `maxlen` argument to specify the maximum length of items we want our `deque` to have — to make it _bounded_.
+
+This is a trivial example, but let's get a sense of how it is working:
+
+```python
+from collections import deque
+
+d = deque([4, 5, 3, 1, 8], maxlen=3)
+print(d) # deque([3, 1, 8], maxlen=3)
+
+d = deque([4, 5, 3, 1, 8], maxlen=4)
+print(d) # deque([5, 3, 1, 8], maxlen=4)
+```
+
+As the items in the iterable are appended from one end, removing the other items (in the case of `maxlen=3` example, 4 and 5) will be from the opposite end.
+
+Of course, the efficiency of a `deque` also comes from its `appendleft()` and `popleft()` methods, which are aptly named, and better than a `list` in terms of time complexity.
+
+```python
+from collections import deque
+
+d = deque([7, 11])
+d.appendleft(3)
+print(d) # deque([3, 7, 11])
+
+d.appendleft(1)
+print(d) # deque([1, 3, 7, 11])
+
+first_i = d.popleft()
+print(first_i) # 1
+print(d) # deque([3, 7, 11])
+```
+
+We also have the `append()` and `pop()` methods which do their operations to/from the right — like a regular `list`:
+
+```python
+from collections import deque
+
+d = deque([2, 4, 6])
+d.append(8)
+print(d) # deque([2, 4, 6, 8])
+
+first_popped = d.pop()
+second_popped = d.pop()
+
+print(f'Popped {first_popped} first, then {second_popped} second.')
+# -> Popped 8 first, then 6 second.
+
+print(d) # deque([2, 4])
+```
+
+Now that we have seen the append and pop operations from both sides, let's implement a queue first, similar to the `list` version at the beginning of the article:
+
+```python
+from collections import deque
+
+class Queue:
+    """Queue implementation as a deque."""
+
+    def __init__(self):
+        """Create new queue."""
+        self._items = deque()
+
+    def is_empty(self):
+        """Check if the queue is empty."""
+        return not bool(self._items)
+
+    def enqueue(self, item):
+        """Add an item to the queue."""
+        self._items.append(item)
+
+    def dequeue(self):
+        """Remove an item from the queue."""
+        return self._items.popleft()
+
+    def size(self):
+        """Get the number of items in the queue."""
+        return len(self._items)
+```
+
+For the stack version, as we need to append and pop from the same end, `append()` and `pop()` methods using a `list` might seem okay at first, too. But, let's modify the previous stack version above to implement it as a `deque`:
+
+```python
+from collections import deque
+
+class Stack:
+    """Stack implementation as a deque."""
+
+    def __init__(self):
+        """Create new stack."""
+        self._items = deque()
+
+    def is_empty(self):
+        """Check if the stack is empty."""
+        return not bool(self._items)
+
+    def push(self, item):
+        """Add an item to the stack."""
+        self._items.append(item)
+
+    def pop(self):
+        """Remove an item from the stack."""
+        return self._items.pop()
+
+    def peek(self):
+        """Get the value of the top item in the stack."""
+        return self._items[-1]
+```
+
+Nothing much seems different, but you can also imagine using the other end, using `appendleft()` together with `popleft()` as well.
+
+We have explored a very simple way to create stacks and queues using a deque, but of course, there is a lot more to dive into. [The official documentation](https://docs.python.org/3/library/collections.html#collections.deque) is the first place to go, and you can also check out a [Real Python article](https://realpython.com/python-deque/) on the subject. As with many things, it is up to you what you want to achieve, and a double-ended queue is just another tool in your toolkit to consider.
+
+\* The examples of stack and queue implementations as a list are from [Brad Miller and David Ranum's wonderful book on algorithms and data structures](https://runestone.academy/ns/books/published/pythonds3/index.html).

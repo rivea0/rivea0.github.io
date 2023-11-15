@@ -1,0 +1,33 @@
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  display: block;
+  background-color: var(--lighter-gray);
+  border-radius: var(--radius);
+  color: var(--fg);
+  padding: var(--gap-half) var(--gap);
+  position: absolute;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  content: attr(data-label);
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, calc(-100% - 10px));
+  width: max-content;
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* disable on screenreader */
+@media reader, speech, aural {
+  .tooltip::after {
+      display: none;
+      content: '';
+  }
+}

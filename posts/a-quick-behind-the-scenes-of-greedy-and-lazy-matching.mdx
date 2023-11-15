@@ -1,0 +1,100 @@
+---
+title: A Quick Behind the Scenes of Greedy and Lazy Matching
+tags: [Regex, JavaScript]
+description: A quick behind the scenes of greedy and lazy matching with JavaScript RegEx.
+slug: a-quick-behind-the-scenes-of-greedy-and-lazy-matching
+date: 2022-03-31
+---
+
+Regular expressions can be a bit of a nightmare — if you encounter them for the first time.
+
+That was what I used to think as well, before I eventually started to like them. You could sense the power of regular expressions, and they seemed to be ubiquitous — they show up in all kinds of places, and you know that there is no escaping from a regular expression (or, a regex). And, one of the things you would keep hearing on your encounters is the concept of a _greedy_ versus _lazy_ matching. Just when you think you finally grasp them somehow, they might seem to be those mysterious concepts once again a week later. So, let's see what is happening here.
+
+Let's say we have a string: `'One said: "The flag is moving." The other said: "The wind is moving." They argued but could not agree.'`. (If you're not familiar with the [koan](https://en.wikipedia.org/wiki/Koan) — _not the wind, not the flag; [mind is moving](https://en.wikisource.org/wiki/The_Gateless_Gate/Not_The_Wind,_Not_The_Flag)_.) 
+
+What we want to do is to match each of the quoted sentences: `"The flag is moving."` and `"The wind is moving."`. Using JavaScript, the first thing comes to mind is to perhaps use something like this regex to get a match:
+
+```js
+let regex = /".+"/g;
+```
+
+However, if you try this, it gets a match for everything after the first quote:
+
+```js
+let s = 'One said: "The flag is moving." The other said: "The wind is moving." They argued but could not agree.';
+
+let regex = /".+"/g;
+
+s.match(regex);
+// -> [ '"The flag is moving." The other said: "The wind is moving."' ]
+```
+
+This is not what we want. But, why that happens is because of the _greedy algorithm_ that our regex uses. What it does is basically going to the next position if there is no match for a given position. Let's see what that means.
+
+The first character of the pattern `".+"` to match is `"`.
+The regex engine starts with the 0th index of the string, which is `O`, therefore gets no match. If there is no match, remember, it goes to the next position. It is `n`, still no match. It continues advancing until it finds `"` at index 10:
+
+_One said: <mark>"</mark>The flag is moving." The other said: "The wind is moving." They argued but could not agree._
+
+Now that the regex engine has found it, it tries to match the next part of the pattern, which is the dot (`.`) character. The dot is a special quantifier that will match "any character except a newline." The character after the first quote on our string was `T`, so, it matches. Because of the `+` quantifier after the dot, it will repeat as long as a character matches the dot — which will be all the rest of the characters in the string in this case:
+
+_One said: <mark>"The flag is moving." The other said: "The wind is moving." They argued but could not agree.</mark>_
+
+Next, the rest of the pattern (`"` at the end) needs to match as well. However, we are at the end of the string already. So, what happens now is, that the engine _backtracks_. It goes back one character, and will try to match from that character onwards:
+
+_One said: <mark>"The flag is moving." The other said: "The wind is moving." They argued but could not agree</mark>._
+
+Since the character after the match is not a quote (`"`), it does not match. Therefore, it backtracks again:
+
+_One said: <mark>"The flag is moving." The other said: "The wind is moving." They argued but could not agre</mark>e._
+
+Now, `e` is not `"` as well. The engine backtracks again and again until it finds the `"`:
+
+_One said: <mark>"The flag is moving." The other said: "The wind is moving."</mark> They argued but could not agree._
+
+Our regex engine has found it, and is happy now. 
+Though, we have a `g` flag for global match, and the search would continue searching for the pattern again after the first match. But, the rest of the string (`They argued but could not agree.`) has no other quotes (`"`) — therefore, we don't get any more results.
+
+Now that we know that was not our intention to get this result, let's take a look at lazy matching.
+
+We can do the lazy match with the quantifier `?` after the `+`. So, our new regex would be:
+
+```js
+let regex = /".+?"/g;
+```
+
+It means that we want to repeat as little as possible. Now it works as intended:
+
+```js
+let s = 'One said: "The flag is moving." The other said: "The wind is moving." They argued but could not agree.';
+
+let regex = /".+?"/g;
+
+s.match(regex);
+// -> [ '"The flag is moving."', '"The wind is moving."' ]
+
+```
+
+The first thing it does is to look for the quote (`"`) to match the first character in the pattern `".+?"`. Similar to before, it tries until it finds it at index 10:
+
+_One said: <mark>"</mark>The flag is moving." The other said: "The wind is moving." They argued but could not agree._
+
+Next, it matches the dot:
+
+_One said: <mark>"T</mark>he flag is moving." The other said: "The wind is moving." They argued but could not agree._
+
+Now, things are different from greedy search. Instead of matching the dot continually, the engine tries matching the rest of the pattern now. In this case, instead of trying to match `h` for the dot (`.`) first, it checks if the `h` character matches the quote  (`"`). Since it does not, the engine matches it with the dot and continue:
+
+_One said: <mark>"Th</mark>e flag is moving." The other said: "The wind is moving." They argued but could not agree._
+
+Now, it checks `e` for the quote (`"`). No match again. It continues until finds the quote:
+
+_One said: <mark>"The flag is moving."</mark> The other said: "The wind is moving." They argued but could not agree._
+
+We've found the first match! Because of the global flag, it will start again from the end of the first match, and find another result for the pattern again eventually:
+
+_One said: <mark>"The flag is moving."</mark> The other said: <mark>"The wind is moving."</mark> They argued but could not agree._
+
+Finally, we've got the result we wanted and are now happy — thanks to understanding the difference between greedy and lazy matching.
+
+**Note**: If you're not satisfied with the koan example and still confused, here is a shorter and simpler explanation: [https://stackoverflow.com/a/2301298](https://stackoverflow.com/a/2301298).

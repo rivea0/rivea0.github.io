@@ -1,0 +1,121 @@
+---
+title: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 1"
+tags: [Miscellaneous, Python]
+description: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 1"
+slug: solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-1
+date: 2022-04-12
+---
+
+This week on Conditionals, we are presented with another five problems to solve for [Problem Set 1](https://cs50.harvard.edu/python/2022/psets/1/). Let's dive in, but before I start, I should remind you of the **disclaimer**: I do not provide full solutions here, it is more exciting when _you_ yourself come up with the answers (see [academic honesty](https://cs50.harvard.edu/python/2022/honesty/)). My plan in this series is only to provide a guide to think about the problems. I also assume you read the problem set explanations, so that the references I make and the things I try to convey is more clear.
+
+## Deep Thought
+In [this problem](https://cs50.harvard.edu/python/2022/psets/1/deep/), we only need to check if the user of our program knows the answer to the Great Question of Life, the Universe, and Everything. Simple as that.
+
+One thing that the last problem set made clear was that _checking the documentation_ —even if it is sometimes hard to find what you are looking for!— is vital to solve the problems. It is still something to keep in mind in this problem set as well.
+
+Now that it is well known that the answer to that great question is [42](https://en.wikipedia.org/wiki/Phrases_from_The_Hitchhiker%27s_Guide_to_the_Galaxy#Answer_to_the_Ultimate_Question_of_Life,_the_Universe,_and_Everything_(42)), we need to make sure the user gives the correct answer — whether they write it literally as `42` or `forty-two`, (or `Forty two`, etc.).
+
+The main thing to do here is to check for two kinds of way to write it: as `42`, or a string with letters. It is clear that we will use the `input` function to get input from the user. Another thing, if you remember from the last problem set, is that the `input` returns a string even if the user enters a number. 
+
+A good habit to have is cleaning user inputs, as they are supposed to be messy, or we should assume them to be so. For example, to make sure that the input is not in [sarcasm case](https://en.wikipedia.org/wiki/Alternating_caps) or [yelling case](https://en.wikipedia.org/wiki/All_caps#Association_with_shouting), it is always a good idea to force the string to be in lowercase. That is done easily with `lower` method. Also, we can _strip_ the input string to make sure there are no unnecessary spaces around. 
+
+Let's say we want our answer with formatting like this: `the answer`, but the user typed in this: `ThE-ansWer `. First step to clear it up would be to make it all lowercase and get rid of the space at the end:
+
+```python
+user_input = user_input.lower().strip() 
+print(user_input) # the-answer
+```
+
+And, it is `the-answer` now. If we want to get rid of the hyphen (`-`) as well, we can _split_ the string with that hyphen, and _join_ the resulting list into a string again. Let's continue step by step:
+
+```python
+user_input = user_input.split('-')
+print(user_input) # ['the', 'answer']
+user_input = ' '.join(user_input) 
+print(user_input) # the answer
+```
+
+It all depends on what you want to do, and how you would like to see the answer. Because we can accept multiple types of formatting in this problem as the answer, it makes sense to use all these methods on the user input. And the last thing to do afterwards is to check if the answer is correct; _if_ so, returning `Yes`; _else_, returning `No`.
+
+## Home Federal Savings Bank
+In this [problem](https://cs50.harvard.edu/python/2022/psets/1/bank/), we check the greeting. If it has any sign of `hello` _in_ it, we do not give any money, therefore output `$0`. If the greeting _starts with_ an `h` though, we can output `$20`. And these are our only constraints. To everything else we are quite generous, and output `$100`.
+
+Actually, Python comes with built-in methods _exactly_ and suitably _named_ to implement our conditions. Again, it is the documentation we should consult. 
+
+One thing that might be obvious or not be obvious to beginners, is that strings are also a sequence, much like lists or tuples. What that means is that they are linear and consist of ordered items. You already might have realized it when you use indexing on a `str` type to access a character, like you use indexing to get an item from a list. The implication is that, sometimes lists —or, any other sequence— behaves similarly to `str` type, and some operations are applicable to both of them. `in` for example, is one operator you can use with lists. Enough for a clue, I guess. As to checking if a string _starts with_ some character, that is also self-explanatory. You might also be interested in a [custom implementation of it](https://rivea0.github.io/blog/custom-endswith-and-startswith-functions/).
+
+## File Extensions
+This [one](https://cs50.harvard.edu/python/2022/psets/1/extensions/) is probably my favorite so far. It incorporates formatting the [MIME types](https://en.wikipedia.org/wiki/Media_type) (or, media types) that are in an [HTTP header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields), which determines how they are displayed on the web. In this problem, we need to get an input for a file name, and return the appropriate MIME type for that file, depending on what extension it has, if it has any.
+
+There are many ways one can solve this problem. The main resource this time —besides the Python documentation, of course—, is the list of [common MIME types](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types) from MDN. To start off, you can see that we have two default types: `text/plain` for textual files (with the extension of `txt`), and `application/octet-stream` for everything else. For all the other types to consider in this problem, instead of hard-coding a conditional for each type and extension, we can create a mapping similar to the one below:
+
+```python
+extensions_mapping = {
+    'image': ['gif', 'jpg', 'jpeg', 'png'],
+    'application': ['pdf', 'zip'],
+}
+```
+
+Of course, first we need to get the extension of the filename. This could be done in different ways, we can _slice_ the string from the index of where the dot is, or _split_ it to get the part after the dot. We also need to clear the input string to handle messy inputs. As we have done that before in Deep Thought, we can _lower_ the string for consistency, _strip_ it to get rid of unnecessary spacing. If we use a mapping, the only thing that is left to do would be to check if the extension is _in_ the values of a type (which would be our _key_), if so, simply printing the _key_ and the _value_ with the format of `[mime_type]/[extension]`. For example, if the filename is `cat.png`, our program should print `image/png`.
+
+There is one catch, though. For the `jpg` extension, the MIME type is `image/jpeg`, instead of `image/jpg`. We can handle that with a simple conditional as well:
+
+```python
+if extension == 'jpg':
+    return 'image/jpeg'
+```
+
+(Of course, if you do not use a function, you can simply print the string instead of using a return statement.)
+
+And, that is all that necessary to solve the problem. On to the next one.
+
+## Math Interpreter
+Here [in this problem](https://cs50.harvard.edu/python/2022/psets/1/interpreter/), the conditionals _if_/_elif_/_else_ really shine. We only need to do simple arithmetic with two operands. We also need to format our output string as a float, having one decimal place. A hint of _splitting_ the input string is already given in the explanation. If the user types in `5 + 4`, the result of our split would be `['5', '+', '4']` (remember, the input always returns a string). The only thing that is left to do is to check the given operator for each of the four operators (`*`, `/`, `+`, `-`) and do the arithmetic. The float formatting works like below:
+
+```python
+x = 6.5418
+print(f'{x:.2f}') # 6.54
+```
+
+Instead of 2, we need to do format it as having _one_ place. This, and a chain of conditions is all that there is to it.
+
+## Meal Time
+This [one](https://cs50.harvard.edu/python/2022/psets/1/meal/) was also quite enjoyable, even though at first glance it seems to be more complicated than others before. The first thing to think about is that we only have three options to consider: a time range of `7:00 - 8:00` which indicates `breakfast time`, `12:00 - 13:00` which means `lunch time`, and finally, `18:00 - 19:00` which is `dinner time`. When we ask the time to user, the input might be in the format of `#:##` or `##:##`. The program structure is also given to us, with a `main` function and a `convert` function, which we can call inside `main`. Let's think about how we can do the converting.
+
+For a given time with the formatting `#:##` or `##:##`, we need to get the hour and minutes — which indicates that we need to _split_ our string, so that the first item of the result of that split would be the hour, and the second one would be the minutes.
+
+Since the hour can be written as `07`, we can check if it _starts with_ 0, so that we can _slice_ it appropriately. 
+
+Say, the user input is `07:30`. What does that mean? It is simply 7 hours and a half. Since an hour is 60 minutes, we can denote that part as a division. So, `30 / 60` in this case, would be `0.5`.  Then, all we need to do is to add the hour and minutes, converting any of them to `int` if necessary. But, if the input is `07:32`, you can imagine doing the division `32 / 60` would result in a not-so-nice-looking output, namely that of `0.5333333333333333`. One thing we can do in that case, is to use the `round` function. Since we are checking clear-cut boundaries for meal hours, we can round the whole operation, so that it would be like:
+
+```python
+round(hour + minutes / 60)
+```
+
+(We do not need to put parentheses around `minutes / 60` since the order of operations takes care of that.) 
+
+After that, the rest is easy. We need to check for each meal time to see if the given time is between a certain meal time. Here, Python makes it easy to use comparison operators in one line, and our code is more elegant as a result. An example:
+
+```python
+time_total = 7.5
+
+print(7 <= time_total <= 8) # True
+```
+
+We do not need to use an `and` operator in that case. It is pretty neat.
+
+The only thing left to do is to return the appropriate meal time for each condition. And, that is all. For the challenge part handling time inputs with `a.m.` and `p.m.`, you would like to do another split on the minute part after you have already split hours and minutes. You can check for `p.m.`, and if it is so, you can simply add 12 to the hour variable. Considering you have **already** split the time to hour and minute parts, dealing with `p.m.` would be similar to this:
+
+```python
+if ' ' in minute:
+    abbr = minute.split(' ')[1]
+    minute = int(minute.split(' ')[0])
+    if abbr == 'p.m.':
+ 	    hour = int(hour) + 12
+
+print(hour, minute, after) # 19 30 p.m.
+```
+
+For `a.m.`, you do not have to do additional arithmetic, just continue as before.
+
+And, that is all for this week's problem set. Perhaps a bit more slightly challenging than the last week, but entertaining nonetheless. We will see what will the next week's problems be like.

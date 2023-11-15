@@ -1,0 +1,84 @@
+---
+title: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 3"
+tags: [Miscellaneous, Python]
+description: "Solving the Problem Sets of CS50's Introduction to Programming with Python — One at a Time: Problem Set 3"
+slug: solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-3
+date: 2022-04-26
+---
+
+On this week's problem set on [Exceptions](https://cs50.harvard.edu/python/2022/psets/3/), we are given four problems this time, instead of five. The problem explanations are quite comprehensive; which I assume you read beforehand. Reminding the **disclaimer** that these blog posts are only for a walkthrough of the problems, let's tackle them one by one.
+
+You can also read the previous posts on [Problem Set 0](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-0/), [Problem Set 1](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-1/), and [Problem Set 2](https://rivea0.github.io/blog/solving-the-problem-sets-of-cs50s-introduction-to-programming-with-python-problem-set-2/). 
+
+## Fuel Gauge
+[This](https://cs50.harvard.edu/python/2022/psets/3/fuel/) is a problem where we need to take a user input which we assume to be formatted as `X/Y`, and display how much fuel left in the tank as a percentage. We are mostly dealing with integer division and exception handling here. Considering we have been getting input from the user for the past problems already, we know how to handle the input accordingly, say, for _splitting_ a string with the format `X/Y`. Remember that when we split a sentence into words, the default split character is the space character. So if we want to split a string like `1+2` into two numbers, using `'1+2'.split('+')` will give a list containing `1`, and `2`.
+
+Before we do any error checking though, we need to get the result as a percentage. And, before getting the result, it might be a better idea to check if the value of `x` is not larger than `y`; then calculating the result accordingly. You must be mostly familiar with converting decimals to percentages from elementary school math. In this case, just multiplying the result of the given fraction with 100 is enough. Then, as the problem explanation says, if the overall result is more than 99, we print `F` to indicate the fuel tank is full; if it is less than 1, we print `E` to indicate it is empty. Otherwise, we print the percentage, which is done easier with an f-string. We also need to print it with _zero_ decimal places — remember putting something like `:.1f` after a float type formats it to have 1 place after the decimal, but in this case, we want _zero_ decimal places.
+
+The main thing to consider is handling the exceptions, of course, wrapping the code in a `try...except` block. As we also need to keep asking the user if there is a `ValueError`, or a `ZeroDivisionError`, what we need to do is similar to the example given in [this week's lecture](https://cs50.harvard.edu/python/2022/weeks/3/) — wrapping the exception handling inside an infinite loop which we can break out of with returning the formatted percentage result. And, that is really all there is to it, let's look at the next one.
+
+## Felipe's Taqueria
+[Here](https://cs50.harvard.edu/python/2022/psets/3/taqueria/), we are already given the menu entrées as a dictionary, the only thing for us to do is to get the user input for an item in the menu, and _accumulate_ the total result of each item that they put in. Of course, we also need to print the total result. Similar to the examples in this week's lecture and the Fuel Gauge problem, we can use an infinite loop to continue getting input from the user. We also need to convert the input into _titlecase_ for it to match the keys in our given dictionary as well. In case of an invalid item which will result in a `KeyError`, say `Burger`, we can ignore it (simply, _pass_) and continue asking the user for an item. If the user hits control-d (a common way to stop the inputs) which will result in an `EOFError` (end-of-file condition), it is time to stop the program, we can do that by returning from the function after printing a newline.
+Well, that was easy. On to the next problem.
+
+## Grocery List
+[This problem](https://cs50.harvard.edu/python/2022/psets/3/grocery/) is also similar to the ones we did before, and it is very easy to implement if you like using dictionaries. Just like the previous two problems, we need to keep getting input — which we did before by putting the `try...except` block inside an infinite loop, and returning (if we use it inside a function) at the right time to break out of it. We can use a dictionary to add the items and increment each of the item's value if it is already in the dictionary. Actually, let's see something similar in action. Let's say we want to get the names of spells that Harry Potter has cast in a day, as well as how many times they are used. Perhaps the most intuitive way to do it is similar to this one:
+
+```python
+spells = {}
+while True:
+    try:
+        spell = input()
+        if spell in spells:
+            spells[spell] += 1
+        else:
+            spells[spell] = 0
+    except EOFError:
+        break
+```
+
+So, if our input is something like this one:
+
+```
+Accio
+Accio
+Lumos
+Expelliarmus
+Expelliarmus
+Expelliarmus
+```
+
+Printing each value and key in our `spells` dictionary will give this output:
+
+```
+2 Accio
+1 Lumos
+3 Expelliarmus
+```
+
+However, we can do a one-liner instead of the one we used with an `if...else` condition. We can use this version instead:
+
+```python
+spells = {}
+while True:
+    try:
+        spell = input()
+        spells[spell] = spells.get(spell, 0) + 1
+    except EOFError:
+        break
+```
+
+What the `get` function does here is literally getting the `spell` from the `spells` dictionary, and providing a default value of `0` if it is not in the dictionary. We add `1` to the whatever value that is returned by the `get` function to increment it. This will give the same output as above if we print each value and key of our dictionary. 
+Of course, as in the problem demo, printing the value and keys is only done after the user hits control-d — in other words, after our program has an `EOFError`. Checking the documentation as we always do before, there are many useful methods to iterate through the _items_ of a dictionary. And, if we want our output to be _sorted_, well, we can _literally_ check the documentation. Since I cannot give any more hints without giving out the solution itself, it is time to move on to the next problem.
+
+## Outdated
+In [the last problem](https://cs50.harvard.edu/python/2022/psets/3/outdated/) of this week, we need to get a user input for a date in the month-day-year format, and output it in the year-month-day format. The input we are given can look like `9/8/1636`, or `September 8, 1636` (yes, an Easter egg: the year Harvard University was [founded](https://www.harvard.edu/about/history/)). Here, we need to do a bit of splitting and some string formatting. We can use the same idea of an infinite loop like before to keep getting the user input, only returning the result when it is appropriate. Since we have two kinds of inputs to handle — the one with forward slashes (`/`), and the other with a comma and a space (`, `) —, we can use two branches for a conditional. Hints in the problem description are quite helpful on splitting a string, which you must be pretty familiar with already. We are also given a list of months in the problem explanation page, and in order to get the value of an inputted month, we can add 1 to the index of that month in that list. Lastly, we can print the formatted result and break — or, if using a function return with the string of our result. But, we need to format the day and month to be two digits, and depending on how you implement it, you can format an int to have two leading zeroes with `f'{n:02}'`, or a string with a very handy `zfill` function. Taken from the documentation, what it does is this:
+
+```python
+>>> "42".zfill(5)
+'00042'
+```
+
+It is self-explanatory indeed. The main thing we always need to do is error-checking, in this case the problem description does not provide a specific exception to handle and that is mostly because you can implement the solution in many different ways. But, one thing we need to make sure of is that the month and day should be within bounds, say if a user gives an input `23` in place of the month, we should prompt them again. We can make sure of this by simply returning the result string only when this conditional is met. After that, the exceptions that you need to deal with actually depends on how your code looks like, but, it mostly makes sense that we might have a `ValueError`, perhaps an `IndexError` for dealing with the months list. Since it is you as the programmer who will decide what exception to handle, checking the documentation is the first thing to do. And here, checking out the [built-in exceptions](https://docs.python.org/3/library/exceptions.html) is the way to go.
+
+We are at the end of the third week, and next week we are going to finish half the course already! I cannot wait to see what problems we are going to solve for the next week on Libraries, and hope you too as well. Until then, happy coding!
