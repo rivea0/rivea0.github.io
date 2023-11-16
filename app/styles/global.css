@@ -2,6 +2,7 @@
   /* Spacing */
   --gap-quarter: 0.25rem;
   --gap-half: 0.5rem;
+  --gap-three-q: 0.75rem;
   --gap: 1rem;
   --gap-double: 2rem;
   --small-gap: 2rem;
@@ -91,7 +92,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 16px;
-  /* line-height: 1.55em; */
+  line-height: 1.45rem;
   -webkit-text-size-adjust: none;
   text-size-adjust: none;
 }
