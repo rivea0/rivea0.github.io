@@ -1,0 +1,95 @@
+---
+title: A simple example of a nested SQL query
+tags: [SQL]
+description: A simple example of a nested SQL query.
+slug: a-simple-example-of-a-nested-sql-query
+date: 2023-08-16
+---
+
+Let's say we have this table:
+
+<Table>
+|city|country|population|latitude|longitude|
+|---|---|---|---|---|
+|Guadalajara|Mexico|1500800|20.659699|-103.349609|
+|Toronto|Canada|2795060|43.653226|-79.383184|
+|Houston|United States|2195914|29.760427|-95.369803|
+|New York|United States|8405837|40.712784|-74.005941|
+|Philadelphia|United States|1553165|39.952584|-75.165222|
+|Havana|Cuba|2106146|23.05407|-82.345189|
+|Mexico City|Mexico|8555500|19.432608|-99.133208|
+|Phoenix|United States|1513367|33.448377|-112.074037|
+|Los Angeles|United States|3884307|34.052234|-118.243685|
+|Ecatepec de Morelos|Mexico|1742000|19.601841|-99.050674|
+|Montreal|Canada|1717767|45.501689|-73.567256|
+|Chicago|United States|2718782|41.878114|-87.629798|
+</Table>
+
+We want to get all the cities west of Chicago.
+As we go towards the west, the longitude must be less than the longitude of Chicago — the west of the prime meridian has longitudes that are negative numbers.
+
+Here is the pseudocode:
+
+```
+SELECT * FROM north_american_cities
+WHERE longitude < ${Chicago's longitude}
+```
+
+So, what we need to do is somehow get the value of Chicago's longitude and use it as comparison.
+It is by itself easy:
+
+```sql
+SELECT longitude FROM north_american_cities
+WHERE city = 'Chicago';
+```
+
+What we can do is simply put it inside the parenthesis and use it as a value itself, just like a variable:
+
+```sql
+SELECT * FROM north_american_cities
+WHERE longitude < (
+    SELECT longitude
+    FROM north_american_cities
+    WHERE city = 'Chicago'
+);
+```
+
+The result is this:
+
+<Table>
+|city|country|population|latitude|longitude|
+|---|---|---|---|---|
+|Guadalajara|Mexico|1500800|20.659699|-103.349609|
+|Houston|United States|2195914|29.760427|-95.369803|
+|Mexico City|Mexico|8555500|19.432608|-99.133208|
+|Phoenix|United States|1513367|33.448377|-112.074037|
+|Los Angeles|United States|3884307|34.052234|-118.243685|
+|Ecatepec de Morelos|Mexico|1742000|19.601841|-99.050674|
+</Table>
+
+Furthermore, we can order the longitudes from west to east using the `ORDER BY` clause:
+
+```sql
+SELECT * FROM north_american_cities
+WHERE longitude < (
+    SELECT longitude
+    FROM north_american_cities
+    WHERE city = 'Chicago'
+)
+ORDER BY longitude;
+```
+
+And, voilà:
+
+<Table>
+|city|country|population|latitude|longitude|
+|---|---|---|---|---|
+|Los Angeles|United States|3884307|34.052234|-118.243685|
+|Phoenix|United States|1513367|33.448377|-112.074037|
+|Guadalajara|Mexico|1500800|20.659699|-103.349609|
+|Mexico City|Mexico|8555500|19.432608|-99.133208|
+|Ecatepec de Morelos|Mexico|1742000|19.601841|-99.050674|
+|Houston|United States|2195914|29.760427|-95.369803|
+</Table>
+
+_The example is taken from [sqlbolt.com](https://sqlbolt.com/lesson/select_queries_review)_.

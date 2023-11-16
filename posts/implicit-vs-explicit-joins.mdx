@@ -1,0 +1,52 @@
+---
+title: Implicit vs. explicit JOINs
+tags: [SQL]
+description: Implicit vs. explicit JOINs in SQL.
+slug: implicit-vs-explicit-joins
+date: 2023-08-19
+---
+
+Let's say we have a `customers` table that looks similar to this:
+
+<Table>
+| customer_id | first_name | last_name |
+| --- | --- | --- |
+| 1 | John | Doe |
+| 2 | Jane | Smith |
+</Table>
+
+And an `items_ordered` table that's looking like this:
+
+<Table>
+| customer_id | order_date | item | price |
+| --- | --- | --- | ---|
+| 1 | 2020-01-01 | Apple | 1.99 |
+| 2 | 2020-02-02 | Banana | 0.99 |
+</Table>
+
+Usually, we can join them using the `INNER JOIN` (or just `JOIN`) clause:
+
+```sql
+SELECT customer_id, first_name, last_name, order_date, item, price
+FROM customers
+INNER JOIN items_ordered
+ON customers.customer_id = items_ordered.customer_id;
+```
+
+But, there is also another way to do the same thing, which is the _implicit JOIN_:
+
+```sql
+SELECT
+    customers.customer_id,
+    customers.first_name,
+    customers.last_name,
+    items_ordered.order_date,
+    items_ordered.item,
+    items_ordered.price
+FROM customers, items_ordered
+WHERE customers.customer_id = items_ordered.customer_id;
+```
+
+Looks a bit more cluttered.
+
+For clarity's sake, using an explicit JOIN syntax makes more sense, and from what I've read, it seems to be no significant performance difference between the two, and the ANSI 92 standard is [said to be recommending](https://stackoverflow.com/a/53061589) using modern explicit joins.

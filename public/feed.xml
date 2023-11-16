@@ -4,9 +4,254 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 15 Nov 2023 10:53:32 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 16 Nov 2023 17:58:56 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[Converting MDX files with frontmatter into an MDX Component in Next.js 13]]></title>
+            <description><![CDATA[<p><a href="https://mdxjs.com" target="_blank" rel="noopener noreferrer">MDX</a> <em>is a superset of markdown that lets you write JSX directly in markdown files</em>.<br>If you&#39;re using Next.js (this post was written for Next.js 13 specifically), you might know that it has a built-in support for MDX. You can read more about how to configure it <a href="https://nextjs.org/docs/app/building-your-application/configuring/mdx" target="_blank" rel="noopener noreferrer">in the docs</a>.</p>
+<p>The most basic way to use it looks like this:</p>
+<pre><code class="language-tsx">import HelloWorld from &#39;./hello.mdx&#39;
+
+export default function Page() {
+  return &lt;HelloWorld /&gt;
+}
+</code></pre>
+<p>If you get the files dynamically, though, and use a frontmatter, things might be a bit confusing.</p>
+<p>The MDX documentation <a href="https://mdxjs.com/guides/frontmatter/" target="_blank" rel="noopener noreferrer">recommends using a remark plugin, <code>remark-frontmatter</code></a> to ignore the frontmatter and get only the MDX content like this:</p>
+<pre><code class="language-tsx">import fs from &#39;node:fs/promises&#39;
+import remarkFrontmatter from &#39;remark-frontmatter&#39;
+import {compile} from &#39;@mdx-js/mdx&#39;
+
+console.log(
+  await compile(await fs.readFile(`./posts/${params.slug}.mdx`), {
+    remarkPlugins: [remarkFrontmatter]
+  })
+)
+</code></pre>
+<p>Say, if we have a <code>hello.mdx</code> file that looks something like this:</p>
+<pre><code class="language-mdx">---
+title: Hello world
+---
+
+# Hi
+
+This is an example MDX file.
+</code></pre>
+<p>What is logged for that <code>hello.mdx</code> looks like this:</p>
+<pre><code>VFile {
+  data: {},
+  messages: [],
+  history: [],
+  cwd: &#39;/Users/me/projects/demo-site&#39;,
+  value: &#39;/*@jsxRuntime automatic @jsxImportSource react*/\n&#39; +
+    &#39;import {Fragment as _Fragment, jsxDEV as _jsxDEV} from &quot;react/jsx-dev-runtime&quot;;\n&#39; +
+    &#39;function _createMdxContent(props) {\n&#39; +
+    &#39;  const _components = Object.assign({\n&#39; +
+    &#39;    h1: &quot;h1&quot;,\n&#39; +
+    &#39;    p: &quot;p&quot;\n&#39; +
+    &#39;  }, props.components);\n&#39; +
+    &#39;  return _jsxDEV(_Fragment, {\n&#39; +
+    &#39;    children: [_jsxDEV(_components.h1, {\n&#39; +
+    &#39;      children: &quot;Hi&quot;\n&#39; +
+    &#39;    }, undefined, false, {\n&#39; +
+    &#39;      fileName: &quot;&lt;source.js&gt;&quot;,\n&#39; +
+    &#39;      lineNumber: 5,\n&#39; +
+    &#39;      columnNumber: 1\n&#39; +
+    &#39;    }, this), &quot;\\n&quot;, _jsxDEV(_components.p, {\n&#39; +
+    &#39;      children: &quot;This is an example MDX file.&quot;\n&#39; +
+    &#39;    }, undefined, false, {\n&#39; +
+    &#39;      fileName: &quot;&lt;source.js&gt;&quot;,\n&#39; +
+    &#39;      lineNumber: 6,\n&#39; +
+    &#39;      columnNumber: 1\n&#39; +
+    &#39;    }, this)]\n&#39; +
+    &#39;  }, undefined, true, {\n&#39; +
+    &#39;    fileName: &quot;&lt;source.js&gt;&quot;,\n&#39; +
+    &#39;    lineNumber: 1,\n&#39; +
+    &#39;    columnNumber: 1\n&#39; +
+    &#39;  }, this);\n&#39; +
+    &#39;}\n&#39; +
+    &#39;function MDXContent(props = {}) {\n&#39; +
+    &#39;  const {wrapper: MDXLayout} = props.components || ({});\n&#39; +
+    &#39;  return MDXLayout ? _jsxDEV(MDXLayout, Object.assign({}, props, {\n&#39; +
+    &#39;    children: _jsxDEV(_createMdxContent, props, undefined, false, {\n&#39; +
+    &#39;      fileName: &quot;&lt;source.js&gt;&quot;\n&#39; +
+    &#39;    }, this)\n&#39; +
+    &#39;  }), undefined, false, {\n&#39; +
+    &#39;    fileName: &quot;&lt;source.js&gt;&quot;\n&#39; +
+    &#39;  }, this) : _createMdxContent(props);\n&#39; +
+    &#39;}\n&#39; +
+    &#39;export default MDXContent;\n&#39;,
+  map: undefined
+}
+</code></pre>
+<p>That is an object called <code>VFile</code>.<br>What matters is its <code>value</code> because that is the function body that we are going to <em>run</em> to compile MDX content into JavaScript.</p>
+<p>In order to do that, we need to add the <code>outputFormat</code> option as <code>&#39;function-body&#39;</code> to the <code>compile()</code> function, and also change the development to <code>false</code>. We also convert it into a <code>String</code>:</p>
+<pre><code class="language-tsx">import fs from &#39;node:fs/promises&#39;
+import remarkFrontmatter from &#39;remark-frontmatter&#39;
+import {compile} from &#39;@mdx-js/mdx&#39;
+
+const code = String(
+  await compile(
+    await fs.readFile(`./posts/${params.slug}.mdx`, {
+      remarkPlugins: [remarkFrontmatter],
+      outputFormat: &#39;function-body&#39;,
+      development: false
+      /* …otherOptions */
+    })
+  )
+)
+</code></pre>
+<p>The default <code>outputFormat</code> of <code>compile()</code> is <code>&#39;program&#39;</code>, it uses <code>import</code> and <code>export</code> statements, but we need to change it into <code>function-body</code>, otherwise we&#39;ll get a dreaded error: <code>Error: Cannot use import statement outside a module</code>.<br>These are not so important details, you can read more in the <a href="https://mdxjs.com/packages/mdx/#optionsoutputformat" target="_blank" rel="noopener noreferrer">docs</a>.</p>
+<p>The only thing left is to run it, and we can finally return it as an MDX component with these two more lines:</p>
+<pre><code class="language-tsx">const {default: Content} = await run(code, runtime)
+
+return &lt;Content /&gt;
+</code></pre>
+<p>Putting it together, what we have written looks like this:</p>
+<pre><code class="language-blog/[slug]/page.tsx">export default async function Page({ params }: {
+  params: { slug: string }
+}) {
+  const code = String(
+    await compile(await fs.readFile(`./posts/${params.slug}.mdx`), {
+      remarkPlugins: [remarkFrontmatter],
+      outputFormat: &#39;function-body&#39;,
+      development: false
+    })
+  )
+
+  const {default: Content} = await run(code, runtime)
+
+  return &lt;Content /&gt;
+}
+</code></pre>
+<p>We can do many different things such as overriding the components of <code>Content</code>, using plugins to add KateX support, etc. MDX offers a lot of flexibility.<br>As always, the first place to check out more of what we can do is <a href="https://mdxjs.com/docs/" target="_blank" rel="noopener noreferrer">the official docs</a>.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/converting-mdx-files-with-frontmatter-into-an-mdx-component-nextjs-13</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/converting-mdx-files-with-frontmatter-into-an-mdx-component-nextjs-13</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 29 Aug 2023 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Implicit vs. explicit JOINs]]></title>
+            <description><![CDATA[<p>Let&#39;s say we have a <code>customers</code> table that looks similar to this:</p>
+<Table>
+| customer_id | first_name | last_name |
+| --- | --- | --- |
+| 1 | John | Doe |
+| 2 | Jane | Smith |
+</Table>
+
+<p>And an <code>items_ordered</code> table that&#39;s looking like this:</p>
+<Table>
+| customer_id | order_date | item | price |
+| --- | --- | --- | ---|
+| 1 | 2020-01-01 | Apple | 1.99 |
+| 2 | 2020-02-02 | Banana | 0.99 |
+</Table>
+
+<p>Usually, we can join them using the <code>INNER JOIN</code> (or just <code>JOIN</code>) clause:</p>
+<pre><code class="language-sql">SELECT customer_id, first_name, last_name, order_date, item, price
+FROM customers
+INNER JOIN items_ordered
+ON customers.customer_id = items_ordered.customer_id;
+</code></pre>
+<p>But, there is also another way to do the same thing, which is the <em>implicit JOIN</em>:</p>
+<pre><code class="language-sql">SELECT
+    customers.customer_id,
+    customers.first_name,
+    customers.last_name,
+    items_ordered.order_date,
+    items_ordered.item,
+    items_ordered.price
+FROM customers, items_ordered
+WHERE customers.customer_id = items_ordered.customer_id;
+</code></pre>
+<p>Looks a bit more cluttered.</p>
+<p>For clarity&#39;s sake, using an explicit JOIN syntax makes more sense, and from what I&#39;ve read, it seems to be no significant performance difference between the two, and the ANSI 92 standard is <a href="https://stackoverflow.com/a/53061589" target="_blank" rel="noopener noreferrer">said to be recommending</a> using modern explicit joins.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/implicit-vs-explicit-joins</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/implicit-vs-explicit-joins</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 19 Aug 2023 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[A simple example of a nested SQL query]]></title>
+            <description><![CDATA[<p>Let&#39;s say we have this table:</p>
+<Table>
+|city|country|population|latitude|longitude|
+|---|---|---|---|---|
+|Guadalajara|Mexico|1500800|20.659699|-103.349609|
+|Toronto|Canada|2795060|43.653226|-79.383184|
+|Houston|United States|2195914|29.760427|-95.369803|
+|New York|United States|8405837|40.712784|-74.005941|
+|Philadelphia|United States|1553165|39.952584|-75.165222|
+|Havana|Cuba|2106146|23.05407|-82.345189|
+|Mexico City|Mexico|8555500|19.432608|-99.133208|
+|Phoenix|United States|1513367|33.448377|-112.074037|
+|Los Angeles|United States|3884307|34.052234|-118.243685|
+|Ecatepec de Morelos|Mexico|1742000|19.601841|-99.050674|
+|Montreal|Canada|1717767|45.501689|-73.567256|
+|Chicago|United States|2718782|41.878114|-87.629798|
+</Table>
+
+<p>We want to get all the cities west of Chicago.<br>As we go towards the west, the longitude must be less than the longitude of Chicago — the west of the prime meridian has longitudes that are negative numbers.</p>
+<p>Here is the pseudocode:</p>
+<pre><code>SELECT * FROM north_american_cities
+WHERE longitude &lt; ${Chicago&#39;s longitude}
+</code></pre>
+<p>So, what we need to do is somehow get the value of Chicago&#39;s longitude and use it as comparison.<br>It is by itself easy:</p>
+<pre><code class="language-sql">SELECT longitude FROM north_american_cities
+WHERE city = &#39;Chicago&#39;;
+</code></pre>
+<p>What we can do is simply put it inside the parenthesis and use it as a value itself, just like a variable:</p>
+<pre><code class="language-sql">SELECT * FROM north_american_cities
+WHERE longitude &lt; (
+    SELECT longitude
+    FROM north_american_cities
+    WHERE city = &#39;Chicago&#39;
+);
+</code></pre>
+<p>The result is this:</p>
+<Table>
+|city|country|population|latitude|longitude|
+|---|---|---|---|---|
+|Guadalajara|Mexico|1500800|20.659699|-103.349609|
+|Houston|United States|2195914|29.760427|-95.369803|
+|Mexico City|Mexico|8555500|19.432608|-99.133208|
+|Phoenix|United States|1513367|33.448377|-112.074037|
+|Los Angeles|United States|3884307|34.052234|-118.243685|
+|Ecatepec de Morelos|Mexico|1742000|19.601841|-99.050674|
+</Table>
+
+<p>Furthermore, we can order the longitudes from west to east using the <code>ORDER BY</code> clause:</p>
+<pre><code class="language-sql">SELECT * FROM north_american_cities
+WHERE longitude &lt; (
+    SELECT longitude
+    FROM north_american_cities
+    WHERE city = &#39;Chicago&#39;
+)
+ORDER BY longitude;
+</code></pre>
+<p>And, voilà:</p>
+<Table>
+|city|country|population|latitude|longitude|
+|---|---|---|---|---|
+|Los Angeles|United States|3884307|34.052234|-118.243685|
+|Phoenix|United States|1513367|33.448377|-112.074037|
+|Guadalajara|Mexico|1500800|20.659699|-103.349609|
+|Mexico City|Mexico|8555500|19.432608|-99.133208|
+|Ecatepec de Morelos|Mexico|1742000|19.601841|-99.050674|
+|Houston|United States|2195914|29.760427|-95.369803|
+</Table>
+
+<p><em>The example is taken from <a href="https://sqlbolt.com/lesson/select_queries_review" target="_blank" rel="noopener noreferrer">sqlbolt.com</a></em>.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/a-simple-example-of-a-nested-sql-query</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/a-simple-example-of-a-nested-sql-query</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Wed, 16 Aug 2023 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[A reminder to use single quotes when writing commit messages]]></title>
             <description><![CDATA[<p>Using backticks in the shell results in <em>command expansion</em>, for example:</p>

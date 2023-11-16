@@ -1,0 +1,155 @@
+---
+title: Converting MDX files with frontmatter into an MDX Component in Next.js 13
+tags: [Miscellaneous]
+description: Converting MDX files with frontmatter into an MDX Component in Next.js 13.
+slug: converting-mdx-files-with-frontmatter-into-an-mdx-component-nextjs-13
+date: 2023-08-29
+---
+
+[MDX](https://mdxjs.com) _is a superset of markdown that lets you write JSX directly in markdown files_.
+If you're using Next.js (this post was written for Next.js 13 specifically), you might know that it has a built-in support for MDX. You can read more about how to configure it [in the docs](https://nextjs.org/docs/app/building-your-application/configuring/mdx).
+
+The most basic way to use it looks like this:
+
+```tsx
+import HelloWorld from './hello.mdx'
+
+export default function Page() {
+  return <HelloWorld />
+}
+```
+
+If you get the files dynamically, though, and use a frontmatter, things might be a bit confusing.
+
+The MDX documentation [recommends using a remark plugin, `remark-frontmatter`](https://mdxjs.com/guides/frontmatter/) to ignore the frontmatter and get only the MDX content like this:
+
+```tsx
+import fs from 'node:fs/promises'
+import remarkFrontmatter from 'remark-frontmatter'
+import {compile} from '@mdx-js/mdx'
+
+console.log(
+  await compile(await fs.readFile(`./posts/${params.slug}.mdx`), {
+    remarkPlugins: [remarkFrontmatter]
+  })
+)
+```
+
+Say, if we have a `hello.mdx` file that looks something like this:
+
+```mdx
+---
+title: Hello world
+---
+
+# Hi
+
+This is an example MDX file.
+
+```
+
+What is logged for that `hello.mdx` looks like this:
+
+```
+VFile {
+  data: {},
+  messages: [],
+  history: [],
+  cwd: '/Users/me/projects/demo-site',
+  value: '/*@jsxRuntime automatic @jsxImportSource react*/\n' +
+    'import {Fragment as _Fragment, jsxDEV as _jsxDEV} from "react/jsx-dev-runtime";\n' +
+    'function _createMdxContent(props) {\n' +
+    '  const _components = Object.assign({\n' +
+    '    h1: "h1",\n' +
+    '    p: "p"\n' +
+    '  }, props.components);\n' +
+    '  return _jsxDEV(_Fragment, {\n' +
+    '    children: [_jsxDEV(_components.h1, {\n' +
+    '      children: "Hi"\n' +
+    '    }, undefined, false, {\n' +
+    '      fileName: "<source.js>",\n' +
+    '      lineNumber: 5,\n' +
+    '      columnNumber: 1\n' +
+    '    }, this), "\\n", _jsxDEV(_components.p, {\n' +
+    '      children: "This is an example MDX file."\n' +
+    '    }, undefined, false, {\n' +
+    '      fileName: "<source.js>",\n' +
+    '      lineNumber: 6,\n' +
+    '      columnNumber: 1\n' +
+    '    }, this)]\n' +
+    '  }, undefined, true, {\n' +
+    '    fileName: "<source.js>",\n' +
+    '    lineNumber: 1,\n' +
+    '    columnNumber: 1\n' +
+    '  }, this);\n' +
+    '}\n' +
+    'function MDXContent(props = {}) {\n' +
+    '  const {wrapper: MDXLayout} = props.components || ({});\n' +
+    '  return MDXLayout ? _jsxDEV(MDXLayout, Object.assign({}, props, {\n' +
+    '    children: _jsxDEV(_createMdxContent, props, undefined, false, {\n' +
+    '      fileName: "<source.js>"\n' +
+    '    }, this)\n' +
+    '  }), undefined, false, {\n' +
+    '    fileName: "<source.js>"\n' +
+    '  }, this) : _createMdxContent(props);\n' +
+    '}\n' +
+    'export default MDXContent;\n',
+  map: undefined
+}
+```
+
+That is an object called `VFile`. 
+What matters is its `value` because that is the function body that we are going to _run_ to compile MDX content into JavaScript.
+
+In order to do that, we need to add the `outputFormat` option as `'function-body'` to the `compile()` function, and also change the development to `false`. We also convert it into a `String`:
+
+```tsx
+import fs from 'node:fs/promises'
+import remarkFrontmatter from 'remark-frontmatter'
+import {compile} from '@mdx-js/mdx'
+
+const code = String(
+  await compile(
+    await fs.readFile(`./posts/${params.slug}.mdx`, {
+      remarkPlugins: [remarkFrontmatter],
+      outputFormat: 'function-body',
+      development: false
+      /* …otherOptions */
+    })
+  )
+)
+```
+
+The default `outputFormat` of `compile()` is `'program'`, it uses `import` and `export` statements, but we need to change it into `function-body`, otherwise we'll get a dreaded error: `Error: Cannot use import statement outside a module`.
+These are not so important details, you can read more in the [docs](https://mdxjs.com/packages/mdx/#optionsoutputformat).
+
+The only thing left is to run it, and we can finally return it as an MDX component with these two more lines:
+
+```tsx
+const {default: Content} = await run(code, runtime)
+
+return <Content />
+```
+
+Putting it together, what we have written looks like this:
+
+```blog/[slug]/page.tsx
+export default async function Page({ params }: {
+  params: { slug: string }
+}) {
+  const code = String(
+    await compile(await fs.readFile(`./posts/${params.slug}.mdx`), {
+      remarkPlugins: [remarkFrontmatter],
+      outputFormat: 'function-body',
+      development: false
+    })
+  )
+
+  const {default: Content} = await run(code, runtime)
+
+  return <Content />
+}
+```
+
+We can do many different things such as overriding the components of `Content`, using plugins to add KateX support, etc. MDX offers a lot of flexibility. 
+As always, the first place to check out more of what we can do is [the official docs](https://mdxjs.com/docs/).
