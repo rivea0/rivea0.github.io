@@ -27,7 +27,8 @@
   --transition-slow: 0.3s ease-in-out;
 
   /* Dark Mode Colors */
-  --bg:  #0d1117;
+  --bg: #0d1117;
+  --bg2: #131922;
   --bg-alpha: hsla(0, 0%, 7%, 0.9);
   --fg: #fafbfc;
   --gray: silver;
@@ -51,6 +52,7 @@
 
 [data-theme='light'] {
   --bg: #fff;
+  --bg2: #f7f7f7;
   --bg-alpha: hsla(0, 0%, 100%, 0.9);
   --fg: #444;
   --gray: gray;
@@ -151,7 +153,8 @@ blockquote {
   font-style: italic;
   margin: 0;
   padding-left: 1rem;
-  border-left: 3px solid var(--light-gray);
+  border-left: 3px solid var(--link);
+  background-color: var(--bg2);
 }
 
 button {
@@ -231,6 +234,11 @@ mark {
   );
   background-color: var(--highlight-text-color--active);
   color: var(--fg);
+}
+
+.footnotes > ol > li {
+  list-style: revert;
+  font-size: small;
 }
 
 @media print {
