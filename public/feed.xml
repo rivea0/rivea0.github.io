@@ -4,7 +4,7 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 21 Dec 2023 17:19:46 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 21 Dec 2023 18:28:19 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
         <item>
@@ -26,7 +26,7 @@ add(7, 5); // 12
 </code></pre>
 <p>What is happening is that <code>7</code> is substituted for <code>x</code>, and <code>5</code> is substituted for <code>y</code>. That&#39;s great.</p>
 <p>But first, let&#39;s look at an example.</p>
-<p>Let&#39;s say we have to find the square root of a number, and we want to do it using Newton&#39;s method of approximating guesses.</p>
+<p>Let&#39;s say we have to find the square root of a number, and we want to do it using <a href="https://ocw.mit.edu/courses/18-335j-introduction-to-numerical-methods-spring-2019/0a734ecc94b60a26213488e68588bc8d_MIT18_335JS19_lec1.pdf" target="_blank" rel="noopener noreferrer">Newton&#39;s method</a> of approximating guesses.</p>
 <p>How it goes is simple. We take a guess for the square root of a number $a$, and we improve our guess until we have a good enough answer that is <em>really close</em> to the actual square root of $a$.</p>
 <p>How to improve our guess looks like this:</p>
 <p>$$x_{n + 1} = \frac{1}{2}\Big(x_n + \frac{a}{x_n}\Big)$$</p>
@@ -38,7 +38,7 @@ add(7, 5); // 12
 </ul>
 <p>So, the next guess will be the average of two numbers: <em>our guess</em> ($x_n$) and <em>the number we want to know the square root of divided by our guess</em> ($\frac{a}{x_n}$).</p>
 <p>The example is not particularly important, so if you don&#39;t feel very warm with math, that&#39;s fine. The gist is that we improve our guess until it&#39;s very very close to the actual number.</p>
-<p>It can be written like this:</p>
+<p>In JavaScript, it can be written like this:</p>
 <pre><code class="language-js">function square(x) {
   return x * x;
 }
@@ -62,7 +62,7 @@ function sqrt_iter(guess, x) {
 sqrt_iter(1, 4); // 2.0000000929222947
 </code></pre>
 <p>But, let&#39;s say we don&#39;t like ternary operations up in our face in <code>sqrt_iter</code>, so we want to abstract it out still further:</p>
-<pre><code class="language-js">function check(predicate, then_clause, else_clause) {		    
+<pre><code class="language-js">function check(predicate, then_clause, else_clause) {
   return predicate ? then_clause : else_clause;
 }
 </code></pre>
@@ -99,7 +99,10 @@ A [predicate](https://en.wikipedia.org/wiki/Propositional_function) is just a fu
 <p>In our example, when we pass <code>sqrt_iter</code> to <code>check</code>, it is evaluated first, hence the recursion error. The reason is that JavaScript makes use of applicative-order, so the arguments are evaluated first.</p>
 <p>Let&#39;s see it with a much simpler example, using Python this time. Let&#39;s say we have a <code>sum_of_squares</code> function that returns, well, <em>the sum of squares</em> of two numbers <code>n</code> and <code>m</code>:</p>
 <pre><code class="language-python">def sum_of_squares(n, m):
-    return (n * n) + (m * m)
+    return square(n) + square(m)
+
+def square(x):
+    return x * x
 </code></pre>
 <p>And, we pass <code>5 + 1</code> and <code>5 * 2</code> as arguments:</p>
 <pre><code class="language-python">sum_of_squares(5 + 1, 5 * 2)
@@ -111,14 +114,14 @@ A [predicate](https://en.wikipedia.org/wiki/Propositional_function) is just a fu
 -&gt;           136
 </code></pre>
 <p>But with normal-order:</p>
-<pre><code>-&gt;      square (5 + 1)   +   (square (5 * 2))
--&gt;  ((5 + 1) * (5 + 1))  +  ((5 * 2) * (5 * 2))
--&gt;             (6 * 6)   +   (10 * 10)
--&gt;                36     +      100
--&gt;                      136
+<pre><code>-&gt;      square(5 + 1)   +   square(5 * 2)
+-&gt;  ((5 + 1) * (5 + 1)) + ((5 * 2) * (5 * 2))
+-&gt;             (6 * 6)  +  (10 * 10)
+-&gt;                36    +    100
+-&gt;                     136
 </code></pre>
 <p>Note that with normal-order, the evaluations of <code>(5 + 1)</code> and <code>(5 * 2)</code> are done twice, so we&#39;re doing extra work.</p>
-<p>With languages like JavaScript that most people are familiar with, it looks like what&#39;s being used is applicative-order evaluation. I guess that is sort of true, but, neither of those are said to be used in the <em>strict sense</em>:</p>
+<p>With languages like JavaScript that most people are familiar with, it looks like what&#39;s being used is applicative-order evaluation. I guess that is sort of true, but neither are said to be used in the <em>strict sense</em>:</p>
 <blockquote>
 <p>In practice, no programming language uses normal-order evaluation because of the performance penalty, and it is also difficult to use strict applicative-order evaluation because of the increase in non-terminating cases. Rather, programming languages tend to use <em>lazy-evaluation</em> as a means of enabling the performance benefit of applicative-order evaluation without the risk.<a href="https://sookocheff.com/post/fp/evaluating-lambda-expressions/#summary" target="_blank" rel="noopener noreferrer">^2</a></p>
 </blockquote>

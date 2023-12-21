@@ -32,7 +32,7 @@ What is happening is that `7` is substituted for `x`, and `5` is substituted for
 
 But first, let's look at an example.
 
-Let's say we have to find the square root of a number, and we want to do it using Newton's method of approximating guesses.
+Let's say we have to find the square root of a number, and we want to do it using [Newton's method](https://ocw.mit.edu/courses/18-335j-introduction-to-numerical-methods-spring-2019/0a734ecc94b60a26213488e68588bc8d_MIT18_335JS19_lec1.pdf) of approximating guesses.
 
 How it goes is simple. We take a guess for the square root of a number $a$, and we improve our guess until we have a good enough answer that is _really close_ to the actual square root of $a$.
 
@@ -50,7 +50,7 @@ So, the next guess will be the average of two numbers: *our guess* ($x_n$) and *
 
 The example is not particularly important, so if you don't feel very warm with math, that's fine. The gist is that we improve our guess until it's very very close to the actual number.
 
-It can be written like this:
+In JavaScript, it can be written like this:
 
 ```js
 function square(x) {
@@ -79,7 +79,7 @@ sqrt_iter(1, 4); // 2.0000000929222947
 But, let's say we don't like ternary operations up in our face in `sqrt_iter`, so we want to abstract it out still further:
 
 ```js
-function check(predicate, then_clause, else_clause) {		    
+function check(predicate, then_clause, else_clause) {
   return predicate ? then_clause : else_clause;
 }
 ```
@@ -133,7 +133,10 @@ Let's see it with a much simpler example, using Python this time. Let's say we h
 
 ```python
 def sum_of_squares(n, m):
-    return (n * n) + (m * m)
+    return square(n) + square(m)
+
+def square(x):
+    return x * x
 ```
 
 And, we pass `5 + 1` and `5 * 2` as arguments:
@@ -154,16 +157,16 @@ With applicative-order, the process looks like this:
 But with normal-order:
 
 ```
-->      square (5 + 1)   +   (square (5 * 2))
-->  ((5 + 1) * (5 + 1))  +  ((5 * 2) * (5 * 2))
-->             (6 * 6)   +   (10 * 10)
-->                36     +      100
-->                      136
+->      square(5 + 1)   +   square(5 * 2)
+->  ((5 + 1) * (5 + 1)) + ((5 * 2) * (5 * 2))
+->             (6 * 6)  +  (10 * 10)
+->                36    +    100
+->                     136
 ```
 
 Note that with normal-order, the evaluations of `(5 + 1)` and `(5 * 2)` are done twice, so we're doing extra work.
 
-With languages like JavaScript that most people are familiar with, it looks like what's being used is applicative-order evaluation. I guess that is sort of true, but, neither of those are said to be used in the _strict sense_:
+With languages like JavaScript that most people are familiar with, it looks like what's being used is applicative-order evaluation. I guess that is sort of true, but neither are said to be used in the _strict sense_:
 
 > In practice, no programming language uses normal-order evaluation because of the performance penalty, and it is also difficult to use strict applicative-order evaluation because of the increase in non-terminating cases. Rather, programming languages tend to use _lazy-evaluation_ as a means of enabling the performance benefit of applicative-order evaluation without the risk.[^2]
 
