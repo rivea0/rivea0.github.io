@@ -1,0 +1,200 @@
+---
+title: Applicative-order vs. normal-order evaluation
+tags: [Miscellaneous]
+description: A slightly haunting ride exploring applicative-order and normal-order evaluation.
+slug: applicative-order-vs-normal-order
+date: 2023-12-21
+---
+
+Let's look at this interesting sentence:
+
+> _The most noticeable effect of applicative-order evaluation is that recursive functions may not terminate._[^1]
+
+Out of context, it sounds like a lot is going on.
+
+_Applicative-order evaluation?_
+
+_Recursive functions that may not terminate?_
+
+It sounds very thrilling, in the sense that it might be straight out of your nightmares, especially when it comes to non-terminating recursive functions.
+
+When it comes to functions, it is no mystery how they are evaluated in the code we write — even if you don't use the term _substitution_, you're aware of what is going on here:
+
+```js
+function add(x, y) { 
+  return x + y; 
+}
+
+add(7, 5); // 12
+```
+
+What is happening is that `7` is substituted for `x`, and `5` is substituted for `y`. That's great.
+
+But first, let's look at an example.
+
+Let's say we have to find the square root of a number, and we want to do it using Newton's method of approximating guesses.
+
+How it goes is simple. We take a guess for the square root of a number $a$, and we improve our guess until we have a good enough answer that is _really close_ to the actual square root of $a$.
+
+How to improve our guess looks like this:
+
+$$x_{n + 1} = \frac{1}{2}\Big(x_n + \frac{a}{x_n}\Big)$$
+
+Let's unpack it a bit.
+
+- $a$ is the number that we want to know the square root of.
+- $x_n$ is our current guess.
+- $x_{n + 1}$ is the next (the _improved_) guess.
+
+So, the next guess will be the average of two numbers: *our guess* ($x_n$) and *the number we want to know the square root of divided by our guess* ($\frac{a}{x_n}$).
+
+The example is not particularly important, so if you don't feel very warm with math, that's fine. The gist is that we improve our guess until it's very very close to the actual number.
+
+It can be written like this:
+
+```js
+function square(x) {
+  return x * x;
+}
+
+function average(x, y) {
+  return (x + y) / 2;
+}
+
+function is_good_enough(guess, x) {
+  return Math.abs(square(guess) - x) < 0.001;
+}
+
+function improve(guess, x) {
+  return average(guess, x / guess);
+}
+
+function sqrt_iter(guess, x) {
+  return is_good_enough(guess, x) ? guess : sqrt_iter(improve(guess, x), x);
+}
+
+sqrt_iter(1, 4); // 2.0000000929222947
+```
+
+But, let's say we don't like ternary operations up in our face in `sqrt_iter`, so we want to abstract it out still further:
+
+```js
+function check(predicate, then_clause, else_clause) {		    
+  return predicate ? then_clause : else_clause;
+}
+```
+
+<Note>
+A [predicate](https://en.wikipedia.org/wiki/Propositional_function) is just a function that returns a boolean.
+</Note>
+
+Then we can use it like this, perhaps:
+
+```js
+function sqrt_iter(guess, x) {
+  return check(
+    is_good_enough(guess, x),
+    guess,
+    sqrt_iter(improve(guess, x), x)
+  );
+}
+```
+
+However, when we run it, we have an error that you might be very familiar when doing recursion: `Maximum call stack size exceeded`.
+
+Why is that?
+
+In the first iteration, when `sqrt_iter` was looking like this:
+
+```js
+function sqrt_iter(guess, x) {
+  return is_good_enough(guess, x) ? guess : sqrt_iter(improve(guess, x), x);
+}
+```
+
+Everything worked fine, and we got our answer.
+
+Why do we have an error when passing the recursive call to another function, then?
+
+Well, the quote was a foreshadowing. The reason is what is called the evaluation order.
+
+If you've ever read or intend to read [_the wizard book_](https://web.mit.edu/6.001/6.037/sicp.pdf), this is one of the subjects that is touched upon in the early pages.
+
+The authors (or _wizards_, I should say) talk about two distinct evaluation orders:
+
+- **applicative-order -->** "evaluate the arguments and then apply"
+- **normal-order -->** "fully expand and then reduce"
+
+With _applicative-order_, a function's arguments are evaluated before the function is applied, and with _normal-order_, none of the arguments are evaluated until they are needed in the function body.
+
+In our example, when we pass `sqrt_iter` to `check`, it is evaluated first, hence the recursion error. The reason is that JavaScript makes use of applicative-order, so the arguments are evaluated first.
+
+Let's see it with a much simpler example, using Python this time. Let's say we have a `sum_of_squares` function that returns, well, _the sum of squares_ of two numbers `n` and `m`:
+
+```python
+def sum_of_squares(n, m):
+    return (n * n) + (m * m)
+```
+
+And, we pass `5 + 1` and `5 * 2` as arguments:
+
+```python
+sum_of_squares(5 + 1, 5 * 2)
+```
+
+With applicative-order, the process looks like this:
+
+```
+->  square(6) + square(10)
+->    (6 * 6) + (10 * 10)
+->         36 + 100
+->           136
+```
+
+But with normal-order:
+
+```
+->      square (5 + 1)   +   (square (5 * 2))
+->  ((5 + 1) * (5 + 1))  +  ((5 * 2) * (5 * 2))
+->             (6 * 6)   +   (10 * 10)
+->                36     +      100
+->                      136
+```
+
+Note that with normal-order, the evaluations of `(5 + 1)` and `(5 * 2)` are done twice, so we're doing extra work.
+
+With languages like JavaScript that most people are familiar with, it looks like what's being used is applicative-order evaluation. I guess that is sort of true, but, neither of those are said to be used in the _strict sense_:
+
+> In practice, no programming language uses normal-order evaluation because of the performance penalty, and it is also difficult to use strict applicative-order evaluation because of the increase in non-terminating cases. Rather, programming languages tend to use _lazy-evaluation_ as a means of enabling the performance benefit of applicative-order evaluation without the risk.[^2]
+
+As another nightmare fuel for the non-terminating recursive case, let's take a look at this one last example:
+
+```js
+function p() { 
+  return p(); 
+}
+
+function test(x, y) {
+  return x === 0 ? 0 : y;
+}
+
+test(0, p());
+```
+
+With applicative-order, what will happen when we call `test` is that both of the arguments will get evaluated first. When we call `p()`, you know what will happen: a good old `Maximum call stack size exceeded`. So, it will never terminate.
+
+With normal-order evaluation, though, realize what happens. 
+The evaluation of the arguments won't happen until `test` goes on to evaluate `x === 0 ? 0 : y`. Only then, `0` is substituted for `x`, and since `0 === 0` is true, the function will return `0` and terminate. It doesn't need to evaluate `p()` further because of [short-circuiting](https://en.wikipedia.org/wiki/Short-circuit_evaluation); the else condition (`:`) is not reached.
+
+So, it is not true that both kinds of evaluations will yield the same answer all the time. 
+
+The takeaway is that, like many things, there is a tradeoff.
+It is entertaining, though, that even a simple matter of substitution has intricacies, probably far more than what is mentioned in this post.
+
+---
+
+_`sum_of_squares` is adapted from the original [Structure and Interpretation of Computer Programming](https://web.mit.edu/6.001/6.037/sicp.pdf#subsection.1.1.5), and the JavaScript examples are adapted from the JavaScript version of the book (yes, [it does exist](https://sourceacademy.org/sicpjs))._
+
+[^1]: https://sookocheff.com/post/fp/evaluating-lambda-expressions/
+[^2]: https://sookocheff.com/post/fp/evaluating-lambda-expressions/#summary
+
