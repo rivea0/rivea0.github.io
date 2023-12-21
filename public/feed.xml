@@ -4,9 +4,147 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 16 Nov 2023 17:58:56 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 21 Dec 2023 17:19:46 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[Applicative-order vs. normal-order evaluation]]></title>
+            <description><![CDATA[<p>Let&#39;s look at this interesting sentence:</p>
+<blockquote>
+<p><em>The most noticeable effect of applicative-order evaluation is that recursive functions may not terminate.</em><a href="https://sookocheff.com/post/fp/evaluating-lambda-expressions/" target="_blank" rel="noopener noreferrer">^1</a></p>
+</blockquote>
+<p>Out of context, it sounds like a lot is going on.</p>
+<p><em>Applicative-order evaluation?</em></p>
+<p><em>Recursive functions that may not terminate?</em></p>
+<p>It sounds very thrilling, in the sense that it might be straight out of your nightmares, especially when it comes to non-terminating recursive functions.</p>
+<p>When it comes to functions, it is no mystery how they are evaluated in the code we write — even if you don&#39;t use the term <em>substitution</em>, you&#39;re aware of what is going on here:</p>
+<pre><code class="language-js">function add(x, y) { 
+  return x + y; 
+}
+
+add(7, 5); // 12
+</code></pre>
+<p>What is happening is that <code>7</code> is substituted for <code>x</code>, and <code>5</code> is substituted for <code>y</code>. That&#39;s great.</p>
+<p>But first, let&#39;s look at an example.</p>
+<p>Let&#39;s say we have to find the square root of a number, and we want to do it using Newton&#39;s method of approximating guesses.</p>
+<p>How it goes is simple. We take a guess for the square root of a number $a$, and we improve our guess until we have a good enough answer that is <em>really close</em> to the actual square root of $a$.</p>
+<p>How to improve our guess looks like this:</p>
+<p>$$x_{n + 1} = \frac{1}{2}\Big(x_n + \frac{a}{x_n}\Big)$$</p>
+<p>Let&#39;s unpack it a bit.</p>
+<ul>
+<li>$a$ is the number that we want to know the square root of.</li>
+<li>$x_n$ is our current guess.</li>
+<li>$x_{n + 1}$ is the next (the <em>improved</em>) guess.</li>
+</ul>
+<p>So, the next guess will be the average of two numbers: <em>our guess</em> ($x_n$) and <em>the number we want to know the square root of divided by our guess</em> ($\frac{a}{x_n}$).</p>
+<p>The example is not particularly important, so if you don&#39;t feel very warm with math, that&#39;s fine. The gist is that we improve our guess until it&#39;s very very close to the actual number.</p>
+<p>It can be written like this:</p>
+<pre><code class="language-js">function square(x) {
+  return x * x;
+}
+
+function average(x, y) {
+  return (x + y) / 2;
+}
+
+function is_good_enough(guess, x) {
+  return Math.abs(square(guess) - x) &lt; 0.001;
+}
+
+function improve(guess, x) {
+  return average(guess, x / guess);
+}
+
+function sqrt_iter(guess, x) {
+  return is_good_enough(guess, x) ? guess : sqrt_iter(improve(guess, x), x);
+}
+
+sqrt_iter(1, 4); // 2.0000000929222947
+</code></pre>
+<p>But, let&#39;s say we don&#39;t like ternary operations up in our face in <code>sqrt_iter</code>, so we want to abstract it out still further:</p>
+<pre><code class="language-js">function check(predicate, then_clause, else_clause) {		    
+  return predicate ? then_clause : else_clause;
+}
+</code></pre>
+<Note>
+A [predicate](https://en.wikipedia.org/wiki/Propositional_function) is just a function that returns a boolean.
+</Note>
+
+<p>Then we can use it like this, perhaps:</p>
+<pre><code class="language-js">function sqrt_iter(guess, x) {
+  return check(
+    is_good_enough(guess, x),
+    guess,
+    sqrt_iter(improve(guess, x), x)
+  );
+}
+</code></pre>
+<p>However, when we run it, we have an error that you might be very familiar when doing recursion: <code>Maximum call stack size exceeded</code>.</p>
+<p>Why is that?</p>
+<p>In the first iteration, when <code>sqrt_iter</code> was looking like this:</p>
+<pre><code class="language-js">function sqrt_iter(guess, x) {
+  return is_good_enough(guess, x) ? guess : sqrt_iter(improve(guess, x), x);
+}
+</code></pre>
+<p>Everything worked fine, and we got our answer.</p>
+<p>Why do we have an error when passing the recursive call to another function, then?</p>
+<p>Well, the quote was a foreshadowing. The reason is what is called the evaluation order.</p>
+<p>If you&#39;ve ever read or intend to read <a href="https://web.mit.edu/6.001/6.037/sicp.pdf" target="_blank" rel="noopener noreferrer"><em>the wizard book</em></a>, this is one of the subjects that is touched upon in the early pages.</p>
+<p>The authors (or <em>wizards</em>, I should say) talk about two distinct evaluation orders:</p>
+<ul>
+<li><strong>applicative-order --&gt;</strong> &quot;evaluate the arguments and then apply&quot;</li>
+<li><strong>normal-order --&gt;</strong> &quot;fully expand and then reduce&quot;</li>
+</ul>
+<p>With <em>applicative-order</em>, a function&#39;s arguments are evaluated before the function is applied, and with <em>normal-order</em>, none of the arguments are evaluated until they are needed in the function body.</p>
+<p>In our example, when we pass <code>sqrt_iter</code> to <code>check</code>, it is evaluated first, hence the recursion error. The reason is that JavaScript makes use of applicative-order, so the arguments are evaluated first.</p>
+<p>Let&#39;s see it with a much simpler example, using Python this time. Let&#39;s say we have a <code>sum_of_squares</code> function that returns, well, <em>the sum of squares</em> of two numbers <code>n</code> and <code>m</code>:</p>
+<pre><code class="language-python">def sum_of_squares(n, m):
+    return (n * n) + (m * m)
+</code></pre>
+<p>And, we pass <code>5 + 1</code> and <code>5 * 2</code> as arguments:</p>
+<pre><code class="language-python">sum_of_squares(5 + 1, 5 * 2)
+</code></pre>
+<p>With applicative-order, the process looks like this:</p>
+<pre><code>-&gt;  square(6) + square(10)
+-&gt;    (6 * 6) + (10 * 10)
+-&gt;         36 + 100
+-&gt;           136
+</code></pre>
+<p>But with normal-order:</p>
+<pre><code>-&gt;      square (5 + 1)   +   (square (5 * 2))
+-&gt;  ((5 + 1) * (5 + 1))  +  ((5 * 2) * (5 * 2))
+-&gt;             (6 * 6)   +   (10 * 10)
+-&gt;                36     +      100
+-&gt;                      136
+</code></pre>
+<p>Note that with normal-order, the evaluations of <code>(5 + 1)</code> and <code>(5 * 2)</code> are done twice, so we&#39;re doing extra work.</p>
+<p>With languages like JavaScript that most people are familiar with, it looks like what&#39;s being used is applicative-order evaluation. I guess that is sort of true, but, neither of those are said to be used in the <em>strict sense</em>:</p>
+<blockquote>
+<p>In practice, no programming language uses normal-order evaluation because of the performance penalty, and it is also difficult to use strict applicative-order evaluation because of the increase in non-terminating cases. Rather, programming languages tend to use <em>lazy-evaluation</em> as a means of enabling the performance benefit of applicative-order evaluation without the risk.<a href="https://sookocheff.com/post/fp/evaluating-lambda-expressions/#summary" target="_blank" rel="noopener noreferrer">^2</a></p>
+</blockquote>
+<p>As another nightmare fuel for the non-terminating recursive case, let&#39;s take a look at this one last example:</p>
+<pre><code class="language-js">function p() { 
+  return p(); 
+}
+
+function test(x, y) {
+  return x === 0 ? 0 : y;
+}
+
+test(0, p());
+</code></pre>
+<p>With applicative-order, what will happen when we call <code>test</code> is that both of the arguments will get evaluated first. When we call <code>p()</code>, you know what will happen: a good old <code>Maximum call stack size exceeded</code>. So, it will never terminate.</p>
+<p>With normal-order evaluation, though, realize what happens.<br>The evaluation of the arguments won&#39;t happen until <code>test</code> goes on to evaluate <code>x === 0 ? 0 : y</code>. Only then, <code>0</code> is substituted for <code>x</code>, and since <code>0 === 0</code> is true, the function will return <code>0</code> and terminate. It doesn&#39;t need to evaluate <code>p()</code> further because of <a href="https://en.wikipedia.org/wiki/Short-circuit_evaluation" target="_blank" rel="noopener noreferrer">short-circuiting</a>; the else condition (<code>:</code>) is not reached.</p>
+<p>So, it is not true that both kinds of evaluations will yield the same answer all the time. </p>
+<p>The takeaway is that, like many things, there is a tradeoff.<br>It is entertaining, though, that even a simple matter of substitution has intricacies, probably far more than what is mentioned in this post.</p>
+<hr>
+<p><em><code>sum_of_squares</code> is adapted from the original <a href="https://web.mit.edu/6.001/6.037/sicp.pdf#subsection.1.1.5" target="_blank" rel="noopener noreferrer">Structure and Interpretation of Computer Programming</a>, and the JavaScript examples are adapted from the JavaScript version of the book (yes, <a href="https://sourceacademy.org/sicpjs" target="_blank" rel="noopener noreferrer">it does exist</a>).</em></p>
+]]></description>
+            <link>https://rivea0.github.io/blog/applicative-order-vs-normal-order</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/applicative-order-vs-normal-order</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Thu, 21 Dec 2023 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[Converting MDX files with frontmatter into an MDX Component in Next.js 13]]></title>
             <description><![CDATA[<p><a href="https://mdxjs.com" target="_blank" rel="noopener noreferrer">MDX</a> <em>is a superset of markdown that lets you write JSX directly in markdown files</em>.<br>If you&#39;re using Next.js (this post was written for Next.js 13 specifically), you might know that it has a built-in support for MDX. You can read more about how to configure it <a href="https://nextjs.org/docs/app/building-your-application/configuring/mdx" target="_blank" rel="noopener noreferrer">in the docs</a>.</p>
