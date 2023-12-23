@@ -4,7 +4,7 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 23 Dec 2023 20:45:17 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 23 Dec 2023 21:17:56 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
         <item>
@@ -54,7 +54,7 @@
 8
 </code></pre>
 <p>Now the <em>grow-and-shrink</em> part is more obvious.</p>
-<p>The actual work of adding <code>1</code> is done <em>on the way in</em>, so to speak.</p>
+<p>The actual work of adding <code>1</code> is done on the way out, so to speak.</p>
 <p>With the second example, though, things are a bit different. With this one, note that the final operation is a recursive call, there is no waiting to add <code>1</code> like in the other example. </p>
 <p>Let&#39;s see it again with the same arguments, <code>plus(2, 3)</code>.</p>
 <p><code>a</code> is not equal to <code>0</code>, so we call <code>plus(1, 4)</code>.</p>
