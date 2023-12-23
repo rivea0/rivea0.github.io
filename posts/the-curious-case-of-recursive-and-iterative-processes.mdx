@@ -1,0 +1,112 @@
+---
+title: The curious case of recursive and iterative processes
+tags: [Miscellaneous, JavaScript]
+description: Exploring recursive and iterative processes with visual examples.
+slug: the-curious-case-of-recursive-and-iterative-processes
+date: 2023-12-23
+---
+
+Note that the title is not _recursion vs. iteration_. Usually, the distinction between these two terms is clear-cut: recursion is about functions that call themselves, while iteration is  done through looping. That is correct, but here, we specifically refer to the shape of how a function evolves. 
+
+What do we mean by _the shape of how a function evolves_?
+
+Let's say for now that if the shape grows and shrinks, then it is recursive, if it doesn't, then it is an iterative process.
+
+The terminology here might be a bit confusing, but one thing to keep in mind throughout this post is:
+
+<p align="center">recursive function !== recursive process</p>
+
+Which means, what if there are recursive functions that have iterative processes?
+
+Is this a recursive function?
+
+```ts
+function plus(a, b) {
+  if (a === 0) {
+    return b;
+  } else {
+    return 1 + plus(a - 1, b);
+  }
+}
+```
+
+What about this one?
+
+```js
+function plus(a, b) {
+  if (a === 0) {
+    return b;
+  } else {
+    return plus(a - 1, b + 1);
+  }
+}
+```
+
+They are both recursive functions alright, but the processes they generate are different. In fact, the second one is what is called a tail-recursive function, but let's not get ahead of ourselves.
+
+Let's say we want to see how `plus(2, 3)` works with both examples.
+
+With the first function, `a` is not equal to `0`, so we return `1 + plus(a - 1, b)`. But we first need to compute `plus(a - 1, b)` for that. So, we go on and call `plus` with new arguments: `plus(1, 3)`. Again, `a` is not equal to `0`, so we return `1 + plus(a - 1, b)`. But again, we need to do a recursive call first, so we go on to `plus(0, 3)`. Now the base case holds, and we return `b`, which is `3`. As this function is popped off the stack, the previous function takes this value and adds `1` to it. Our value is now `4`. When this one is popped off the stack as well, we're left with the very first function call; it adds `1` to the value it gets, which is `4`, and the result is `5`. And, we're done. This is good old recursion as we know it.
+
+Here is a visual display of what is just described:
+
+![Recursive process](/blog/post-images/2023-12-23/recursive-process.gif)
+
+To see the _shape_ more clearly, let's give it different arguments: `5` and `3` this time. The process would look like this:
+
+```
+plus(5, 3)
+1 + plus(4, 3)
+1 + (1 + plus(3, 3))
+1 + (1 + (1 + plus(2, 3)))
+1 + (1 + (1 + (1 + plus(1, 3))))
+1 + (1 + (1 + (1 + (1 + plus(0, 3)))))
+1 + (1 + (1 + (1 + (1 + 3))))
+1 + (1 + (1 + (1 + 4)))
+1 + (1 + (1 + 5))
+1 + (1 + 6)
+1 + 7
+8
+```
+
+Now the _grow-and-shrink_ part is more obvious.
+
+The actual work of adding `1` is done _on the way in_, so to speak.
+
+With the second example, though, things are a bit different. With this one, note that the final operation is a recursive call, there is no waiting to add `1` like in the other example. 
+
+Let's see it again with the same arguments, `plus(2, 3)`.
+
+`a` is not equal to `0`, so we call `plus(1, 4)`.
+
+Once again, `a` is not equal to `0`, so we go on to `plus(0, 5)`.
+And now the base case holds, `a` is `0`, so we return `b` which is `5`.
+
+Here's how it goes:
+
+![Iterative process](/blog/post-images/2023-12-23/iterative-process.gif)
+
+If we were to use `5` and `3`:
+
+```
+plus(5, 3)
+plus(4, 4)
+plus(3, 5)
+plus(2, 6)
+plus(1, 7)
+plus(0, 8)
+8
+```
+
+So, while the first example has a _**recursive process**_, the second one has an _**iterative process**_.
+
+The second one is also an example of a tail-recursive function because there is nothing left to do after the recursive call.
+
+Note that the second function is still a recursive function, it calls itself, but it has an iterative process.
+
+Most of these sound like a confusion of terminology, but they eventually make sense.
+
+More information can be found at https://sourceacademy.org/sicpjs/1.2.1, in fact, the example is adapted from one of the exercises.
+You can also read the section from [the original book](https://web.mit.edu/6.001/6.037/sicp.pdf#subsection.1.2.1) or watch [Brian Harvey's lecture](https://archive.org/details/ucberkeley_webcast_0G3tNuBBO5I), which dives into the subject at the 17~ minute mark.
+
+_The animated GIFs are inspired by [Lydia Hallie's JavaScript Visualized series](https://dev.to/lydiahallie/javascript-visualized-event-loop-3dif)._

@@ -4,9 +4,84 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 21 Dec 2023 18:28:19 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 23 Dec 2023 20:45:17 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[The curious case of recursive and iterative processes]]></title>
+            <description><![CDATA[<p>Note that the title is not <em>recursion vs. iteration</em>. Usually, the distinction between these two terms is clear-cut: recursion is about functions that call themselves, while iteration is  done through looping. That is correct, but here, we specifically refer to the shape of how a function evolves. </p>
+<p>What do we mean by <em>the shape of how a function evolves</em>?</p>
+<p>Let&#39;s say for now that if the shape grows and shrinks, then it is recursive, if it doesn&#39;t, then it is an iterative process.</p>
+<p>The terminology here might be a bit confusing, but one thing to keep in mind throughout this post is:</p>
+<p align="center">recursive function !== recursive process</p>
+
+<p>Which means, what if there are recursive functions that have iterative processes?</p>
+<p>Is this a recursive function?</p>
+<pre><code class="language-ts">function plus(a, b) {
+  if (a === 0) {
+    return b;
+  } else {
+    return 1 + plus(a - 1, b);
+  }
+}
+</code></pre>
+<p>What about this one?</p>
+<pre><code class="language-js">function plus(a, b) {
+  if (a === 0) {
+    return b;
+  } else {
+    return plus(a - 1, b + 1);
+  }
+}
+</code></pre>
+<p>They are both recursive functions alright, but the processes they generate are different. In fact, the second one is what is called a tail-recursive function, but let&#39;s not get ahead of ourselves.</p>
+<p>Let&#39;s say we want to see how <code>plus(2, 3)</code> works with both examples.</p>
+<p>With the first function, <code>a</code> is not equal to <code>0</code>, so we return <code>1 + plus(a - 1, b)</code>. But we first need to compute <code>plus(a - 1, b)</code> for that. So, we go on and call <code>plus</code> with new arguments: <code>plus(1, 3)</code>. Again, <code>a</code> is not equal to <code>0</code>, so we return <code>1 + plus(a - 1, b)</code>. But again, we need to do a recursive call first, so we go on to <code>plus(0, 3)</code>. Now the base case holds, and we return <code>b</code>, which is <code>3</code>. As this function is popped off the stack, the previous function takes this value and adds <code>1</code> to it. Our value is now <code>4</code>. When this one is popped off the stack as well, we&#39;re left with the very first function call; it adds <code>1</code> to the value it gets, which is <code>4</code>, and the result is <code>5</code>. And, we&#39;re done. This is good old recursion as we know it.</p>
+<p>Here is a visual display of what is just described:</p>
+<p><img src="/blog/post-images/2023-12-23/recursive-process.gif" alt="Recursive process"></p>
+<p>To see the <em>shape</em> more clearly, let&#39;s give it different arguments: <code>5</code> and <code>3</code> this time. The process would look like this:</p>
+<pre><code>plus(5, 3)
+1 + plus(4, 3)
+1 + (1 + plus(3, 3))
+1 + (1 + (1 + plus(2, 3)))
+1 + (1 + (1 + (1 + plus(1, 3))))
+1 + (1 + (1 + (1 + (1 + plus(0, 3)))))
+1 + (1 + (1 + (1 + (1 + 3))))
+1 + (1 + (1 + (1 + 4)))
+1 + (1 + (1 + 5))
+1 + (1 + 6)
+1 + 7
+8
+</code></pre>
+<p>Now the <em>grow-and-shrink</em> part is more obvious.</p>
+<p>The actual work of adding <code>1</code> is done <em>on the way in</em>, so to speak.</p>
+<p>With the second example, though, things are a bit different. With this one, note that the final operation is a recursive call, there is no waiting to add <code>1</code> like in the other example. </p>
+<p>Let&#39;s see it again with the same arguments, <code>plus(2, 3)</code>.</p>
+<p><code>a</code> is not equal to <code>0</code>, so we call <code>plus(1, 4)</code>.</p>
+<p>Once again, <code>a</code> is not equal to <code>0</code>, so we go on to <code>plus(0, 5)</code>.<br>And now the base case holds, <code>a</code> is <code>0</code>, so we return <code>b</code> which is <code>5</code>.</p>
+<p>Here&#39;s how it goes:</p>
+<p><img src="/blog/post-images/2023-12-23/iterative-process.gif" alt="Iterative process"></p>
+<p>If we were to use <code>5</code> and <code>3</code>:</p>
+<pre><code>plus(5, 3)
+plus(4, 4)
+plus(3, 5)
+plus(2, 6)
+plus(1, 7)
+plus(0, 8)
+8
+</code></pre>
+<p>So, while the first example has a <em><strong>recursive process</strong></em>, the second one has an <em><strong>iterative process</strong></em>.</p>
+<p>The second one is also an example of a tail-recursive function because there is nothing left to do after the recursive call.</p>
+<p>Note that the second function is still a recursive function, it calls itself, but it has an iterative process.</p>
+<p>Most of these sound like a confusion of terminology, but they eventually make sense.</p>
+<p>More information can be found at <a href="https://sourceacademy.org/sicpjs/1.2.1" target="_blank" rel="noopener noreferrer">https://sourceacademy.org/sicpjs/1.2.1</a>, in fact, the example is adapted from one of the exercises.<br>You can also read the section from <a href="https://web.mit.edu/6.001/6.037/sicp.pdf#subsection.1.2.1" target="_blank" rel="noopener noreferrer">the original book</a> or watch <a href="https://archive.org/details/ucberkeley_webcast_0G3tNuBBO5I" target="_blank" rel="noopener noreferrer">Brian Harvey&#39;s lecture</a>, which dives into the subject at the 17~ minute mark.</p>
+<p><em>The animated GIFs are inspired by <a href="https://dev.to/lydiahallie/javascript-visualized-event-loop-3dif" target="_blank" rel="noopener noreferrer">Lydia Hallie&#39;s JavaScript Visualized series</a>.</em></p>
+]]></description>
+            <link>https://rivea0.github.io/blog/the-curious-case-of-recursive-and-iterative-processes</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/the-curious-case-of-recursive-and-iterative-processes</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 23 Dec 2023 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[Applicative-order vs. normal-order evaluation]]></title>
             <description><![CDATA[<p>Let&#39;s look at this interesting sentence:</p>
