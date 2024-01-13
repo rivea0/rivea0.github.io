@@ -4,9 +4,94 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 23 Dec 2023 21:17:56 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 13 Jan 2024 11:40:42 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[When in need of a Promise]]></title>
+            <description><![CDATA[<p>If you&#39;re using a library that uses callbacks extensively, like <a href="https://www.npmjs.com/package/sqlite3" target="_blank" rel="noopener noreferrer"><code>sqlite3</code></a>, there&#39;s a good chance that it creates some frustration. There are libraries that add a promise-based API to <code>sqlite3</code>, such as <a href="https://www.npmjs.com/package/sqlite" target="_blank" rel="noopener noreferrer"><code>sqlite</code></a> that might be more convenient to use, but let&#39;s narrow our focus for now and take a look at a very simple (and somewhat contrived) case.</p>
+<p>Let&#39;s say we have an <code>insertRow</code> function that simply inserts data into some <code>entries</code> table:</p>
+<pre><code class="language-js">async function insertRow(db, data) {
+  const { title, description, date } = data;
+
+  db.run(
+    `INSERT INTO entries(title, description, date) VALUES(?, ?, ?);`,
+    title, 
+    description, 
+    date,
+    async function (error) {
+      if (error) {
+        throw new Error(error.message);
+      } else {
+        console.log(
+          `Inserted a row to entries with the ID: ${this.lastID}`
+        );
+      }
+    }
+  );
+}
+</code></pre>
+<p>...which is called by <code>insert</code>:</p>
+<pre><code class="language-js">async function insert(data) {
+  const db = new sqlite3.Database(filepath);
+  try {
+    await insertRow(db, data);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+</code></pre>
+<p>...which is called by <code>createEntry</code>:</p>
+<pre><code class="language-js">async function createEntry(formData) {
+  const data = {
+    title: formData.get(&#39;title&#39;),
+    description: formData.get(&#39;description&#39;),
+    date: formData.get(&#39;date&#39;),
+  };
+
+  try {
+    await insert(data);
+  } catch (error) {
+    return { message: `Failed to create entry ${data.title}` };
+  }
+}
+</code></pre>
+<p>It might indeed be a contrived example, but if you&#39;re quick to notice, we&#39;re trying to rethrow the error (which was first thrown by <code>insertRow</code>) in <code>insert</code>, and catch it in <code>createEntry</code>. However, in <code>insertRow</code>, the error is thrown inside the callback, which is passed to <code>db.run</code> — which means it will never be caught, unless we do something about it. </p>
+<p>Instead, we can return a promise from <code>insertRow</code> that <em>rejects</em> when an error happens:</p>
+<pre><code class="language-js">async function insertRow(db, data) {
+  const { title, description, date } = data;
+
+  return new Promise((resolve, reject) =&gt; {
+    db.run(
+      `INSERT INTO entries(title, description, date) VALUES(?, ?, ?);`,
+      title, 
+      description, 
+      date,
+      async function (error) {
+        if (error) {
+          reject(error);
+        } else {
+          console.log(
+            `Inserted a row to entries with the ID: ${this.lastID}`
+          );
+          resolve();
+        }
+      }
+    );
+  });
+}
+</code></pre>
+<p>Since we&#39;re using <code>try...catch</code> in <code>insert</code> and rethrow the error, we&#39;ll eventually return with </p>
+<pre><code class="language-js">{ message: `Failed to create entry ${data.title}` };
+</code></pre>
+<p>inside <code>createEntry</code> as we catch the error there.</p>
+<p>This might not be ideal, and using a library that provides a promise-based API would be a better idea, but when you have to use a callback-based approach, wrapping it as a Promise is something to keep in mind.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/when-in-need-of-a-promise</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/when-in-need-of-a-promise</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 13 Jan 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[The curious case of recursive and iterative processes]]></title>
             <description><![CDATA[<p>Note that the title is not <em>recursion vs. iteration</em>. Usually, the distinction between these two terms is clear-cut: recursion is about functions that call themselves, while iteration is  done through looping. That is correct, but here, we specifically refer to the shape of how a function evolves. </p>

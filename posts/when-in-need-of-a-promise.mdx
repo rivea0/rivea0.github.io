@@ -1,0 +1,103 @@
+---
+title: When in need of a Promise
+tags: [JavaScript]
+description: A contrived example of using Promises when you're dealing with a callback-based API.
+slug: when-in-need-of-a-promise
+date: 2024-01-13
+---
+
+If you're using a library that uses callbacks extensively, like [`sqlite3`](https://www.npmjs.com/package/sqlite3), there's a good chance that it creates some frustration. There are libraries that add a promise-based API to `sqlite3`, such as [`sqlite`](https://www.npmjs.com/package/sqlite) that might be more convenient to use, but let's narrow our focus for now and take a look at a very simple (and somewhat contrived) case.
+
+Let's say we have an `insertRow` function that simply inserts data into some `entries` table:
+
+```js
+async function insertRow(db, data) {
+  const { title, description, date } = data;
+
+  db.run(
+    `INSERT INTO entries(title, description, date) VALUES(?, ?, ?);`,
+    title, 
+    description, 
+    date,
+    async function (error) {
+      if (error) {
+        throw new Error(error.message);
+      } else {
+        console.log(
+          `Inserted a row to entries with the ID: ${this.lastID}`
+        );
+      }
+    }
+  );
+}
+```
+
+...which is called by `insert`:
+
+```js
+async function insert(data) {
+  const db = new sqlite3.Database(filepath);
+  try {
+    await insertRow(db, data);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+```
+
+...which is called by `createEntry`:
+
+```js
+async function createEntry(formData) {
+  const data = {
+    title: formData.get('title'),
+    description: formData.get('description'),
+    date: formData.get('date'),
+  };
+
+  try {
+    await insert(data);
+  } catch (error) {
+    return { message: `Failed to create entry ${data.title}` };
+  }
+}
+```
+
+It might indeed be a contrived example, but if you're quick to notice, we're trying to rethrow the error (which was first thrown by `insertRow`) in `insert`, and catch it in `createEntry`. However, in `insertRow`, the error is thrown inside the callback, which is passed to `db.run` — which means it will never be caught, unless we do something about it. 
+
+Instead, we can return a promise from `insertRow` that _rejects_ when an error happens:
+
+```js
+async function insertRow(db, data) {
+  const { title, description, date } = data;
+
+  return new Promise((resolve, reject) => {
+    db.run(
+      `INSERT INTO entries(title, description, date) VALUES(?, ?, ?);`,
+      title, 
+      description, 
+      date,
+      async function (error) {
+        if (error) {
+          reject(error);
+        } else {
+          console.log(
+            `Inserted a row to entries with the ID: ${this.lastID}`
+          );
+          resolve();
+        }
+      }
+    );
+  });
+}
+```
+
+Since we're using `try...catch` in `insert` and rethrow the error, we'll eventually return with 
+
+```js
+{ message: `Failed to create entry ${data.title}` };
+``` 
+
+inside `createEntry` as we catch the error there.
+
+This might not be ideal, and using a library that provides a promise-based API would be a better idea, but when you have to use a callback-based approach, wrapping it as a Promise is something to keep in mind.
