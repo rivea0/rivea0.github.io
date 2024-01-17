@@ -27,6 +27,7 @@ export default function Page() {
               isWriting={false}
               language={project.language}
               framework={project.framework}
+              more={project.more}
             />
             </li>
           )

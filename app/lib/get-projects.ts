@@ -1,4 +1,30 @@
-const projects = [
+import { ReactNode } from 'react'
+import { GlowCloudMore, LemonDescription } from './components/components'
+
+
+type ProjectProps = {
+  title: string,
+  description: string | ReactNode,
+  demoHref?: string,
+  codeHref?: string,
+  isWriting?: boolean,
+  more?: string | ReactNode,
+  isThirdParty?: boolean, 
+  thirdPartyName?: string,
+  language?: string[],
+  framework?: string[]
+}
+
+
+const projects: ProjectProps[] = [
+  {
+    title: 'Lemon: 30-Day Challenge Tracker',
+    description: LemonDescription(),
+    demoHref: '',
+    codeHref: 'https://github.com/rivea0/lemon',
+    language: ['TypeScript'],
+    framework: ['Next.js']
+  },
   {
     title: 'WikiAnagrams',
     description: 'A simple website to search for anagrams of a word, taken from its Wiktionary page.',
@@ -8,20 +34,20 @@ const projects = [
     framework: ['Next.js']
   },
   {
-    title: 'Glow Cloud: The Weather',
-    description: 'Weather report with a slightly absurd take. Inspired by the podcast Welcome to Night Vale.',
-    demoHref: 'https://glow-cloud.vercel.app/',
-    codeHref: 'https://github.com/rivea0/glow-cloud',
-    language: ['TypeScript'],
-    framework: ['Next.js']
-
-  },
-  {
     title: 'Vocab-Build',
     description: 'A Python CLI tool to study English vocabulary.',
     demoHref: '',
     codeHref: 'https://github.com/rivea0/vocab-build',
     language: ['Python'],
+  },
+  {
+    title: 'Glow Cloud: The Weather',
+    description: 'Weather report with a slightly absurd take. Inspired by the podcast Welcome to Night Vale.',
+    demoHref: 'https://glow-cloud.vercel.app/',
+    codeHref: 'https://github.com/rivea0/glow-cloud',
+    language: ['TypeScript'],
+    framework: ['Next.js'],
+    more: GlowCloudMore()
   },
   {
     title: 'Casual Math',

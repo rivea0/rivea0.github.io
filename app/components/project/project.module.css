@@ -38,3 +38,8 @@
   display: flex;
   gap: 12px;
 }
+
+.more {
+  flex-basis: 100%;
+  font-weight: lighter;
+}
