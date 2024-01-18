@@ -18,11 +18,32 @@
   justify-content: space-between;
 }
 
+.h3 {
+  margin-top: 4rem;
+  margin-bottom: -4px;
+}
+
+.ul > li > a > h4 {
+  font-size: 1.1rem;
+}
+
+.underlineSvg {
+  width: 175px;
+  height: 10px;
+}
+
+.underlineSvgPath {
+  fill: var(--link);
+}
+
 @media (max-width: 768px) {
   .heading {
     flex-direction: column;
   }
   .secondHeading {
     margin-top: var(--gap-half);
+  }
+  .underlineSvg {
+    width: 140px;
   }
 }
