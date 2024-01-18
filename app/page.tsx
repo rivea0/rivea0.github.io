@@ -7,13 +7,13 @@ import { selectedPosts } from '@lib/get-posts';
 export default async function HomePage() {
   return (
     <>
-      <h3>Hi, and welcome!</h3>
+      <h3 className={styles.heading2}>Hi, and welcome!</h3>
       <p>
         I love learning new things, and{' '}
         <Link href="/blog">writing about them</Link> as I do so.
       </p>
       <div>
-        <h3 className={styles.h3}>Selected Posts</h3>
+        <h3 className={styles.heading3}>Selected Posts</h3>
         <svg
           viewBox="0 0 567 10"
           fill="none"
