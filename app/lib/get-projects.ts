@@ -26,6 +26,13 @@ const projects: ProjectProps[] = [
     framework: ['Next.js']
   },
   {
+    title: 'Vocab-Build',
+    description: 'A Python CLI tool to study English vocabulary.',
+    demoHref: '',
+    codeHref: 'https://github.com/rivea0/vocab-build',
+    language: ['Python'],
+  },
+  {
     title: 'WikiAnagrams',
     description: 'A simple website to search for anagrams of a word, taken from its Wiktionary page.',
     demoHref: 'https://wikianagrams.vercel.app/',
@@ -34,20 +41,21 @@ const projects: ProjectProps[] = [
     framework: ['Next.js']
   },
   {
-    title: 'Vocab-Build',
-    description: 'A Python CLI tool to study English vocabulary.',
-    demoHref: '',
-    codeHref: 'https://github.com/rivea0/vocab-build',
-    language: ['Python'],
-  },
-  {
     title: 'Glow Cloud: The Weather',
     description: 'Weather report with a slightly absurd take. Inspired by the podcast Welcome to Night Vale.',
-    demoHref: 'https://glow-cloud.vercel.app/',
+    demoHref: 'https://glow-cloud.vercel.app',
     codeHref: 'https://github.com/rivea0/glow-cloud',
     language: ['TypeScript'],
     framework: ['Next.js'],
     more: GlowCloudMore()
+  },
+  {
+    title: 'Terra Incognita',
+    description: 'The hackathon project for NASA Space Apps Challenge 2023, in the category of "Planetary Tourism Office."',
+    demoHref: 'https://terra-incognita.vercel.app',
+    codeHref: 'https://github.com/rivea0/terra-incognita',
+    language: ['TypeScript'],
+    framework: ['Next.js']
   },
   {
     title: 'Casual Math',
@@ -56,7 +64,6 @@ const projects: ProjectProps[] = [
     codeHref: 'https://github.com/rivea0/casual-math',
     language: ['JavaScript'],
     framework: ['React']
-
   },
   {
     title: 'Simple Caesar Cipher',
