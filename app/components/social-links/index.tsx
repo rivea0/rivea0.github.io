@@ -33,7 +33,7 @@ export default function Socials() {
       />
       <SocialButton
         href="mailto:e.e.ereneda@gmail.com"
-        icon={<Mail color={`var(--link)`} />}
+        icon={<Mail color={`var(--icon-mail-color)`} />}
         tooltip="Email"
       />
       <SocialButton

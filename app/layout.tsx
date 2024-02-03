@@ -20,7 +20,7 @@ export default function RootLayout({
           <div className={styles.wrapper}>
             <main className={styles.main}>
               <div className={styles.heading}>
-                <span className={styles.headingText}><h1>rivea0</h1></span>
+                <span className={styles.headingText}><h1>Eda Eren</h1></span>
                 <SocialLinks />
               </div>
               <NavLinks />
@@ -37,15 +37,15 @@ export default function RootLayout({
 export const metadata = {
   metadataBase: new URL('https://rivea0.github.io'),
   title: {
-    template: '%s | rivea0',
-    default: 'rivea0',
+    template: '%s | Eda Eren',
+    default: 'Eda Eren',
   },
   description: 'My blog, projects, etc.',
   openGraph: {
-    title: 'rivea0',
+    title: 'Eda Eren',
     description: 'My blog, projects, etc.',
     url: 'https://rivea0.github.io',
-    siteName: 'rivea0',
+    siteName: 'Eda Eren',
     images: [
       '/img/opengraph-image.png'
     ],

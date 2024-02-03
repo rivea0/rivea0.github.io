@@ -22,8 +22,8 @@
 
 .headingText h1 {
   color: var(--link);
-  font-size: 2.2rem;
-  font-weight: 600;
+  font-size: 2rem;
+  font-weight: 500;
 }
 
 .footer {
@@ -37,8 +37,8 @@
     flex-direction: column;
   }
 
-  .headingText {
-    font-size: 2rem;
+  .headingText h1 {
+    font-size: 1.875rem;
   }
 
   .secondHeading {
