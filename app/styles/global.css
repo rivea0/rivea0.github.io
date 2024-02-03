@@ -47,10 +47,10 @@
   --project-bg: rgba(255, 255, 255, 0.05);
 
   --icon-github-color: #e5e8ee;
-  --icon-mail-color: #bcbffc;
-  --icon-rss-color: #9cfaf6;
-  --icon-dev-fill-color: #e5e8ee;
-  --icon-buy-me-a-coffee-color: #f8f37c;
+  --icon-mail-color: #CDCFFC;
+  --icon-rss-color: #CDFCFA;
+  --icon-dev-fill-color: #E4E1E1;
+  --icon-buy-me-a-coffee-color: #F9F596;
 
   /* Syntax Highlighting */
   --token: #999;
@@ -84,10 +84,10 @@
   --nav-link: black;
 
   --icon-github-color: #19212d;
-  --icon-mail-color: var(--link);
-  --icon-rss-color: #0bd0c8;
-  --icon-dev-fill-color: #19212d;
-  --icon-buy-me-a-coffee-color: #ffdd00;
+  --icon-mail-color: #a994ff;
+  --icon-rss-color: #54ded8;
+  --icon-dev-fill-color: #a79e9e;
+  --icon-buy-me-a-coffee-color: #E5C600;
 
 }
 
