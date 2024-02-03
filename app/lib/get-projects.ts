@@ -1,20 +1,22 @@
-import { ReactNode } from 'react'
-import { GlowCloudMore, LemonDescription } from './components/components'
-
+import { ReactNode } from 'react';
+import {
+  GlowCloudMore,
+  LemonDescription,
+  PrimeThemeDescription,
+} from './components/components';
 
 type ProjectProps = {
-  title: string,
-  description: string | ReactNode,
-  demoHref?: string,
-  codeHref?: string,
-  isWriting?: boolean,
-  more?: string | ReactNode,
-  isThirdParty?: boolean, 
-  thirdPartyName?: string,
-  language?: string[],
-  framework?: string[]
-}
-
+  title: string;
+  description: string | ReactNode;
+  demoHref?: string;
+  codeHref?: string;
+  isWriting?: boolean;
+  more?: string | ReactNode;
+  isThirdParty?: boolean;
+  thirdPartyName?: string;
+  language?: string[];
+  framework?: string[];
+};
 
 const projects: ProjectProps[] = [
   {
@@ -23,7 +25,7 @@ const projects: ProjectProps[] = [
     demoHref: '',
     codeHref: 'https://github.com/rivea0/lemon',
     language: ['TypeScript'],
-    framework: ['Next.js']
+    framework: ['Next.js'],
   },
   {
     title: 'Vocab-Build',
@@ -34,36 +36,47 @@ const projects: ProjectProps[] = [
   },
   {
     title: 'WikiAnagrams',
-    description: 'A simple website to search for anagrams of a word, taken from its Wiktionary page.',
+    description:
+      'A simple website to search for anagrams of a word, taken from its Wiktionary page.',
     demoHref: 'https://wikianagrams.vercel.app/',
     codeHref: 'https://github.com/rivea0/wikianagrams',
     language: ['TypeScript'],
-    framework: ['Next.js']
+    framework: ['Next.js'],
   },
   {
     title: 'Glow Cloud: The Weather',
-    description: 'Weather report with a slightly absurd take. Inspired by the podcast Welcome to Night Vale.',
+    description:
+      'Weather report with a slightly absurd take. Inspired by the podcast Welcome to Night Vale.',
     demoHref: 'https://glow-cloud.vercel.app',
     codeHref: 'https://github.com/rivea0/glow-cloud',
     language: ['TypeScript'],
     framework: ['Next.js'],
-    more: GlowCloudMore()
+    more: GlowCloudMore(),
+  },
+  {
+    title: 'Obsidian Prime',
+    description: PrimeThemeDescription(),
+    demoHref: '',
+    codeHref: 'https://github.com/rivea0/obsidian-prime',
+    language: ['CSS'],
   },
   {
     title: 'Terra Incognita',
-    description: 'The hackathon project for NASA Space Apps Challenge 2023, in the category of "Planetary Tourism Office."',
+    description:
+      'The hackathon project for NASA Space Apps Challenge 2023, in the category of "Planetary Tourism Office."',
     demoHref: 'https://terra-incognita.vercel.app',
     codeHref: 'https://github.com/rivea0/terra-incognita',
     language: ['TypeScript'],
-    framework: ['Next.js']
+    framework: ['Next.js'],
   },
   {
     title: 'Casual Math',
-    description: 'A pure (and my first!) React application to solve simple math operations.',
+    description:
+      'A pure (and my first!) React application to solve simple math operations.',
     demoHref: 'https://casualmath.netlify.app',
     codeHref: 'https://github.com/rivea0/casual-math',
     language: ['JavaScript'],
-    framework: ['React']
+    framework: ['React'],
   },
   {
     title: 'Simple Caesar Cipher',
@@ -74,15 +87,15 @@ const projects: ProjectProps[] = [
   },
   {
     title: 'Heap for Reading Lists',
-    description: "A Flask web application to create, analyze, and get recommendations from your reading list. Created as the final project for Harvard's CS50.",
+    description:
+      "A Flask web application to create, analyze, and get recommendations from your reading list. Created as the final project for Harvard's CS50.",
     demoHref: 'https://heap.pythonanywhere.com',
     codeHref: 'https://github.com/rivea0/heap-for-reading-lists',
     language: ['Python'],
-    framework: ['Flask']
-
+    framework: ['Flask'],
   },
-]
+];
 
 export function getProjects() {
-  return projects
+  return projects;
 }

@@ -38,3 +38,12 @@ export function GlowCloudMore() {
     </>
   );
 }
+
+export function PrimeThemeDescription() {
+  return (
+    <>
+      <span>A customizable dark/light theme for <Link href="https://obsidian.md">Obsidian</Link>.</span> 
+      <span> Also comes with <Link href="https://github.com/rivea0/obsidian-prime-snippets">CSS snippets</Link>.</span>
+    </>
+  )
+}
