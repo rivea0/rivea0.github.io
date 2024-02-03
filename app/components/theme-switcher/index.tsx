@@ -8,14 +8,11 @@ import Tooltip from '@components/tooltip'
 
 export default function ThemeSwitcher({
   className = '',
-  iconSize = 24,
   hideTooltip = false,
-  strokeWidth,
 }: {
   className?: string
   iconSize?: number
   hideTooltip?: boolean
-  strokeWidth?: number
 }) {
   const { theme: activeTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -42,9 +39,9 @@ export default function ThemeSwitcher({
             className={`${socialStyles.icon} ${className}`}
           >
             {activeTheme === 'light' ? (
-              <Moon size={iconSize} strokeWidth={strokeWidth || 2} />
+              <Moon color={`var(--icon-moon-color)`} />
             ) : (
-              <Sun size={iconSize} strokeWidth={strokeWidth || 2} />
+              <Sun color={`var(--icon-sun-color)`} />
             )}
           </button>
       )}

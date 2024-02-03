@@ -1,23 +1,32 @@
-export default function withIcon(icon: string) {
+export default function withIcon(svgPath: string) {
   function Icon({
-    size = 24,
+    strokeWidth = 1.5,
     color = 'currentColor',
-    fill = '',
-    strokeWidth = 1,
+    fillColor = 'none',
+    viewBox = "0 0 24 24"
+  }: {
+    strokeWidth?: number;
+    color?: string;
+    fillColor?: string;
+    viewBox?: string;
   }) {
     return (
       <svg
-        viewBox="0 0 24 24"
-        width={size}
-        height={size}
+        xmlns="http://www.w3.org/2000/svg"
+        className="icon"
+        width={24}
+        height={24}
+        viewBox={viewBox}
         strokeWidth={strokeWidth}
-        fill={fill ? fill : 'none'}
-        stroke={color || 'currentColor'}
-        dangerouslySetInnerHTML={{ __html: icon }}
+        stroke={color}
+        fill={fillColor}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        dangerouslySetInnerHTML={{ __html: svgPath }}
         aria-hidden="true"
-      />
-    )
+      >
+      </svg>
+    );
   }
-
   return Icon
 }

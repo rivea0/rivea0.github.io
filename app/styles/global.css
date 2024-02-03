@@ -26,6 +26,10 @@
   --transition: 0.1s ease-in-out;
   --transition-slow: 0.3s ease-in-out;
 
+  /* Theme switcher icon colors */
+  --icon-moon-color: #324158;
+  --icon-sun-color: #c5ccdB;
+
   /* Dark Mode Colors */
   --bg: #0d1117;
   --bg2: #131922;
@@ -41,6 +45,11 @@
   --link: #9ca0fa;
   --nav-link: #fff;
   --project-bg: rgba(255, 255, 255, 0.05);
+
+  --icon-github-color: #e5e8ee;
+  --icon-rss-color: #9cfaf6;
+  --icon-dev-fill-color: #e5e8ee;
+  --icon-buy-me-a-coffee-color: #f8f37c;
 
   /* Syntax Highlighting */
   --token: #999;
@@ -72,6 +81,12 @@
   --name: #333;
   --highlight: #eaeaea;
   --nav-link: black;
+
+  --icon-github-color: #19212d;
+  --icon-rss-color: #0bd0c8;
+  --icon-dev-fill-color: #19212d;
+  --icon-buy-me-a-coffee-color: #ffdd00;
+
 }
 
 * {
