@@ -1,0 +1,85 @@
+---
+title: A recursive algorithm for incrementing natural numbers
+tags: [Computer Science, Miscellaneous]
+description: A recursive algorithm for incrementing natural numbers example from The Algorithm Design Manual.
+slug: a-recursive-algorithm-for-incrementing-natural-numbers
+date: 2024-02-03
+---
+
+Incrementing a natural number is simple as adding $1$ to it, so why would we ever want to think about a fancy way of doing it? All we need to do is to go from $y$ to $y + 1$, and well, that's pretty obvious.
+
+But, let's take a look at one example:
+
+```python
+from math import floor
+
+def increment(y):
+    if y == 0:
+        return 1
+    elif y % 2 == 1:
+        return 2 * increment(floor(y / 2))
+
+    return y + 1
+```
+
+It's a beautiful recursive algorithm for incrementing natural numbers, taken from Steven Skiena’s _The Algorithm Design Manual_.
+
+But how do we know that it's correct?
+
+The book answers it, by using [induction](https://rivea0.github.io/bite-sized-math-for-cs/unit-01-proofs/induction/).
+
+The _base case_ is when $y$ equals $0$, and if that's the case, we return $1$. That is correct: $0 + 1 = 1$.
+
+Our _induction hypothesis_ is that $\text{Increment}(n - 1)$ is $n$.
+We assume that is the case, and go on to show that $\text{Increment}(n)$ holds as well, that is, $\text{Increment}(n) = n + 1$.
+
+When $y$ is an even number (when $y \text{ mod }  2 = 0$), we return $y + 1$ in the last expression in the code, so that's correct.
+
+So what's the deal with odd numbers, then?
+
+When $y$ is odd (when $y \text{ mod }  2 = 1$), what is returned from the `increment` function is 
+
+```python
+2 * increment(floor(y / 2))
+```
+
+Remember that we need to prove $\text{Increment}(n) = n + 1$, so we need to prove that what we return here is indeed `y + 1`.
+
+When $y$ is odd, we can write it as $2m + 1$, for some integer $m$. In that case, what we have is:
+
+```python
+2 * increment(floor(((2 * m) + 1) / 2))
+```
+
+Or:
+
+$$2 \cdot \text{Increment}(\lfloor(2m + 1) / 2\rfloor)$$
+
+<Note>
+$\lfloor$ and $\rfloor$ indicate the [floor function](https://en.wikipedia.org/wiki/Floor_and_ceiling_functions).
+</Note>
+
+We can simplify it by dividing the terms inside $\text{Increment}$ by $2$:
+
+$$2 \cdot \text{Increment}(\lfloor{m + 1 / 2}\rfloor)$$
+
+
+Taking the floor of $m + 1/2$ is just $m$ (remember that $m$ is an integer):
+
+$$ 2 \cdot \text{Increment}(m)$$
+
+...which is (by our _induction hypothesis_):
+
+$$2(m + 1)$$
+
+...which is:
+
+$$2m + 2$$
+
+We said that $y$ is $2m + 1$. And the result of our increment function returns $2m + 2$, which is the correct answer: $y + 1$ 🎉
+
+This is certainly a bit tricky at first, but provides an important lesson that induction is a solid way of proving correctness, even though most of it feels like magic.
+
+---
+
+_The lectures based on the book _The Algorithm Design Manual_ can be found [here](https://www3.cs.stonybrook.edu/~skiena/373/videos/)._
