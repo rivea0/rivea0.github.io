@@ -57,7 +57,7 @@
   --comment: #999;
   --keyword: #fff;
   --name: #fff;
-  --highlight: #2e2e2e;
+  --highlight: #282a36;
 }
 
 [data-theme='light'] {
@@ -81,6 +81,7 @@
   --keyword: #000;
   --name: #333;
   --highlight: #eaeaea;
+  --highlight: #fafafa;
   --nav-link: black;
 
   --icon-github-color: #19212d;
