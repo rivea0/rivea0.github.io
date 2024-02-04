@@ -33,11 +33,11 @@ The _base case_ is when $y$ equals $0$, and if that's the case, we return $1$. T
 Our _induction hypothesis_ is that $\text{Increment}(n - 1)$ is $n$.
 We assume that is the case, and go on to show that $\text{Increment}(n)$ holds as well, that is, $\text{Increment}(n) = n + 1$.
 
-When $y$ is an even number (when $y \text{ mod }  2 = 0$), we return $y + 1$ in the last expression in the code, so that's correct.
+When $y$ is an even number (when $y \text{ mod }  2 = 0$), we return $y + 1$ in the last line, so that's correct.
 
 So what's the deal with odd numbers, then?
 
-When $y$ is odd (when $y \text{ mod }  2 = 1$), what is returned from the `increment` function is 
+When $y$ is odd (when $y \text{ mod }  2 = 1$), what is returned from the `increment` function is:
 
 ```python
 2 * increment(floor(y / 2))
@@ -64,7 +64,7 @@ We can simplify it by dividing the terms inside $\text{Increment}$ by $2$:
 $$2 \cdot \text{Increment}(\lfloor{m + 1 / 2}\rfloor)$$
 
 
-Taking the floor of $m + 1/2$ is just $m$ (remember that $m$ is an integer):
+Taking the floor of $m + 1/2$, we have just $m$ (remember that $m$ is an integer):
 
 $$ 2 \cdot \text{Increment}(m)$$
 
@@ -78,7 +78,7 @@ $$2m + 2$$
 
 We said that $y$ is $2m + 1$. And the result of our increment function returns $2m + 2$, which is the correct answer: $y + 1$ 🎉
 
-This is certainly a bit tricky at first, but provides an important lesson that induction is a solid way of proving correctness, even though most of it feels like magic.
+This is certainly a bit tricky at first, but it provides an important lesson that induction is a solid way of proving correctness, even though most of it feels like magic.
 
 ---
 
