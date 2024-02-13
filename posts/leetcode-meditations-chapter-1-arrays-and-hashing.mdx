@@ -1,0 +1,155 @@
+---
+title: "LeetCode Meditations — Chapter 1: Arrays & Hashing"
+tags: [Computer Science, Python, JavaScript]
+description: The first chapter of LeetCode Meditation series.
+slug: leetcode-meditations-chapter-1-arrays-and-hashing
+date: 2024-02-13
+---
+
+![Cover image](/blog/post-images/2024-02-13/01-lm-ch1.png)
+
+Before starting the [Arrays & Hashing section in the Blind 75 list](https://neetcode.io/practice), let's _very briefly_ get to know our prerequisite topics for now:
+
+- dynamic arrays
+- hash tables
+- prefix sums
+
+<br />
+
+## Dynamic Arrays
+
+Dynamic arrays are, well, dynamic. They're flexible, and can change their size during execution.
+
+Python's `list` type is a dynamic array.
+We can create an `items` list, for example:
+
+```python
+items = [3, 5]
+```
+
+The _length_ of `items` is obviously 2, but its _capacity_ is greater than or equal to its length. In fact, **capacity** refers to the total size, whereas **length** is the actual size.
+
+Since dynamic arrays are still arrays, they need a _contiguous block of memory_.
+
+We can easily add an item to `items`:
+
+```python
+items.append(7)
+```
+
+And add some more:
+
+```python
+items.append(9)
+items.append(11)
+items.append(13)
+```
+
+All the while, the length and capacity of `items` keeps growing dynamically.
+
+![Dynamic arrays example](/blog/post-images/2024-02-13/dynamic-arrays.gif)
+
+#### Time and space complexity
+
+Accessing an element is $O(1)$ as we have [random access](https://en.wikipedia.org/wiki/Random_access).
+
+Inserting a new element or deleting an element is $O(n)$ (think about having to shift all the elements before inserting or after deleting an item). But, [in order to not be too pessimistic, we can look at amortized analysis](https://en.wikipedia.org/wiki/Amortized_analysis), in that case, inserting/deleting at the end of the array becomes $O(1)$.  
+
+Space complexity is $O(n)$, because of the excess space.
+
+<br />
+
+## Hash Tables
+
+A hash table maps keys to values, implementing an _associative array_.
+
+Python's `dict` is one example:
+
+```python
+number_of_petals = {
+    'Euphorbia': 2, 
+    'Trillium': 3, 
+    'Columbine': 5,
+}
+```
+
+Also JavaScript's "object"s:
+
+```js
+let numberOfMoons = {
+  'Earth': 1,
+  'Mars': 2,
+  'Jupiter': 95,
+  'Saturn': 146,
+  'Uranus': 27,
+  'Neptune': 14,
+};
+```
+
+There are two important ingredients for a hash table:
+- an array of "buckets" to store the data
+- a hash function to map the data to a specific index in the array
+
+Hashes are usually large integers, so to find an index, we can take the result of the hash modulo the array's length.
+
+![Hash tables example](/blog/post-images/2024-02-13/hash-tables.gif)
+
+<Note>
+The **hash function** that's mapping the elements to buckets is <mark>not</mark> the `hash()` used in the visual (it's just a [Python function](https://docs.python.org/3/library/functions.html#hash) to calculate the hash value of an object). The hash function in this case is the modulo ( `%` ) operation.
+</Note>
+
+Here, with the hash value of each item's key, we calculate the remainder when it's divided by the length of the array to find which "bucket" it should go to.
+
+The ratio of the number of elements to the number of buckets is called the **load factor**, and the higher it gets, the more **collisions** (when elements have to be inserted at the same place in the array) occur.
+
+There are some collusion resolution tactics like **linear probing** (probing through the array until finding an empty bucket) and **chaining** (chaining multiple elements as linked lists), but we'll not go into those for now.
+
+#### Time and Space Complexity
+
+The average case for searching, inserting, and deleting operations are $O(1)$ as we use keys to look up the values.
+
+Space complexity is $O(n)$ as it grows linearly with the amount of elements.
+
+<br />
+
+## Prefix Sums
+A prefix sum is the sequence of numbers we get after adding the sums of running totals of another sequence.
+It's also called the **cumulative sum**.
+
+The first element of the resulting array is the first element of the input array. That's fine. We start at the second item, and add the previous numbers each time as we go. That is:
+
+$$result[i] = \begin{cases} nums[0] & \text{if } i \text{ is zero} \\ result[i - 1] + nums[i] & \text{if  } i \geq 1 \end{cases}$$
+
+In code, we can implement that easily:
+
+```python
+def runningSum(nums):
+    result = [nums[0]]
+    
+    for i in range(1, len(nums)):
+        result.append(result[i - 1] + nums[i])
+
+    return result
+```
+
+![Prefix sums example](/blog/post-images/2024-02-13/prefix-sums.gif)
+
+
+#### Time and space complexity
+
+Time complexity for a prefix sum is $O(n)$ because we're iterating over each of the elements in the array.
+The space complexity is also $O(n)$ because the need of space grows as the length of the original array grows.
+
+---
+
+And, we're done with the introduction to the first chapter, now it's time to take a breath and notice your surroundings. Maybe it's raining, or a bird sings nearby, or there's just the silence of the night. Or neither of them, that's all fine.
+
+The first problem to look at will be [Contains Duplicate](https://leetcode.com/problems/contains-duplicate/), so until then, happy coding.
+
+##### References
+
+- [Dynamic Arrays in Python - brilliant.org](https://brilliant.org/wiki/dynamic-arrays/#dynamic-arrays-in-python)
+- [Hash Tables - brilliant.org](https://brilliant.org/wiki/hash-tables)
+- ["Taking Hash Tables Off The Shelf" - Vaidehi Joshi](https://medium.com/basecs/taking-hash-tables-off-the-shelf-139cbf4752f0)
+- [Prefix Sum - LeetCode The Hard Way](https://leetcodethehardway.com/tutorials/basic-topics/prefix-sum)
+
