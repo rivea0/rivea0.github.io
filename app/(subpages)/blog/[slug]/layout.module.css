@@ -39,3 +39,9 @@
   padding: 2px 8px;
   font-size: 1rem;
 }
+
+@media screen and (max-width: 768px) {
+  .tags > li {
+    padding: 2px 4px;
+  }
+}
