@@ -1,0 +1,90 @@
+---
+title: "LeetCode Meditations: Contains Duplicate"
+tags: [Computer Science, Python, TypeScript]
+description: Solving the LeetCode Contains Duplicate problem.
+slug: leetcode-meditations-contains-duplicate
+date: 2024-02-15
+---
+
+![Cover image](/blog/post-images/2024-02-15/02-lm.png)
+
+For [this problem](https://leetcode.com/problems/contains-duplicate/description/), let's start with the description: 
+
+> Given an integer array `nums`, return `true` if any value appears **at least twice** in the array, and return `false` if every element is distinct.
+
+For example:
+
+```ts
+[1, 2, 3, 1] // true
+[1, 2, 3, 4] // false
+[1, 1, 1, 3, 3, 4, 3, 2, 4, 2] // true
+```
+
+---
+
+We can use a [`Set`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set) which only keeps the values without duplicates.
+
+For each example, it would look like this:
+
+```js
+new Set([1, 2, 3, 1]);
+// -> Set(3) { 1, 2, 3 }
+
+new Set([1, 2, 3, 4]);
+// -> Set(4) { 1, 2, 3, 4 }
+
+new Set([1, 1, 1, 3, 3, 4, 3, 2, 4, 2]);
+// -> Set(4) { 1, 3, 4, 2 }
+```
+
+In that case, the difference between the _size_ of the set and the length of the original array will tell us whether it contains duplicates or not. If they are not equal to each other, that means the array has duplicates.
+
+Using TypeScript, my solution was this:
+
+```ts
+function containsDuplicate(nums: number[]): boolean {
+  return !(new Set(nums).size === nums.length);
+};
+```
+
+It's obvious from the size and length comparison that this solution works, and indeed, it passes the tests.
+
+#### Time & space complexity
+
+My guess for the time complexity is that it's $O(n)$, because the `Set` constructor iterates over each element in the array it is given as the argument.
+I think that the space complexity is also $O(n)$, because in the worst case where each element is unique, `Set` needs to allocate memory for each of them. 
+
+##### Using Python
+
+We can translate this solution into Python like this as well:
+
+```python
+class Solution:
+    def containsDuplicate(self, nums: List[int]) -> bool:
+        return len(set(nums)) != len(nums)
+```
+
+---
+
+It's now time to take a breath.
+
+Let's look at [NeetCode's solution](https://www.youtube.com/watch?v=3OamzN90kPg):
+
+```python
+class Solution:
+    def containsDuplicate(self, nums: List[int]) -> bool:
+        hashset = set()
+
+        for n in nums:
+            if n in hashset:
+                return True
+            hashset.add(n)
+
+        return False
+```
+
+The worst case is still $O(n)$, and space complexity is $O(n)$ as well in the case of each element being unique.
+
+However, I think it's an improvement as compared to my initial solution, because instead of creating the set in one go, we can return immediately if the element is in the set as we go through adding each one.
+
+As we have reached the end of this meditation, we can take one more deep breath. Next up is the [Valid Anagram](https://leetcode.com/problems/valid-anagram/) problem. Until then, happy coding.
