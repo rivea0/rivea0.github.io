@@ -5,6 +5,8 @@ import NavLinks from '@components/nav-links'
 import Footer from '@components/footer'
 import ThemeProvider from '@components/theme-provider'
 import styles from './layout.module.css'
+import siteConfig from '../siteConfig.json'
+import { GCScript } from 'next-goatcounter';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -13,10 +15,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body>
         <ThemeProvider>
+        <GCScript siteUrl={`https://${siteConfig.GC}.goatcounter.com/count`} />
           <div className={styles.wrapper}>
             <main className={styles.main}>
               <div className={styles.heading}>
