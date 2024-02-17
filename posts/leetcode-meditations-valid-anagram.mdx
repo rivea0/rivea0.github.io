@@ -1,0 +1,165 @@
+---
+title: "LeetCode Meditations: Valid Anagram"
+tags: [Computer Science, Python, TypeScript]
+description: Solving the LeetCode Valid Anagram problem.
+slug: leetcode-meditations-valid-anagram
+date: 2024-02-17
+---
+
+![Cover image](/blog/post-images/2024-02-17/03-lm.png)
+
+For [this one](https://leetcode.com/problems/valid-anagram), let's start with the description:
+
+> Given two strings `s` and `t`, return `true` _if_ `t` _is an anagram of_ `s`_, and_ `false` _otherwise_.
+>
+> An **Anagram** is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.
+
+And, both arguments will consist of lowercase English letters.
+
+For example:
+
+```ts
+isAnagram('anagram', 'nagaram');
+// -> true
+
+isAnagram('rat', 'car');
+// -> false
+```
+
+---
+
+Here, we can use [`Map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) to store the letter counts in both strings. If the same letter in the second string doesn't occur the same number of times as in the first string, we know that they are not anagrams.
+
+Of course, the first thing to check is if the lengths of the strings are equal, because if they are not, then there is no way they are anagrams in the first place.
+
+
+```ts
+function isAnagram(s: string, t: string): boolean {
+  if (s.length !== t.length) {
+    return false;
+  }
+
+  let isValid = true;
+
+  let sDict = new Map();
+  let tDict = new Map();
+
+  // Initialize the objects with letters mapping to letter counts 
+  for (const letter of s) {
+    const letterCount = sDict.get(letter);
+    !letterCount ? sDict.set(letter, 1) : sDict.set(letter, letterCount + 1);
+  }
+
+  for (const letter of t) {
+    const letterCount = tDict.get(letter);
+    !letterCount ? tDict.set(letter, 1) : tDict.set(letter, letterCount + 1);
+  }
+    
+  // Check if a letter doesn't occur the same number of times
+  sDict.forEach((letterCount, letter) => {
+    if (tDict.get(letter) !== letterCount) {
+      isValid = false;
+    }
+  });
+
+  return isValid;
+};
+```
+
+#### Time and space complexity
+
+My guess for the time complexity is $O(n)$ as we iterate through the string's length to create the map. Space complexity would be $O(n)$ as well, because creating the map grows linearly as the length of the string increases.
+
+##### Using Python
+
+Many things are potential one-liners in Python, so 
+
+```python
+collections.Counter(s) == collections.Counter(t)
+``` 
+
+is the easiest thing to do. 
+
+But to recreate the above code, it might look like this:
+
+```python
+class Solution:
+    def isAnagram(self, s: str, t: str) -> bool:
+        if len(s) != len(t):
+            return False
+        
+        s_dict = {}
+        t_dict = {}
+
+        for letter in s:
+            s_dict[letter] = s_dict.get(letter, 0) + 1
+
+        for letter in t:
+            t_dict[letter] = t_dict.get(letter, 0) + 1
+
+        for letter, letter_count in s_dict.items():
+            if t_dict.get(letter, 0) != letter_count:
+                return False
+        
+        return True
+
+```
+
+Note that we don't need an `isValid` flag in this case, as we're not checking the letter counts inside a function with limited scope inside some function like a `forEach`.
+
+Also inside the last loop, as the letter in `s_dict` may not be in `t_dict`, we're using `t_dict.get(letter, 0)`, so if it doesn't exist, it would be initialized with the count `0`. 
+I don't think that's a good solution at all, though.
+So let's take a deep breath, and look at NeetCode's solution.
+
+---
+
+NeetCode's solution was pretty similar to the Python version above.
+
+```python
+class Solution:
+    def isAnagram(self, s: str, t: str) -> bool:
+        if len(s) != len(t):
+            return False
+        
+        countS, countT = {}, {}
+
+        for i in range(len(s)):
+            countS[s[i]] = 1 + countS.get(s[i], 0)
+            countT[t[i]] = 1 + countT.get(t[i], 0)
+
+        for c in countS:
+            if countS[c] != countT.get(c, 0):
+                return False
+        
+        return True
+```
+
+The time and space complexity in this case are $O(n)$ as well.
+
+To get rid of the extra memory usage and make the space complexity $O(1)$, he mentions the solution where you can compare the sorted versions of the strings:
+
+```python
+sorted(s) == sorted(t)
+```
+
+In the case of TypeScript (or JavaScript) it could be:
+
+```ts
+[...s].sort().join('') === [...t].sort().join('');
+```
+
+<Note>
+This one wouldn't work as intended:
+
+```ts
+[...s].sort() === [...t].sort();
+```
+
+Because [arrays are objects](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#description), they'll be equal to each other only if they point to the same object in memory. In this case, even if `[...s].sort()` and `[...t].sort()` look like they are the same, they won't be equal to each other.
+</Note>
+
+But, of course, sorting algorithms can't get better than $O(n \ log \ n)$ when it comes to time complexity, and some of them use $O(n)$ space to create additional storage as well, so it's another trade-off.
+
+We can take one more deep breath now.
+
+Next up is [Two Sum](https://leetcode.com/problems/two-sum), until then, happy coding.
