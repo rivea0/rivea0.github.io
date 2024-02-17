@@ -25,7 +25,6 @@ function SocialButton({
 export default function Socials() {
   return (
     <div className={styles.socials}>
-      <ThemeSwitcher />
       <SocialButton
         href="https://github.com/rivea0"
         icon={<GitHub color={`var(--icon-github-color)`} />}
@@ -51,6 +50,7 @@ export default function Socials() {
         icon={<BuyMeACoffee color={`var(--icon-buy-me-a-coffee-color)`} />}
         tooltip="Buy Me a Coffee"
       />
+      <ThemeSwitcher />
     </div>
   )
 }
