@@ -40,7 +40,8 @@ export default function Page() {
         <p>I'm doing very amateur photography, you can check out my <Link href="https://unsplash.com/@rivea0">Unsplash</Link>.</p>
         <p>I also write down some fleeting thoughts at <Link href="https://thementaltraveller.bearblog.dev">thementaltraveller.bearblog.dev</Link>.</p>
         <hr />
-        <p><em>Site is built using <a href="https://nextjs.org">Next.js</a>, licensed under <Link href="">MIT</Link>.</em></p>
+        <p><em>This site is built using <a href="https://nextjs.org">Next.js</a>, licensed under <Link href="">MIT</Link>.</em></p>
+        <p><em><Link href="https://www.goatcounter.com">GoatCounter</Link> (which is <Link href="https://github.com/arp242/goatcounter">open source</Link>!) is used for privacy-friendly analytics.</em></p>
         <p><em>Blog content licensed under <Link href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</Link>.</em></p>
       </div>
     </Suspense>
