@@ -1,0 +1,125 @@
+---
+title: "LeetCode Meditations: Two Sum"
+tags: [Computer Science, Python, TypeScript]
+description: Solving the LeetCode Two Sum problem.
+slug: leetcode-meditations-two-sum
+date: 2024-02-19
+---
+
+![Cover image](/blog/post-images/2024-02-19/04-lm.png)
+
+Let's see what the description says for [this one](https://leetcode.com/problems/two-sum/):
+
+> Given an array of integers `nums` and an integer `target`, return _indices of the two numbers such that they add up to `target`_.
+> 
+> You may assume that each input would have **_exactly_ one solution**, and you may not use the _same_ element twice.
+>
+> You can return the answer in any order. 
+
+
+For example:
+
+```ts
+twoSum([2, 7, 11, 15], 9);
+// -> [0, 1]
+// Because nums[0] + nums[1] == 9, we return [0, 1].
+
+twoSum([3, 2, 4], 6);
+// -> [1, 2]
+
+twoSum([3, 3], 6);
+// -> [0, 1]
+```
+
+And, as the constraints say, **only one valid answer exists**.
+
+---
+
+The very first naive solution I thought of was this:
+
+```ts
+function twoSum(nums: number[], target: number): number[] {
+  for (let i = 0; i < nums.length; i++) {
+    for (let j = i + 1; j < nums.length; j++) {
+      if (nums[i] + nums[j] === target) {
+        return [i, j];
+      }
+    }
+  }
+};
+```
+
+#### Time and space complexity
+
+This solution passes the tests alright, but, the time complexity is $O(n^2)$ because we have a nested loop. The good thing is that the space complexity is $O(1)$ as we don't use additional memory.
+
+Still, the time complexity ruins our day, so there must be a better way.
+
+---
+
+A better way is a "one-pass solution," where NeetCode explains the concept [around the second minute mark of the video](https://youtu.be/KLlXCFG5TnA?t=111).
+
+The idea is that for each item, we can check if `target - item` exists in the array that has a different index than that item. And the crux of the idea is that we can use a hash table to store the indices, and return immediately after finding the complementary item:
+
+```ts
+function twoSum(nums: number[], target: number): number[] {
+  let indicesOfNums: { [n: number]: number } = {};
+
+  for (let i = 0; i < nums.length; i++) {
+    if (target - nums[i] in indicesOfNums) {
+      return [indicesOfNums[target - nums[i]], i];
+    }
+    indicesOfNums[nums[i]] = i;
+  }
+};
+```
+
+And, indeed, it passes the tests. 🎉
+
+#### Time and space complexity
+
+Here, time complexity is $O(n)$ because in the worst case, we're iterating through the whole array, so, as the length of the array increases, the time complexity will increase linearly. Nevertheless, it is better than our initial solution. 
+
+The space complexity, however, becomes $O(n)$ because we're storing an additional data structure, and in the worst case, it is proportional to the array's length.
+
+##### Using Python
+
+We can translate the above code into Python:
+
+```python
+class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        indices_of_nums = {}
+
+        for i, num in enumerate(nums):
+            if target - num in indices_of_nums:
+                return [indices_of_nums[target - num], i]
+            
+            indices_of_nums[num] = i
+```
+
+Now it's time to take a deep breath. 
+
+Let's take a look at NeetCode's solution.
+
+---
+
+NeetCode's solution turns out to be the same as the Python version above, except that it is slightly more explicit:
+
+```python
+class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        prevMap = {} # val : index
+
+        for i, n in enumerate(nums):
+            diff = target - n
+            if diff in prevMap:
+                return [prevMap[diff], i]
+            prevMap[n] = i
+        
+        return
+```
+
+And, that's it for Two Sums, we can take one more deep breath. 
+
+Next up is [Group Anagrams](https://leetcode.com/problems/group-anagrams/), until then, happy coding.
