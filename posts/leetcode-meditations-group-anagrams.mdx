@@ -1,0 +1,179 @@
+---
+title: "LeetCode Meditations: Group Anagrams"
+tags: [Computer Science, Python, TypeScript]
+description: Solving the LeetCode Group Anagrams problem.
+slug: leetcode-meditations-group-anagrams
+date: 2024-02-21
+---
+
+![Cover image](/blog/post-images/2024-02-21/05-lm.png)
+
+Let's start with the description for [Group Anagrams](https://leetcode.com/problems/group-anagrams/description/):
+
+> Given an array of strings `strs`, group **the anagrams** together. You can return the answer in **any order**.
+>
+> An **Anagram** is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.
+
+For example:
+
+```ts
+groupAnagrams(['eat', 'tea', 'tan', 'ate', 'nat', 'bat']);
+// -> [ ['bat'], ['nat', 'tan'], ['ate', 'eat', 'tea'] ]
+
+groupAnagrams(['']);
+// -> [ [''] ]
+
+groupAnagrams(['a']);
+// -> [ ['a'] ]
+```
+
+And, as one of the constraints says, _each of the strings will consist of lowercase English letters_.
+
+---
+
+One thing to remember from the previous [Valid Anagram](https://rivea0.github.io/blog/leetcode-meditations-valid-anagram) problem is that we can easily check if two strings are anagrams of each other by comparing their _sorted_ versions.
+
+So, we can use a hash table to store the sorted words. In that case, all words that are anagrams of each other will be grouped together in an _array_, and share the same key:
+
+```ts
+function groupAnagrams(strs: string[]): string[][] {
+  let words: { [word: string]: string[] } = {};
+
+  for (let s of strs) {
+    let sortedWord = [...s].sort().join('');
+    (sortedWord in words) ? words[sortedWord].push(s) : words[sortedWord] = [s];
+  }
+
+  return Object.values(words);
+};
+```
+
+#### Time and space complexity
+
+Since we're using the sorting operation, time complexity will be $O(n \ log \ n)$ as it is the best we can do with sorting. But we're doing the sorting operation _for each element in `strs`_, so the loop itself has an $O(n)$ time complexity. 
+To not confuse ourselves, we'll use another variable, $m$, to denote the length of `strs`, that is, the number of times we'll iterate for each element. Overall, the time complexity will be $O(m \cdot n \ log \ n)$.
+
+We can say that space complexity is $O(m \cdot n)$ where $m$ is the length of `strs` and $n$ is the length of the longest string, because in the worst case where all strings are anagrams of each other, the value array can contain $m$ strings, and the key's length will be $n$, so, `words` will grow proportionally.
+
+##### Using Python
+
+<Note>
+To reflect the ternary operation in the TypeScript version:
+
+```ts
+(sortedWord in words) ? words[sortedWord].push(s) : words[sortedWord] = [s];
+```
+
+We could write it in Python like:
+
+```python
+words[sorted_word].append(s) if sorted_word in words else words[sorted_word] = [s]
+```
+
+But since it's a bit clunky, we can use [`setdefault()`](https://docs.python.org/3/library/stdtypes.html#dict.setdefault) where we're setting the default value of  `words[sorted_word]` to `[]`.
+</Note>
+
+It might look like this in Python:
+
+```python
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        words = {}
+
+        for s in strs:
+            sorted_word = ''.join(sorted(s))
+            words.setdefault(sorted_word, []).append(s)
+
+        return words.values()
+```
+
+Now, after taking a deep breath, we can look at NeetCode's solution.
+
+---
+
+And, voilà, [a more efficient solution](https://youtu.be/vzdNOK2oB2E?si=Y4OxVBiArZYomm5t&t=118) exists:
+
+```python
+from collections import defaultdict
+
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        res = defaultdict(list)
+
+        for s in strs:
+            count = [0] * 26 # a ... z
+
+            for c in s:
+                count[ord(c) - ord('a')] += 1
+
+            res[tuple(count)].append(s)
+
+        return res.values()
+```
+
+Here, the constraint we mentioned in the beginning gives some perspective to this solution:
+For each string, we can count the number of characters from `'a'` to `'z'`, because the strings will be just lowercase English letters. 
+
+We can still use a hash table, and map each of the 26 letters to an index, and increase the value at that index every time we see that letter. The keys will be these arrays of length 26, and the values will be the arrays of strings themselves.
+
+For example, if we have these strings:
+
+```python
+['eat', 'tea', 'tan']
+```
+
+Then, `res` will look like this:
+
+```python
+{
+    (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0): ['tan'],
+    (1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0): ['eat', 'tea']
+}
+```
+
+<Note>
+`count` is converted into a `tuple` because `list`s cannot be keys as they are mutable. You can [read more on this](https://wiki.python.org/moin/DictionaryKeys).
+</Note>
+
+Also note that in the code, we use the ASCII numbers of the characters to get their index, for example, the count of `'a'` will be at the 0th index, so it's basic offset arithmetic.
+
+For instance, the ASCII number of `'z'` is `122`, and `'a'` is `97`, when you get the difference, it will be `25`, meaning that the `'z'` will be at the end of the array, that is, the 25th index.
+
+---
+
+After taking another deep breath, let's try converting it into TypeScript:
+
+```ts
+function groupAnagrams(strs: string[]): string[][] {
+  let result: { [count: string]: string[] } = {};
+
+  for (let s of strs) {
+    let count = new Array(26).fill(0);
+
+    for (let c of s) {
+      count[c.charCodeAt(0) - 'a'.charCodeAt(0)]++;
+    }
+
+    const key = count.toString();
+
+    !(key in result) ? result[key] = [s] : result[key].push(s);
+  }
+
+  return Object.values(result);
+};
+```
+
+<Note>
+While we couldn't use lists as keys in the Python version, we'll just convert the `count` array into string with `toString()` in this TypeScript version and use it as key. 
+</Note>
+
+#### Time and space complexity
+
+The time complexity will be $O(m \cdot n)$ where $m$ is the total number of strings and the $n$ is the length of a string.
+
+For the space complexity, the dominant item will be the `res` variable (_the `count` array won't matter much because it won't grow with the input size, it is constant, or $O(1)$_).
+In the case where each key is unique, the space complexity will be $O(m \cdot n)$ where $m$ is the total number of strings, and $n$ is the length of the longest string.
+
+---
+
+And, that's the end of Group Arrays. The next one will be [Top K Frequent Elements](https://leetcode.com/problems/top-k-frequent-elements/), until then, happy coding.

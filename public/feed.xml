@@ -4,9 +4,410 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 13 Feb 2024 21:52:19 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 21 Feb 2024 16:04:56 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Group Anagrams]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-02-21/05-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/group-anagrams/description/" target="_blank" rel="noopener noreferrer">Group Anagrams</a>:</p>
+<blockquote>
+<p>Given an array of strings <code>strs</code>, group <strong>the anagrams</strong> together. You can return the answer in <strong>any order</strong>.</p>
+<p>An <strong>Anagram</strong> is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">groupAnagrams([&#39;eat&#39;, &#39;tea&#39;, &#39;tan&#39;, &#39;ate&#39;, &#39;nat&#39;, &#39;bat&#39;]);
+// -&gt; [ [&#39;bat&#39;], [&#39;nat&#39;, &#39;tan&#39;], [&#39;ate&#39;, &#39;eat&#39;, &#39;tea&#39;] ]
+
+groupAnagrams([&#39;&#39;]);
+// -&gt; [ [&#39;&#39;] ]
+
+groupAnagrams([&#39;a&#39;]);
+// -&gt; [ [&#39;a&#39;] ]
+</code></pre>
+<p>And, as one of the constraints says, <em>each of the strings will consist of lowercase English letters</em>.</p>
+<hr>
+<p>One thing to remember from the previous <a href="https://rivea0.github.io/blog/leetcode-meditations-valid-anagram" target="_blank" rel="noopener noreferrer">Valid Anagram</a> problem is that we can easily check if two strings are anagrams of each other by comparing their <em>sorted</em> versions.</p>
+<p>So, we can use a hash table to store the sorted words. In that case, all words that are anagrams of each other will be grouped together in an <em>array</em>, and share the same key:</p>
+<pre><code class="language-ts">function groupAnagrams(strs: string[]): string[][] {
+  let words: { [word: string]: string[] } = {};
+
+  for (let s of strs) {
+    let sortedWord = [...s].sort().join(&#39;&#39;);
+    (sortedWord in words) ? words[sortedWord].push(s) : words[sortedWord] = [s];
+  }
+
+  return Object.values(words);
+};
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>Since we&#39;re using the sorting operation, time complexity will be $O(n \ log \ n)$ as it is the best we can do with sorting. But we&#39;re doing the sorting operation <em>for each element in <code>strs</code></em>, so the loop itself has an $O(n)$ time complexity.<br>To not confuse ourselves, we&#39;ll use another variable, $m$, to denote the length of <code>strs</code>, that is, the number of times we&#39;ll iterate for each element. Overall, the time complexity will be $O(m \cdot n \ log \ n)$.</p>
+<p>We can say that space complexity is $O(m \cdot n)$ where $m$ is the length of <code>strs</code> and $n$ is the length of the longest string, because in the worst case where all strings are anagrams of each other, the value array can contain $m$ strings, and the key&#39;s length will be $n$, so, <code>words</code> will grow proportionally.</p>
+<h5>Using Python</h5>
+<Note>
+To reflect the ternary operation in the TypeScript version:
+
+<pre><code class="language-ts">(sortedWord in words) ? words[sortedWord].push(s) : words[sortedWord] = [s];
+</code></pre>
+<p>We could write it in Python like:</p>
+<pre><code class="language-python">words[sorted_word].append(s) if sorted_word in words else words[sorted_word] = [s]
+</code></pre>
+<p>But since it&#39;s a bit clunky, we can use <a href="https://docs.python.org/3/library/stdtypes.html#dict.setdefault" target="_blank" rel="noopener noreferrer"><code>setdefault()</code></a> where we&#39;re setting the default value of  <code>words[sorted_word]</code> to <code>[]</code>.<br></Note></p>
+<p>It might look like this in Python:</p>
+<pre><code class="language-python">class Solution:
+    def groupAnagrams(self, strs: List[str]) -&gt; List[List[str]]:
+        words = {}
+
+        for s in strs:
+            sorted_word = &#39;&#39;.join(sorted(s))
+            words.setdefault(sorted_word, []).append(s)
+
+        return words.values()
+</code></pre>
+<p>Now, after taking a deep breath, we can look at NeetCode&#39;s solution.</p>
+<hr>
+<p>And, voilà, <a href="https://youtu.be/vzdNOK2oB2E?si=Y4OxVBiArZYomm5t&t=118" target="_blank" rel="noopener noreferrer">a more efficient solution</a> exists:</p>
+<pre><code class="language-python">from collections import defaultdict
+
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -&gt; List[List[str]]:
+        res = defaultdict(list)
+
+        for s in strs:
+            count = [0] * 26 # a ... z
+
+            for c in s:
+                count[ord(c) - ord(&#39;a&#39;)] += 1
+
+            res[tuple(count)].append(s)
+
+        return res.values()
+</code></pre>
+<p>Here, the constraint we mentioned in the beginning gives some perspective to this solution:<br>For each string, we can count the number of characters from <code>&#39;a&#39;</code> to <code>&#39;z&#39;</code>, because the strings will be just lowercase English letters. </p>
+<p>We can still use a hash table, and map each of the 26 letters to an index, and increase the value at that index every time we see that letter. The keys will be these arrays of length 26, and the values will be the arrays of strings themselves.</p>
+<p>For example, if we have these strings:</p>
+<pre><code class="language-python">[&#39;eat&#39;, &#39;tea&#39;, &#39;tan&#39;]
+</code></pre>
+<p>Then, <code>res</code> will look like this:</p>
+<pre><code class="language-python">{
+    (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0): [&#39;tan&#39;],
+    (1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0): [&#39;eat&#39;, &#39;tea&#39;]
+}
+</code></pre>
+<Note>
+`count` is converted into a `tuple` because `list`s cannot be keys as they are mutable. You can [read more on this](https://wiki.python.org/moin/DictionaryKeys).
+</Note>
+
+<p>Also note that in the code, we use the ASCII numbers of the characters to get their index, for example, the count of <code>&#39;a&#39;</code> will be at the 0th index, so it&#39;s basic offset arithmetic.</p>
+<p>For instance, the ASCII number of <code>&#39;z&#39;</code> is <code>122</code>, and <code>&#39;a&#39;</code> is <code>97</code>, when you get the difference, it will be <code>25</code>, meaning that the <code>&#39;z&#39;</code> will be at the end of the array, that is, the 25th index.</p>
+<hr>
+<p>After taking another deep breath, let&#39;s try converting it into TypeScript:</p>
+<pre><code class="language-ts">function groupAnagrams(strs: string[]): string[][] {
+  let result: { [count: string]: string[] } = {};
+
+  for (let s of strs) {
+    let count = new Array(26).fill(0);
+
+    for (let c of s) {
+      count[c.charCodeAt(0) - &#39;a&#39;.charCodeAt(0)]++;
+    }
+
+    const key = count.toString();
+
+    !(key in result) ? result[key] = [s] : result[key].push(s);
+  }
+
+  return Object.values(result);
+};
+</code></pre>
+<Note>
+While we couldn't use lists as keys in the Python version, we'll just convert the `count` array into string with `toString()` in this TypeScript version and use it as key. 
+</Note>
+
+<h4>Time and space complexity</h4>
+<p>The time complexity will be $O(m \cdot n)$ where $m$ is the total number of strings and the $n$ is the length of a string.</p>
+<p>For the space complexity, the dominant item will be the <code>res</code> variable (<em>the <code>count</code> array won&#39;t matter much because it won&#39;t grow with the input size, it is constant, or $O(1)$</em>).<br>In the case where each key is unique, the space complexity will be $O(m \cdot n)$ where $m$ is the total number of strings, and $n$ is the length of the longest string.</p>
+<hr>
+<p>And, that&#39;s the end of Group Arrays. The next one will be <a href="https://leetcode.com/problems/top-k-frequent-elements/" target="_blank" rel="noopener noreferrer">Top K Frequent Elements</a>, until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-group-anagrams</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-group-anagrams</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Wed, 21 Feb 2024 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Two Sum]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-02-19/04-lm.png" alt="Cover image"></p>
+<p>Let&#39;s see what the description says for <a href="https://leetcode.com/problems/two-sum/" target="_blank" rel="noopener noreferrer">this one</a>:</p>
+<blockquote>
+<p>Given an array of integers <code>nums</code> and an integer <code>target</code>, return <em>indices of the two numbers such that they add up to <code>target</code></em>.</p>
+<p>You may assume that each input would have <strong><em>exactly</em> one solution</strong>, and you may not use the <em>same</em> element twice.</p>
+<p>You can return the answer in any order. </p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">twoSum([2, 7, 11, 15], 9);
+// -&gt; [0, 1]
+// Because nums[0] + nums[1] == 9, we return [0, 1].
+
+twoSum([3, 2, 4], 6);
+// -&gt; [1, 2]
+
+twoSum([3, 3], 6);
+// -&gt; [0, 1]
+</code></pre>
+<p>And, as the constraints say, <strong>only one valid answer exists</strong>.</p>
+<hr>
+<p>The very first naive solution I thought of was this:</p>
+<pre><code class="language-ts">function twoSum(nums: number[], target: number): number[] {
+  for (let i = 0; i &lt; nums.length; i++) {
+    for (let j = i + 1; j &lt; nums.length; j++) {
+      if (nums[i] + nums[j] === target) {
+        return [i, j];
+      }
+    }
+  }
+};
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>This solution passes the tests alright, but, the time complexity is $O(n^2)$ because we have a nested loop. The good thing is that the space complexity is $O(1)$ as we don&#39;t use additional memory.</p>
+<p>Still, the time complexity ruins our day, so there must be a better way.</p>
+<hr>
+<p>A better way is a &quot;one-pass solution,&quot; where NeetCode explains the concept <a href="https://youtu.be/KLlXCFG5TnA?t=111" target="_blank" rel="noopener noreferrer">around the second minute mark of the video</a>.</p>
+<p>The idea is that for each item, we can check if <code>target - item</code> exists in the array that has a different index than that item. And the crux of the idea is that we can use a hash table to store the indices, and return immediately after finding the complementary item:</p>
+<pre><code class="language-ts">function twoSum(nums: number[], target: number): number[] {
+  let indicesOfNums: { [n: number]: number } = {};
+
+  for (let i = 0; i &lt; nums.length; i++) {
+    if (target - nums[i] in indicesOfNums) {
+      return [indicesOfNums[target - nums[i]], i];
+    }
+    indicesOfNums[nums[i]] = i;
+  }
+};
+</code></pre>
+<p>And, indeed, it passes the tests. 🎉</p>
+<h4>Time and space complexity</h4>
+<p>Here, time complexity is $O(n)$ because in the worst case, we&#39;re iterating through the whole array, so, as the length of the array increases, the time complexity will increase linearly. Nevertheless, it is better than our initial solution. </p>
+<p>The space complexity, however, becomes $O(n)$ because we&#39;re storing an additional data structure, and in the worst case, it is proportional to the array&#39;s length.</p>
+<h5>Using Python</h5>
+<p>We can translate the above code into Python:</p>
+<pre><code class="language-python">class Solution:
+    def twoSum(self, nums: List[int], target: int) -&gt; List[int]:
+        indices_of_nums = {}
+
+        for i, num in enumerate(nums):
+            if target - num in indices_of_nums:
+                return [indices_of_nums[target - num], i]
+            
+            indices_of_nums[num] = i
+</code></pre>
+<p>Now it&#39;s time to take a deep breath. </p>
+<p>Let&#39;s take a look at NeetCode&#39;s solution.</p>
+<hr>
+<p>NeetCode&#39;s solution turns out to be the same as the Python version above, except that it is slightly more explicit:</p>
+<pre><code class="language-python">class Solution:
+    def twoSum(self, nums: List[int], target: int) -&gt; List[int]:
+        prevMap = {} # val : index
+
+        for i, n in enumerate(nums):
+            diff = target - n
+            if diff in prevMap:
+                return [prevMap[diff], i]
+            prevMap[n] = i
+        
+        return
+</code></pre>
+<p>And, that&#39;s it for Two Sums, we can take one more deep breath. </p>
+<p>Next up is <a href="https://leetcode.com/problems/group-anagrams/" target="_blank" rel="noopener noreferrer">Group Anagrams</a>, until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-two-sum</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-two-sum</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Mon, 19 Feb 2024 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Valid Anagram]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-02-17/03-lm.png" alt="Cover image"></p>
+<p>For <a href="https://leetcode.com/problems/valid-anagram" target="_blank" rel="noopener noreferrer">this one</a>, let&#39;s start with the description:</p>
+<blockquote>
+<p>Given two strings <code>s</code> and <code>t</code>, return <code>true</code> <em>if</em> <code>t</code> <em>is an anagram of</em> <code>s</code><em>, and</em> <code>false</code> <em>otherwise</em>.</p>
+<p>An <strong>Anagram</strong> is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.</p>
+</blockquote>
+<p>And, both arguments will consist of lowercase English letters.</p>
+<p>For example:</p>
+<pre><code class="language-ts">isAnagram(&#39;anagram&#39;, &#39;nagaram&#39;);
+// -&gt; true
+
+isAnagram(&#39;rat&#39;, &#39;car&#39;);
+// -&gt; false
+</code></pre>
+<hr>
+<p>Here, we can use <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map" target="_blank" rel="noopener noreferrer"><code>Map</code></a> to store the letter counts in both strings. If the same letter in the second string doesn&#39;t occur the same number of times as in the first string, we know that they are not anagrams.</p>
+<p>Of course, the first thing to check is if the lengths of the strings are equal, because if they are not, then there is no way they are anagrams in the first place.</p>
+<pre><code class="language-ts">function isAnagram(s: string, t: string): boolean {
+  if (s.length !== t.length) {
+    return false;
+  }
+
+  let isValid = true;
+
+  let sDict = new Map();
+  let tDict = new Map();
+
+  // Initialize the objects with letters mapping to letter counts 
+  for (const letter of s) {
+    const letterCount = sDict.get(letter);
+    !letterCount ? sDict.set(letter, 1) : sDict.set(letter, letterCount + 1);
+  }
+
+  for (const letter of t) {
+    const letterCount = tDict.get(letter);
+    !letterCount ? tDict.set(letter, 1) : tDict.set(letter, letterCount + 1);
+  }
+    
+  // Check if a letter doesn&#39;t occur the same number of times
+  sDict.forEach((letterCount, letter) =&gt; {
+    if (tDict.get(letter) !== letterCount) {
+      isValid = false;
+    }
+  });
+
+  return isValid;
+};
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>My guess for the time complexity is $O(n)$ as we iterate through the string&#39;s length to create the map. Space complexity would be $O(n)$ as well, because creating the map grows linearly as the length of the string increases.</p>
+<h5>Using Python</h5>
+<p>Many things are potential one-liners in Python, so </p>
+<pre><code class="language-python">collections.Counter(s) == collections.Counter(t)
+</code></pre>
+<p>is the easiest thing to do. </p>
+<p>But to recreate the above code, it might look like this:</p>
+<pre><code class="language-python">class Solution:
+    def isAnagram(self, s: str, t: str) -&gt; bool:
+        if len(s) != len(t):
+            return False
+        
+        s_dict = {}
+        t_dict = {}
+
+        for letter in s:
+            s_dict[letter] = s_dict.get(letter, 0) + 1
+
+        for letter in t:
+            t_dict[letter] = t_dict.get(letter, 0) + 1
+
+        for letter, letter_count in s_dict.items():
+            if t_dict.get(letter, 0) != letter_count:
+                return False
+        
+        return True
+</code></pre>
+<p>Note that we don&#39;t need an <code>isValid</code> flag in this case, as we&#39;re not checking the letter counts inside a function with limited scope inside some function like a <code>forEach</code>.</p>
+<p>Also inside the last loop, as the letter in <code>s_dict</code> may not be in <code>t_dict</code>, we&#39;re using <code>t_dict.get(letter, 0)</code>, so if it doesn&#39;t exist, it would be initialized with the count <code>0</code>.<br>I don&#39;t think that&#39;s a good solution at all, though.<br>So let&#39;s take a deep breath, and look at NeetCode&#39;s solution.</p>
+<hr>
+<p>NeetCode&#39;s solution was pretty similar to the Python version above.</p>
+<pre><code class="language-python">class Solution:
+    def isAnagram(self, s: str, t: str) -&gt; bool:
+        if len(s) != len(t):
+            return False
+        
+        countS, countT = {}, {}
+
+        for i in range(len(s)):
+            countS[s[i]] = 1 + countS.get(s[i], 0)
+            countT[t[i]] = 1 + countT.get(t[i], 0)
+
+        for c in countS:
+            if countS[c] != countT.get(c, 0):
+                return False
+        
+        return True
+</code></pre>
+<p>The time and space complexity in this case are $O(n)$ as well.</p>
+<p>To get rid of the extra memory usage and make the space complexity $O(1)$, he mentions the solution where you can compare the sorted versions of the strings:</p>
+<pre><code class="language-python">sorted(s) == sorted(t)
+</code></pre>
+<p>In the case of TypeScript (or JavaScript) it could be:</p>
+<pre><code class="language-ts">[...s].sort().join(&#39;&#39;) === [...t].sort().join(&#39;&#39;);
+</code></pre>
+<Note>
+This one wouldn't work as intended:
+
+<pre><code class="language-ts">[...s].sort() === [...t].sort();
+</code></pre>
+<p>Because <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#description" target="_blank" rel="noopener noreferrer">arrays are objects</a>, they&#39;ll be equal to each other only if they point to the same object in memory. In this case, even if <code>[...s].sort()</code> and <code>[...t].sort()</code> look like they are the same, they won&#39;t be equal to each other.<br></Note></p>
+<p>But, of course, sorting algorithms can&#39;t get better than $O(n \ log \ n)$ when it comes to time complexity, and some of them use $O(n)$ space to create additional storage as well, so it&#39;s another trade-off.</p>
+<p>We can take one more deep breath now.</p>
+<p>Next up is <a href="https://leetcode.com/problems/two-sum" target="_blank" rel="noopener noreferrer">Two Sum</a>, until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-valid-anagram</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-valid-anagram</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 17 Feb 2024 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Contains Duplicate]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-02-15/02-lm.png" alt="Cover image"></p>
+<p>For <a href="https://leetcode.com/problems/contains-duplicate/description/" target="_blank" rel="noopener noreferrer">this problem</a>, let&#39;s start with the description: </p>
+<blockquote>
+<p>Given an integer array <code>nums</code>, return <code>true</code> if any value appears <strong>at least twice</strong> in the array, and return <code>false</code> if every element is distinct.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">[1, 2, 3, 1] // true
+[1, 2, 3, 4] // false
+[1, 1, 1, 3, 3, 4, 3, 2, 4, 2] // true
+</code></pre>
+<hr>
+<p>We can use a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set" target="_blank" rel="noopener noreferrer"><code>Set</code></a> which only keeps the values without duplicates.</p>
+<p>For each example, it would look like this:</p>
+<pre><code class="language-js">new Set([1, 2, 3, 1]);
+// -&gt; Set(3) { 1, 2, 3 }
+
+new Set([1, 2, 3, 4]);
+// -&gt; Set(4) { 1, 2, 3, 4 }
+
+new Set([1, 1, 1, 3, 3, 4, 3, 2, 4, 2]);
+// -&gt; Set(4) { 1, 3, 4, 2 }
+</code></pre>
+<p>In that case, the difference between the <em>size</em> of the set and the length of the original array will tell us whether it contains duplicates or not. If they are not equal to each other, that means the array has duplicates.</p>
+<p>Using TypeScript, my solution was this:</p>
+<pre><code class="language-ts">function containsDuplicate(nums: number[]): boolean {
+  return !(new Set(nums).size === nums.length);
+};
+</code></pre>
+<p>It&#39;s obvious from the size and length comparison that this solution works, and indeed, it passes the tests.</p>
+<h4>Time &amp; space complexity</h4>
+<p>My guess for the time complexity is that it&#39;s $O(n)$, because the <code>Set</code> constructor iterates over each element in the array it is given as the argument.<br>I think that the space complexity is also $O(n)$, because in the worst case where each element is unique, <code>Set</code> needs to allocate memory for each of them. </p>
+<h5>Using Python</h5>
+<p>We can translate this solution into Python like this as well:</p>
+<pre><code class="language-python">class Solution:
+    def containsDuplicate(self, nums: List[int]) -&gt; bool:
+        return len(set(nums)) != len(nums)
+</code></pre>
+<hr>
+<p>It&#39;s now time to take a breath.</p>
+<p>Let&#39;s look at <a href="https://www.youtube.com/watch?v=3OamzN90kPg" target="_blank" rel="noopener noreferrer">NeetCode&#39;s solution</a>:</p>
+<pre><code class="language-python">class Solution:
+    def containsDuplicate(self, nums: List[int]) -&gt; bool:
+        hashset = set()
+
+        for n in nums:
+            if n in hashset:
+                return True
+            hashset.add(n)
+
+        return False
+</code></pre>
+<p>The worst case is still $O(n)$, and space complexity is $O(n)$ as well in the case of each element being unique.</p>
+<p>However, I think it&#39;s an improvement as compared to my initial solution, because instead of creating the set in one go, we can return immediately if the element is in the set as we go through adding each one.</p>
+<p>As we have reached the end of this meditation, we can take one more deep breath. Next up is the <a href="https://leetcode.com/problems/valid-anagram/" target="_blank" rel="noopener noreferrer">Valid Anagram</a> problem. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-contains-duplicate</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-contains-duplicate</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Thu, 15 Feb 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 1: Arrays & Hashing]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-02-13/01-lm-ch1.png" alt="Cover image"></p>
