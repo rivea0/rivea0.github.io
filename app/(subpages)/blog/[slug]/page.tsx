@@ -9,6 +9,8 @@ import { Code } from 'bright'
 import { MDXImage } from '@components/mdx-image'
 import { MDXNote } from '@components/mdx-note'
 import { MDXTable } from '@components/mdx-table'
+import catppuccinLatte from './bright-themes/catppuccinLatte.json'
+
 import '../../../../public/assets/katex/katex.min.css'
 
 export default async function Page({ params }: { 
@@ -27,7 +29,7 @@ export default async function Page({ params }: {
 
   Code.theme = {
     dark: 'dracula',
-    light: 'material-lighter'
+    light: catppuccinLatte
   }
   Code.style = { overflow: 'scroll' }
 
