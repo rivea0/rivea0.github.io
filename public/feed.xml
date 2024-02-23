@@ -4,9 +4,130 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 21 Feb 2024 16:04:56 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 23 Feb 2024 20:17:55 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Top K Frequent Elements]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-02-23/06-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/top-k-frequent-elements/" target="_blank" rel="noopener noreferrer">Top K Frequent Elements</a>:</p>
+<blockquote>
+<p>Given an integer array <code>nums</code> and an integer <code>k</code>, return <em>the</em> <code>k</code> <em>most frequent elements</em>. You may return the answer in <strong>any order</strong>.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">topKFrequent([1, 1, 1, 2, 2, 3], 2);
+// -&gt; Output: [1, 2]
+
+topKFrequent([1], 1);
+// -&gt; Output: [1]
+</code></pre>
+<p>One of the constraints indicates that <em>it is <strong>guaranteed</strong> that the answer is <strong>unique</strong>.</em></p>
+<hr>
+<p>The first obvious idea is to keep a frequency map. We can do it easily like:</p>
+<pre><code class="language-ts">let count = new Map();
+
+nums.forEach(n =&gt; {
+  count.set(n, (count.get(n) ?? 0) + 1);
+});
+</code></pre>
+<Note>
+What we do here is a bit similar to `setdefault()` in Python; when `n` does not exist in `count`, we first set its value to `0`, otherwise just increment it.
+</Note>
+
+<p>Since we need to return the <em>k most frequent elements</em>, we need to do a bit more work. My idea is to sort the <code>count</code> map by values (the <em>frequencies</em>) in reverse order to keep the most frequent elements in front, then get only the keys (the <em>numbers</em>), and slice it until <em>k</em>:</p>
+<pre><code class="language-ts">return [...count.entries()]
+  .sort(([, a], [, b]) =&gt; b - a)
+  .map((i) =&gt; i[0])
+  .slice(0, k);
+</code></pre>
+<p>All in all, it looks like this:</p>
+<pre><code class="language-ts">function topKFrequent(nums: number[], k: number): number[] {
+  let count = new Map();
+
+  nums.forEach(n =&gt; {
+    count.set(n, (count.get(n) ?? 0) + 1);
+  });
+
+  return [...count.entries()]
+    .sort(([, a], [, b]) =&gt; b - a)
+    .map(i =&gt; i[0])
+    .slice(0, k);
+};
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>Since we have a sorting operation, the time complexity cannot be better than $O(n \ log \ n)$. The space complexity is $O(n)$ as it will grow linearly as the <code>nums</code> array grows.</p>
+<hr>
+<h5>Using Python</h5>
+<p>After one deep breath, we can try converting the above code into Python:</p>
+<pre><code class="language-python">class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -&gt; List[int]:
+        count = {}
+
+        for n in nums:
+            count[n] = count.get(n, 0) + 1
+
+        sorted_items = sorted(count.items(), key=lambda i: i[1], reverse=True)
+
+        return list(map(lambda x: x[0], sorted_items))[:k]
+</code></pre>
+<p>What we do is pretty much the same as the TypeScript version above. </p>
+<p>The problem description also adds a &quot;<strong>follow up</strong>,&quot; that the algorithm&#39;s time complexity must be better than $O(n \ log \ n)$, where $n$ is the array&#39;s size. Because we&#39;re doing the sorting, it doesn&#39;t satisfy this criterion. So, after one more deep breath, let&#39;s see NeetCode&#39;s solution.</p>
+<hr>
+<p>It turns out, there is a <a href="https://youtu.be/YPTqKIgVk-k?si=-3tyBJiMZ1e0K0W3&t=178" target="_blank" rel="noopener noreferrer">better solution</a> with $O(n)$ time complexity using a bucket sort algorithm.</p>
+<p>We can create an array of size $n$ where each index corresponds to the <em>count</em> of elements. So, the values that occur twice will be stored in the second index, if all the elements are unique, all of them will be in the index <code>1</code>, etc. </p>
+<p>In that case, if all elements are the same, they will be at the very last index because the count of that element will be $n$, the length of the <code>nums</code> array.</p>
+<pre><code class="language-python">class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -&gt; List[int]:
+        count = {}
+        freq = [[] for i in range(len(nums) + 1)]
+
+        for n in nums:
+            count[n] = 1 + count.get(n, 0)
+        for n, c in count.items():
+            freq[c].append(n)
+
+        res = []
+        for i in range(len(freq) - 1, 0, -1):
+            for n in freq[i]:
+                res.append(n)
+                if len(res) == k:
+                    return res
+</code></pre>
+<p>Note that in the last loop, we go in reverse, because higher the index, higher the frequency of values.</p>
+<p>In TypeScript, it might look like this:</p>
+<pre><code class="language-ts">function topKFrequent(nums: number[], k: number): number[] {
+  let count = new Map();
+  let freq = Array.from({ length: nums.length + 1 }, () =&gt; []);
+
+  for (const n of nums) {
+    count.set(n, (count.get(n) ?? 0) + 1);
+  }
+
+  for (const [n, c] of count.entries()) {
+    freq[c].push(n);
+  }
+    
+  let res = [];
+  for (let i = freq.length - 1; i &gt; 0; i--) {
+    for (const n of freq[i]) {
+      res.push(n);
+      if (res.length === k) { 
+        return res;
+      }
+    }
+  }
+};
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(n)$ this time, because in the worst case where each element is unique, each loop will iterate over $n$ elements at most. And, the space complexity is $O(n)$ as well, because the storage we use will grow linearly as the <code>nums</code> itself grows.</p>
+<hr>
+<p>Next up is the problem <a href="https://leetcode.com/problems/product-of-array-except-self/" target="_blank" rel="noopener noreferrer">Product of Array Except Self</a>. Until then, don&#39;t forget to take deep breaths, and happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-top-k-frequent-elements</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-top-k-frequent-elements</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Fri, 23 Feb 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Group Anagrams]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-02-21/05-lm.png" alt="Cover image"></p>

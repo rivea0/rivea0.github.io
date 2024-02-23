@@ -1,0 +1,157 @@
+---
+title: "LeetCode Meditations: Top K Frequent Elements"
+tags: [Computer Science, Python, TypeScript]
+description: Solving the LeetCode Top K Frequent Elements problem.
+slug: leetcode-meditations-top-k-frequent-elements
+date: 2024-02-23
+---
+
+![Cover image](/blog/post-images/2024-02-23/06-lm.png)
+
+Let's start with the description for [Top K Frequent Elements](https://leetcode.com/problems/top-k-frequent-elements/):
+
+> Given an integer array `nums` and an integer `k`, return _the_ `k` _most frequent elements_. You may return the answer in **any order**.
+
+For example:
+
+```ts
+topKFrequent([1, 1, 1, 2, 2, 3], 2);
+// -> Output: [1, 2]
+
+topKFrequent([1], 1);
+// -> Output: [1]
+```
+
+One of the constraints indicates that _it is **guaranteed** that the answer is **unique**._
+
+---
+
+The first obvious idea is to keep a frequency map. We can do it easily like:
+
+```ts
+let count = new Map();
+
+nums.forEach(n => {
+  count.set(n, (count.get(n) ?? 0) + 1);
+});
+```
+<Note>
+What we do here is a bit similar to `setdefault()` in Python; when `n` does not exist in `count`, we first set its value to `0`, otherwise just increment it.
+</Note>
+
+Since we need to return the _k most frequent elements_, we need to do a bit more work. My idea is to sort the `count` map by values (the _frequencies_) in reverse order to keep the most frequent elements in front, then get only the keys (the _numbers_), and slice it until _k_:
+
+```ts
+return [...count.entries()]
+  .sort(([, a], [, b]) => b - a)
+  .map((i) => i[0])
+  .slice(0, k);
+```
+
+All in all, it looks like this:
+
+```ts
+function topKFrequent(nums: number[], k: number): number[] {
+  let count = new Map();
+
+  nums.forEach(n => {
+    count.set(n, (count.get(n) ?? 0) + 1);
+  });
+
+  return [...count.entries()]
+    .sort(([, a], [, b]) => b - a)
+    .map(i => i[0])
+    .slice(0, k);
+};
+```
+
+#### Time and space complexity
+Since we have a sorting operation, the time complexity cannot be better than $O(n \ log \ n)$. The space complexity is $O(n)$ as it will grow linearly as the `nums` array grows.
+
+---
+
+##### Using Python
+
+After one deep breath, we can try converting the above code into Python:
+
+```python
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        count = {}
+
+        for n in nums:
+            count[n] = count.get(n, 0) + 1
+
+        sorted_items = sorted(count.items(), key=lambda i: i[1], reverse=True)
+
+        return list(map(lambda x: x[0], sorted_items))[:k]
+```
+
+What we do is pretty much the same as the TypeScript version above. 
+
+The problem description also adds a "**follow up**," that the algorithm's time complexity must be better than $O(n \ log \ n)$, where $n$ is the array's size. Because we're doing the sorting, it doesn't satisfy this criterion. So, after one more deep breath, let's see NeetCode's solution.
+
+---
+
+It turns out, there is a [better solution](https://youtu.be/YPTqKIgVk-k?si=-3tyBJiMZ1e0K0W3&t=178) with $O(n)$ time complexity using a bucket sort algorithm.
+
+We can create an array of size $n$ where each index corresponds to the _count_ of elements. So, the values that occur twice will be stored in the second index, if all the elements are unique, all of them will be in the index `1`, etc. 
+
+In that case, if all elements are the same, they will be at the very last index because the count of that element will be $n$, the length of the `nums` array.
+
+```python
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        count = {}
+        freq = [[] for i in range(len(nums) + 1)]
+
+        for n in nums:
+            count[n] = 1 + count.get(n, 0)
+        for n, c in count.items():
+            freq[c].append(n)
+
+        res = []
+        for i in range(len(freq) - 1, 0, -1):
+            for n in freq[i]:
+                res.append(n)
+                if len(res) == k:
+                    return res
+
+```
+
+Note that in the last loop, we go in reverse, because higher the index, higher the frequency of values.
+
+In TypeScript, it might look like this:
+
+```ts
+function topKFrequent(nums: number[], k: number): number[] {
+  let count = new Map();
+  let freq = Array.from({ length: nums.length + 1 }, () => []);
+
+  for (const n of nums) {
+    count.set(n, (count.get(n) ?? 0) + 1);
+  }
+
+  for (const [n, c] of count.entries()) {
+    freq[c].push(n);
+  }
+    
+  let res = [];
+  for (let i = freq.length - 1; i > 0; i--) {
+    for (const n of freq[i]) {
+      res.push(n);
+      if (res.length === k) { 
+        return res;
+      }
+    }
+  }
+};
+```
+
+#### Time and space complexity
+
+The time complexity is $O(n)$ this time, because in the worst case where each element is unique, each loop will iterate over $n$ elements at most. And, the space complexity is $O(n)$ as well, because the storage we use will grow linearly as the `nums` itself grows.
+
+---
+
+Next up is the problem [Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/). Until then, don't forget to take deep breaths, and happy coding.
