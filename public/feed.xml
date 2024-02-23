@@ -4,7 +4,7 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 23 Feb 2024 20:17:55 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 23 Feb 2024 20:30:14 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
         <item>
@@ -71,9 +71,9 @@ What we do here is a bit similar to `setdefault()` in Python; when `n` does not 
         return list(map(lambda x: x[0], sorted_items))[:k]
 </code></pre>
 <p>What we do is pretty much the same as the TypeScript version above. </p>
-<p>The problem description also adds a &quot;<strong>follow up</strong>,&quot; that the algorithm&#39;s time complexity must be better than $O(n \ log \ n)$, where $n$ is the array&#39;s size. Because we&#39;re doing the sorting, it doesn&#39;t satisfy this criterion. So, after one more deep breath, let&#39;s see NeetCode&#39;s solution.</p>
+<p>The problem description also adds a &quot;<strong>follow up</strong>,&quot; that the algorithm&#39;s time complexity must be better than $O(n \ log \ n)$, where $n$ is the array&#39;s size. Because we&#39;re doing the sorting, it doesn&#39;t satisfy this criterion. So, after one more deep breath, let&#39;s see <a href="https://neetcode.io/" target="_blank" rel="noopener noreferrer">NeetCode</a>&#39;s solution.</p>
 <hr>
-<p>It turns out, there is a <a href="https://youtu.be/YPTqKIgVk-k?si=-3tyBJiMZ1e0K0W3&t=178" target="_blank" rel="noopener noreferrer">better solution</a> with $O(n)$ time complexity using a bucket sort algorithm.</p>
+<p>It turns out, there is a <a href="https://youtu.be/YPTqKIgVk-k?si=-3tyBJiMZ1e0K0W3&t=178" target="_blank" rel="noopener noreferrer">better solution</a> with $O(n)$ time complexity using the <a href="https://en.wikipedia.org/wiki/Bucket_sort" target="_blank" rel="noopener noreferrer">bucket sort algorithm</a>.</p>
 <p>We can create an array of size $n$ where each index corresponds to the <em>count</em> of elements. So, the values that occur twice will be stored in the second index, if all the elements are unique, all of them will be in the index <code>1</code>, etc. </p>
 <p>In that case, if all elements are the same, they will be at the very last index because the count of that element will be $n$, the length of the <code>nums</code> array.</p>
 <pre><code class="language-python">class Solution:

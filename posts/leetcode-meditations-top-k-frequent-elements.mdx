@@ -89,11 +89,11 @@ class Solution:
 
 What we do is pretty much the same as the TypeScript version above. 
 
-The problem description also adds a "**follow up**," that the algorithm's time complexity must be better than $O(n \ log \ n)$, where $n$ is the array's size. Because we're doing the sorting, it doesn't satisfy this criterion. So, after one more deep breath, let's see NeetCode's solution.
+The problem description also adds a "**follow up**," that the algorithm's time complexity must be better than $O(n \ log \ n)$, where $n$ is the array's size. Because we're doing the sorting, it doesn't satisfy this criterion. So, after one more deep breath, let's see [NeetCode](https://neetcode.io/)'s solution.
 
 ---
 
-It turns out, there is a [better solution](https://youtu.be/YPTqKIgVk-k?si=-3tyBJiMZ1e0K0W3&t=178) with $O(n)$ time complexity using a bucket sort algorithm.
+It turns out, there is a [better solution](https://youtu.be/YPTqKIgVk-k?si=-3tyBJiMZ1e0K0W3&t=178) with $O(n)$ time complexity using the [bucket sort algorithm](https://en.wikipedia.org/wiki/Bucket_sort).
 
 We can create an array of size $n$ where each index corresponds to the _count_ of elements. So, the values that occur twice will be stored in the second index, if all the elements are unique, all of them will be in the index `1`, etc. 
 
