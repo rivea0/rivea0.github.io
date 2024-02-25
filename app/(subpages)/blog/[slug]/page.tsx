@@ -10,6 +10,7 @@ import { MDXImage } from '@components/mdx-image'
 import { MDXNote } from '@components/mdx-note'
 import { MDXTable } from '@components/mdx-table'
 import catppuccinLatte from './bright-themes/catppuccinLatte.json'
+import { focus } from './bright-extensions/extension'
 
 import '../../../../public/assets/katex/katex.min.css'
 
@@ -32,6 +33,7 @@ export default async function Page({ params }: {
     light: catppuccinLatte
   }
   Code.style = { overflow: 'scroll' }
+  Code.extensions = [focus];
 
   return <Content components={{ img: MDXImage, pre: Code, Note: MDXNote, Table: MDXTable }} />
 }
