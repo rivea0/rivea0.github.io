@@ -1,0 +1,225 @@
+---
+title: "LeetCode Meditations: Product of Array Except Self"
+tags: [Computer Science, Python, TypeScript]
+description: Solving the LeetCode Product of Array Except Self problem.
+slug: leetcode-meditations-product-of-array-except-self
+date: 2024-02-25
+---
+
+![Cover image](/blog/post-images/2024-02-25/07-lm.png)
+
+The description of [this problem](https://leetcode.com/problems/product-of-array-except-self/) states that:
+
+> Given an integer array `nums`, return _an array_ `answer` _such that_ `answer[i]` _is equal to the product of all the elements of_ `nums` _except_ `nums[i]`.
+>
+> The product of any prefix or suffix of `nums` is **guaranteed** to fit in a **32-bit** integer.
+>
+> You must write an algorithm that runs in `O(n)` time and without using the division operation.
+
+For example:
+
+```ts
+productExceptSelf([1, 2, 3, 4]);
+// -> [24, 12, 8, 6]
+
+productExceptSelf([-1, 1, 0, -3, 3]);
+// -> [0, 0, 9, 0, 0]
+```
+
+---
+
+If we want to ignore the runtime having to be $O(n)$, a _very_ naive idea is to get the product of the _filtered_ version of the array... _for each element_ (where the indices of the array do not include the current item's index).
+
+Yes, I know that sounds terrible, but well, it works for most of the test cases until it hits one with a **Time Limit Exceeded** error because it's far from optimal:
+
+```ts
+function productExceptSelf(nums: number[]): number[] {
+  let result = [];
+  for (let i = 0; i < nums.length; i++) {
+    result[i] = nums
+      .filter((_, idx) => idx !== i)
+      .reduce((acc, item) => acc * item, 1);
+  }
+
+  return result;
+};
+```
+
+#### Time and space complexity
+This is **not** a solution to the problem, but the time complexity will be $O(n^3)$ as we do filter and reduce for each element. As we create another array using `filter()` for each iteration, the space complexity is, I think, $O(n^2)$.
+
+So, after a deep breath, let's see [NeetCode](https://neetcode.io/)'s solution.
+
+---
+
+Here is a very [clever solution](https://youtu.be/bNvIQI2wAjk?si=XTH7V8HePypZOcY_&t=129). We'll make use of _prefix_ and _postfix_ variables. They have to be `1` as default, as it is the identity for multiplication. _Prefix_ will start from the first element of the array and calculate the product so far up to the last element, and it'll be updated with the new value as we go.
+
+So, for example, if the `nums` array is `[2, 3, 5]`, we'll go up to `5`:
+
+```
+[2, 3, 5] // nums
+
+
+1 -> initial value of prefix
+
+
+2 * 1 = 2 -> nums[0] * prefix = new prefix
+
+3 * 2 = 6 -> nums[1] * prefix = new prefix
+
+
+[1, 2, 6] // result
+```
+
+It might be easier to see with code:
+
+```ts
+let result: number[] = [];
+let prefix = 1; // Initial value
+
+for (let i = 0; i < nums.length; i++) {
+  result[i] = prefix;
+  prefix *= nums[i];
+}
+```
+
+_Postfix_ will start from the end of the array, and starting from the last item, it'll calculate the products so far as well. But we need to multiply it with the values calculated with the prefix, so that we get what we want: the total product of all elements _before_ and _after_ the $i$th element.
+
+In the example above, our result looked like `[1, 2, 6]` so far. We're going reverse this time, starting from the last element, up to the first one:
+
+
+```
+[2, 3, 5] // nums
+[1, 2, 6] // result created so far thanks to prefix
+
+1 -> initial value for postfix
+
+
+6 * 1 = 6
+-> result[result.length - 1] * postfix = new result[result.length - 1]
+
+5 * 1 = 5
+-> nums[nums.length - 1] * postfix = new postfix
+
+
+
+2 * 5 = 10
+-> result[result.length - 2] * postfix = new result[result.length - 2]
+
+3 * 5 = 15
+-> nums[nums.length - 2] * postfix = new postfix
+
+
+
+1 * 15 = 15
+-> result[result.length - 3] * postfix = new result[result.length - 3]
+
+
+[15, 10, 6] // end result
+```
+
+Again, in code:
+
+```ts
+let result: number[] = [];
+let prefix = 1; // Initial value
+
+for (let i = 0; i < nums.length; i++) {
+  result[i] = prefix;
+  prefix *= nums[i];
+}
+
+// focus(1:6)
+let postfix = 1; // Initial value
+
+for (let i = nums.length - 1; i > -1; i--) {
+  result[i] *= postfix;
+  postfix *= nums[i];
+}
+```
+
+<Note>
+We multiply the value in `result[i]` with `postfix` this time, instead of just assigning `result[i]` the value of `postfix` (as we did with `prefix`).
+</Note>
+
+---
+
+One deep breath, and here is the Python version of the whole thing:
+
+```python
+class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        result = [1] * (len(nums))
+        prefix = 1
+        postfix = 1
+
+        for i in range(len(nums)):
+            result[i] = prefix
+            prefix *= nums[i]
+
+        for i in range(len(nums) - 1, -1, -1):
+            result[i] *= postfix
+            postfix *= nums[i]
+
+        return result
+```
+
+And here is the TypeScript version:
+
+```ts
+function productExceptSelf(nums: number[]): number[] {
+    let result = Array.from({ length: nums.length }, () => 1);
+    let prefix = 1;
+    let postfix = 1;
+
+    for (let i = 0; i < nums.length; i++) {
+        result[i] = prefix;
+        prefix *= nums[i];
+    }
+
+    for (let i = nums.length - 1; i > -1; i--) {
+        result[i] *= postfix;
+        postfix *= nums[i];
+    }
+
+    return result;
+};
+```
+
+---
+
+Once again, to understand the idea better, if our array is `[🌸, 🍁, 🍀, 🌼]` then, at the end of the first loop where we used `prefix`, `result` looks like this:
+
+```
+[
+    1, 
+    🌸, 
+    🌸 * 🍁, 
+    🌸 * 🍁 * 🍀
+]
+```
+
+And, after the second loop where we used `postfix`, `result` looks like this:
+
+```
+[
+    🍁 * 🍀 * 🌼 * (1),
+    🍀 * 🌼 * (🌸),
+    🌼 * (🌸 * 🍁),
+    1 * (🌸 * 🍁 * 🍀)
+]
+```
+
+<Note>
+The values inside the parentheses are the previous values of `result`.
+</Note>
+
+#### Time and space complexity
+
+This version has $O(n)$ time complexity, as each loop just iterates through the elements of `nums` once, which is linear time.
+
+Since we use a fixed amount of space, the space complexity is technically $O(n)$ because we initialize `result` with the length of `nums`, but the description for this problem states that _the output array **does not** count as extra space_, so it is $O(1)$.
+
+---
+
+Next up is [Longest Consecutive Sequence](https://leetcode.com/problems/longest-consecutive-sequence/), until then, happy coding.

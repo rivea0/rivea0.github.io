@@ -4,9 +4,187 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 23 Feb 2024 20:30:14 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 25 Feb 2024 10:59:13 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Product of Array Except Self]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-02-25/07-lm.png" alt="Cover image"></p>
+<p>The description of <a href="https://leetcode.com/problems/product-of-array-except-self/" target="_blank" rel="noopener noreferrer">this problem</a> states that:</p>
+<blockquote>
+<p>Given an integer array <code>nums</code>, return <em>an array</em> <code>answer</code> <em>such that</em> <code>answer[i]</code> <em>is equal to the product of all the elements of</em> <code>nums</code> <em>except</em> <code>nums[i]</code>.</p>
+<p>The product of any prefix or suffix of <code>nums</code> is <strong>guaranteed</strong> to fit in a <strong>32-bit</strong> integer.</p>
+<p>You must write an algorithm that runs in <code>O(n)</code> time and without using the division operation.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">productExceptSelf([1, 2, 3, 4]);
+// -&gt; [24, 12, 8, 6]
+
+productExceptSelf([-1, 1, 0, -3, 3]);
+// -&gt; [0, 0, 9, 0, 0]
+</code></pre>
+<hr>
+<p>If we want to ignore the runtime having to be $O(n)$, a <em>very</em> naive idea is to get the product of the <em>filtered</em> version of the array... <em>for each element</em> (where the indices of the array do not include the current item&#39;s index).</p>
+<p>Yes, I know that sounds terrible, but well, it works for most of the test cases until it hits one with a <strong>Time Limit Exceeded</strong> error because it&#39;s far from optimal:</p>
+<pre><code class="language-ts">function productExceptSelf(nums: number[]): number[] {
+  let result = [];
+  for (let i = 0; i &lt; nums.length; i++) {
+    result[i] = nums
+      .filter((_, idx) =&gt; idx !== i)
+      .reduce((acc, item) =&gt; acc * item, 1);
+  }
+
+  return result;
+};
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>This is <strong>not</strong> a solution to the problem, but the time complexity will be $O(n^3)$ as we do filter and reduce for each element. As we create another array using <code>filter()</code> for each iteration, the space complexity is, I think, $O(n^2)$.</p>
+<p>So, after a deep breath, let&#39;s see <a href="https://neetcode.io/" target="_blank" rel="noopener noreferrer">NeetCode</a>&#39;s solution.</p>
+<hr>
+<p>Here is a very <a href="https://youtu.be/bNvIQI2wAjk?si=XTH7V8HePypZOcY_&t=129" target="_blank" rel="noopener noreferrer">clever solution</a>. We&#39;ll make use of <em>prefix</em> and <em>postfix</em> variables. They have to be <code>1</code> as default, as it is the identity for multiplication. <em>Prefix</em> will start from the first element of the array and calculate the product so far up to the last element, and it&#39;ll be updated with the new value as we go.</p>
+<p>So, for example, if the <code>nums</code> array is <code>[2, 3, 5]</code>, we&#39;ll go up to <code>5</code>:</p>
+<pre><code>[2, 3, 5] // nums
+
+
+1 -&gt; initial value of prefix
+
+
+2 * 1 = 2 -&gt; nums[0] * prefix = new prefix
+
+3 * 2 = 6 -&gt; nums[1] * prefix = new prefix
+
+
+[1, 2, 6] // result
+</code></pre>
+<p>It might be easier to see with code:</p>
+<pre><code class="language-ts">let result: number[] = [];
+let prefix = 1; // Initial value
+
+for (let i = 0; i &lt; nums.length; i++) {
+  result[i] = prefix;
+  prefix *= nums[i];
+}
+</code></pre>
+<p><em>Postfix</em> will start from the end of the array, and starting from the last item, it&#39;ll calculate the products so far as well. But we need to multiply it with the values calculated with the prefix, so that we get what we want: the total product of all elements <em>before</em> and <em>after</em> the $i$th element.</p>
+<p>In the example above, our result looked like <code>[1, 2, 6]</code> so far. We&#39;re going reverse this time, starting from the last element, up to the first one:</p>
+<pre><code>[2, 3, 5] // nums
+[1, 2, 6] // result created so far thanks to prefix
+
+1 -&gt; initial value for postfix
+
+
+6 * 1 = 6
+-&gt; result[result.length - 1] * postfix = new result[result.length - 1]
+
+5 * 1 = 5
+-&gt; nums[nums.length - 1] * postfix = new postfix
+
+
+
+2 * 5 = 10
+-&gt; result[result.length - 2] * postfix = new result[result.length - 2]
+
+3 * 5 = 15
+-&gt; nums[nums.length - 2] * postfix = new postfix
+
+
+
+1 * 15 = 15
+-&gt; result[result.length - 3] * postfix = new result[result.length - 3]
+
+
+[15, 10, 6] // end result
+</code></pre>
+<p>Again, in code:</p>
+<pre><code class="language-ts">let result: number[] = [];
+let prefix = 1; // Initial value
+
+for (let i = 0; i &lt; nums.length; i++) {
+  result[i] = prefix;
+  prefix *= nums[i];
+}
+
+// focus(1:6)
+let postfix = 1; // Initial value
+
+for (let i = nums.length - 1; i &gt; -1; i--) {
+  result[i] *= postfix;
+  postfix *= nums[i];
+}
+</code></pre>
+<Note>
+We multiply the value in `result[i]` with `postfix` this time, instead of just assigning `result[i]` the value of `postfix` (as we did with `prefix`).
+</Note>
+
+<hr>
+<p>One deep breath, and here is the Python version of the whole thing:</p>
+<pre><code class="language-python">class Solution:
+    def productExceptSelf(self, nums: List[int]) -&gt; List[int]:
+        result = [1] * (len(nums))
+        prefix = 1
+        postfix = 1
+
+        for i in range(len(nums)):
+            result[i] = prefix
+            prefix *= nums[i]
+
+        for i in range(len(nums) - 1, -1, -1):
+            result[i] *= postfix
+            postfix *= nums[i]
+
+        return result
+</code></pre>
+<p>And here is the TypeScript version:</p>
+<pre><code class="language-ts">function productExceptSelf(nums: number[]): number[] {
+    let result = Array.from({ length: nums.length }, () =&gt; 1);
+    let prefix = 1;
+    let postfix = 1;
+
+    for (let i = 0; i &lt; nums.length; i++) {
+        result[i] = prefix;
+        prefix *= nums[i];
+    }
+
+    for (let i = nums.length - 1; i &gt; -1; i--) {
+        result[i] *= postfix;
+        postfix *= nums[i];
+    }
+
+    return result;
+};
+</code></pre>
+<hr>
+<p>Once again, to understand the idea better, if our array is <code>[🌸, 🍁, 🍀, 🌼]</code> then, at the end of the first loop where we used <code>prefix</code>, <code>result</code> looks like this:</p>
+<pre><code>[
+    1, 
+    🌸, 
+    🌸 * 🍁, 
+    🌸 * 🍁 * 🍀
+]
+</code></pre>
+<p>And, after the second loop where we used <code>postfix</code>, <code>result</code> looks like this:</p>
+<pre><code>[
+    🍁 * 🍀 * 🌼 * (1),
+    🍀 * 🌼 * (🌸),
+    🌼 * (🌸 * 🍁),
+    1 * (🌸 * 🍁 * 🍀)
+]
+</code></pre>
+<Note>
+The values inside the parentheses are the previous values of `result`.
+</Note>
+
+<h4>Time and space complexity</h4>
+<p>This version has $O(n)$ time complexity, as each loop just iterates through the elements of <code>nums</code> once, which is linear time.</p>
+<p>Since we use a fixed amount of space, the space complexity is technically $O(n)$ because we initialize <code>result</code> with the length of <code>nums</code>, but the description for this problem states that <em>the output array <strong>does not</strong> count as extra space</em>, so it is $O(1)$.</p>
+<hr>
+<p>Next up is <a href="https://leetcode.com/problems/longest-consecutive-sequence/" target="_blank" rel="noopener noreferrer">Longest Consecutive Sequence</a>, until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-product-of-array-except-self</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-product-of-array-except-self</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 25 Feb 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Top K Frequent Elements]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-02-23/06-lm.png" alt="Cover image"></p>
