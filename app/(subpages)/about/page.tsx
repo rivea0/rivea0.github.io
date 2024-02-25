@@ -21,9 +21,8 @@ export default function Page() {
           <p >I have many kinds of interests, and I try to write helpful guides, usually to my future self to retain information better — as writing is the best learning strategy.</p>
           <p >Here are <em>some</em> of the things that I love the most (at this time of writing):</p>
           <ul className={styles.ul}>
-            <li>trying to figure out whether I should use <code>pyenv</code></li>
-            <li>trying to figure out why I don't use <code>pyenv</code></li>
-            <li>TypeScript</li>
+            <li>trying to solve LeetCode problems <Link href="https://rivea0.github.io/blog/leetcode-meditations-introduction">mindfully</Link></li>
+            <li>learning TypeScript</li>
             <li>reading Emerson and Thoreau</li>
             <li>writing words as a human being</li>
             <li>basic mathematical logic</li>
