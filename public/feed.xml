@@ -4,9 +4,113 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 25 Feb 2024 10:59:13 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 27 Feb 2024 18:35:23 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Longest Consecutive Sequence]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-02-27/08-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/longest-consecutive-sequence/" target="_blank" rel="noopener noreferrer">Longest Consecutive Sequence</a> states:</p>
+<blockquote>
+<p>Given an unsorted array of integers <code>nums</code>, return <em>the length of the longest consecutive elements sequence.</em></p>
+<p>You must write an algorithm that runs in <code>O(n)</code> time.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">longestConsecutive([100, 4, 200, 1, 3, 2]);
+// -&gt; 4
+// The longest consecutive elements sequence is `[1, 2, 3, 4]`, the length is 4.
+
+longestConsecutive([0, 3, 7, 2, 5, 8, 4, 6, 0, 1]);
+// -&gt; 9
+</code></pre>
+<hr>
+<p>The first idea is to get the non-duplicate elements, sort them, and then count how many of them follows a consecutive series. However, it won&#39;t be $O(n)$ time as the description says: any sorting can&#39;t be better than $O(n \ log \ n)$. But let&#39;s see how we can go about it nonetheless.</p>
+<p>Getting the non-duplicate ones is easy: we can use a <code>Set</code>.<br>Sorting them is no problem either, but how can we count the consecutive ones?<br>Looping through each element, we can&#39;t just check if the current element + 1 is in the set and update the count, because that doesn&#39;t mean that there is a consecutive order.</p>
+<p>So instead, we can keep track of <em>multiple counts</em>, rather than holding just one count variable.<br>In order to do that, we need to keep multiple starting points for each sequence that potentially exists. </p>
+<p>The tricky part is when the sequences change. For example, in a sorted array like <code>[1, 2, 3, 4, 100, 150]</code>, it is obvious that the first sequence is of length $4$, but when it comes to <code>100</code>, we need to <em>reset our count</em> to start a new sequence.</p>
+<p>In TypeScript, it might look like this:</p>
+<pre><code class="language-ts">function longestConsecutive(nums: number[]): number {
+  if (!nums.length) { 
+    return 0; 
+  }
+
+  let counts: number[] = [];
+  let count = 0;
+  let numsSorted = [...new Set(nums)].sort((a, b) =&gt; a - b);
+
+  for (let i = 0; i &lt; numsSorted.length; i++) {
+    counts.push(++count);
+    if (numsSorted[i + 1] !== numsSorted[i] + 1) {
+      count = 0;
+    }
+  }
+
+  return Math.max(...counts);
+};
+</code></pre>
+<p>So, as we loop through each element, we keep count, and add it to our <code>counts</code> array, and only reset it when the next element is not the next one in sequence.</p>
+<p>This solution passes the tests, but note that when we get to the last element, <code>numsSorted[i + 1]</code> is just <code>undefined</code>, so checking for inequality is meaningless. </p>
+<h4>Time and space complexity</h4>
+<p>Since we are sorting <code>nums</code>, time complexity can&#39;t be better than $O(n \ log \ n)$. The space complexity will be $O(n)$ because of the additional storage for <code>numsSorted</code> and <code>counts</code> arrays, which will grow linearly as the length <code>nums</code> increases.</p>
+<p>In fact, there is a much better way of doing this, so let&#39;s take a deep breath, and see how we can improve.</p>
+<hr>
+<p>When you notice that we use a <code>Set</code> anyway, why not use it for what it&#39;s already good at, checking if an element is in it, instead of just pruning the duplicate elements?<br>The good part is that we don&#39;t even need to sort them.</p>
+<pre><code class="language-ts">function longestConsecutive(nums: number[]): number {
+  if (!nums.length) { 
+    return 0;
+  }
+
+  let count: number;
+  let nums_ = new Set(nums);
+  let longestSeq = 0;
+    
+  for (let n of nums) {
+    if (!nums_.has(n - 1)) {
+      count = 0;
+      while (nums_.has(n + count)) {
+        count++;
+      }
+
+      if (count &gt; longestSeq) {
+        longestSeq = count;
+      }
+    }
+  }
+
+  return longestSeq;
+};
+</code></pre>
+<p>This time we check if an element has a previous one that comes <em>before</em> it; if not, we reset <code>count</code> and continue incrementing it while there is a consecutive sequence from that element onward. We update the longest sequence accordingly if the current count is greater than the previous longest sequence.</p>
+<p>Here is the Python version:</p>
+<pre><code class="language-python">class Solution:
+    def longestConsecutive(self, nums: List[int]) -&gt; int:
+        if not nums:
+            return 0
+
+        nums_ = set(nums)
+        longest_seq = 0
+
+        for n in nums:
+            if n - 1 not in nums_:
+                count = 0
+                while n + count in nums_:
+                    count += 1
+
+                if count &gt; longest_seq:
+                    longest_seq = count
+
+        return longest_seq
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity is just $O(n)$ this time, as we only iterate through the <code>nums</code> array.<br>The space complexity is again $O(n)$ though, because we need to allocate space for <code>nums_</code>.</p>
+<hr>
+<p>This was the last problem in Arrays &amp; Hashing section in <a href="https://neetcode.io/practice" target="_blank" rel="noopener noreferrer">Blind 75</a>. Next up, we&#39;ll look at the <a href="https://leetcodethehardway.com/tutorials/basic-topics/two-pointers" target="_blank" rel="noopener noreferrer">Two Pointers</a> technique. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-longest-consecutive-sequence</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-longest-consecutive-sequence</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 27 Feb 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Product of Array Except Self]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-02-25/07-lm.png" alt="Cover image"></p>

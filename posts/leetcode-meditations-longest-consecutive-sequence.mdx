@@ -1,0 +1,140 @@
+---
+title: "LeetCode Meditations: Longest Consecutive Sequence"
+tags: [Computer Science, Python, TypeScript]
+description: Solving the LeetCode Longest Consecutive Sequence problem.
+slug: leetcode-meditations-longest-consecutive-sequence
+date: 2024-02-27
+---
+
+![Cover image](/blog/post-images/2024-02-27/08-lm.png)
+
+The description for [Longest Consecutive Sequence](https://leetcode.com/problems/longest-consecutive-sequence/) states:
+
+> Given an unsorted array of integers `nums`, return _the length of the longest consecutive elements sequence._
+>
+> You must write an algorithm that runs in `O(n)` time.
+
+For example:
+
+```ts
+longestConsecutive([100, 4, 200, 1, 3, 2]);
+// -> 4
+// The longest consecutive elements sequence is `[1, 2, 3, 4]`, the length is 4.
+
+longestConsecutive([0, 3, 7, 2, 5, 8, 4, 6, 0, 1]);
+// -> 9
+```
+
+---
+
+The first idea is to get the non-duplicate elements, sort them, and then count how many of them follows a consecutive series. However, it won't be $O(n)$ time as the description says: any sorting can't be better than $O(n \ log \ n)$. But let's see how we can go about it nonetheless.
+
+Getting the non-duplicate ones is easy: we can use a `Set`.
+Sorting them is no problem either, but how can we count the consecutive ones?
+Looping through each element, we can't just check if the current element + 1 is in the set and update the count, because that doesn't mean that there is a consecutive order.
+
+So instead, we can keep track of _multiple counts_, rather than holding just one count variable.
+In order to do that, we need to keep multiple starting points for each sequence that potentially exists. 
+
+The tricky part is when the sequences change. For example, in a sorted array like `[1, 2, 3, 4, 100, 150]`, it is obvious that the first sequence is of length $4$, but when it comes to `100`, we need to _reset our count_ to start a new sequence.
+
+In TypeScript, it might look like this:
+
+```ts
+function longestConsecutive(nums: number[]): number {
+  if (!nums.length) { 
+    return 0; 
+  }
+
+  let counts: number[] = [];
+  let count = 0;
+  let numsSorted = [...new Set(nums)].sort((a, b) => a - b);
+
+  for (let i = 0; i < numsSorted.length; i++) {
+    counts.push(++count);
+    if (numsSorted[i + 1] !== numsSorted[i] + 1) {
+      count = 0;
+    }
+  }
+
+  return Math.max(...counts);
+};
+```
+
+So, as we loop through each element, we keep count, and add it to our `counts` array, and only reset it when the next element is not the next one in sequence.
+
+This solution passes the tests, but note that when we get to the last element, `numsSorted[i + 1]` is just `undefined`, so checking for inequality is meaningless. 
+
+#### Time and space complexity
+
+Since we are sorting `nums`, time complexity can't be better than $O(n \ log \ n)$. The space complexity will be $O(n)$ because of the additional storage for `numsSorted` and `counts` arrays, which will grow linearly as the length `nums` increases.
+
+In fact, there is a much better way of doing this, so let's take a deep breath, and see how we can improve.
+
+---
+
+When you notice that we use a `Set` anyway, why not use it for what it's already good at, checking if an element is in it, instead of just pruning the duplicate elements?
+The good part is that we don't even need to sort them.
+
+```ts
+function longestConsecutive(nums: number[]): number {
+  if (!nums.length) { 
+    return 0;
+  }
+
+  let count: number;
+  let nums_ = new Set(nums);
+  let longestSeq = 0;
+    
+  for (let n of nums) {
+    if (!nums_.has(n - 1)) {
+      count = 0;
+      while (nums_.has(n + count)) {
+        count++;
+      }
+
+      if (count > longestSeq) {
+        longestSeq = count;
+      }
+    }
+  }
+
+  return longestSeq;
+};
+```
+
+This time we check if an element has a previous one that comes _before_ it; if not, we reset `count` and continue incrementing it while there is a consecutive sequence from that element onward. We update the longest sequence accordingly if the current count is greater than the previous longest sequence.
+
+Here is the Python version:
+
+```python
+class Solution:
+    def longestConsecutive(self, nums: List[int]) -> int:
+        if not nums:
+            return 0
+
+        nums_ = set(nums)
+        longest_seq = 0
+
+        for n in nums:
+            if n - 1 not in nums_:
+                count = 0
+                while n + count in nums_:
+                    count += 1
+
+                if count > longest_seq:
+                    longest_seq = count
+
+        return longest_seq
+
+```
+
+#### Time and space complexity
+
+The time complexity is just $O(n)$ this time, as we only iterate through the `nums` array.  
+The space complexity is again $O(n)$ though, because we need to allocate space for `nums_`.
+
+
+---
+
+This was the last problem in Arrays & Hashing section in [Blind 75](https://neetcode.io/practice). Next up, we'll look at the [Two Pointers](https://leetcodethehardway.com/tutorials/basic-topics/two-pointers) technique. Until then, happy coding.
