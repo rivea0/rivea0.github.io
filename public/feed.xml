@@ -4,9 +4,71 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 27 Feb 2024 18:35:23 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 29 Feb 2024 10:30:32 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations — Chapter 2: Two Pointers]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-02-29/09-lm-ch2.png" alt="Cover image"></p>
+<p>One of the techniques of iterating through an array is the <em>two pointers technique</em>, and it is as simple as it sounds: we just keep two pointers, one starting from the left, and the other from the right, gradually getting closer to each other.</p>
+<p><img src="/blog/post-images/2024-02-29/two-pointers.gif" alt="Two pointers"></p>
+<h3>Palindrome example</h3>
+<p>A very basic example can be the one where we check if a string is a palindrome or not. A palindrome is a string that reads the same forwards and backwards.</p>
+<p>In an imaginary world where all the inputs always consist of lowercase English letters, we can do it like this:</p>
+<pre><code class="language-ts">// s consists of lowercase English letters
+function isPalindrome(s: string) {
+  let left = 0;
+  let right = s.length - 1;
+
+  while (left &lt;= right) {
+    if (s[left++] !== s[right--]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+</code></pre>
+<p>We initialize two pointers: <code>left</code> and <code>right</code>. <code>left</code> points to the start of the array, while the <code>right</code> points to the last element. As we loop while <code>left</code> is less than <code>right</code>, we check if they are equal. If not, we return <code>false</code> immediately. Otherwise, our <code>left</code> pointer is increased; that is, it&#39;s moved to the <em>right</em> one step, and our <code>right</code> pointer is decreased, meaning that it&#39;s moved to the <em>left</em> one step.<br>When they eventually overlap, the loop terminates, and we return <code>true</code>.</p>
+<p>Let&#39;s say our string is <code>&#39;racecar&#39;</code>, which is a palindrome.<br>It will go like this:</p>
+<p><img src="/blog/post-images/2024-02-29/palindrome.gif" alt="Palindrome example"></p>
+<h3>Squares of a sorted array example</h3>
+<p>Another example where we can use the two pointers technique is the problem <a href="https://leetcode.com/problems/squares-of-a-sorted-array" target="_blank" rel="noopener noreferrer">Squares of a Sorted Array</a>.</p>
+<p>The description says:</p>
+<blockquote>
+<p>Given an integer array <code>nums</code> sorted in <strong>non-decreasing</strong> order, return <em>an array of <strong>the squares of each number</strong> sorted in non-decreasing order</em>.</p>
+</blockquote>
+<p>For example, if the input is <code>[-4, -1, 0, 3, 10]</code>, the output should be <code>[0, 1, 9, 16, 100]</code>. </p>
+<p>Now obviously, we can just square each one, and then sort the array with a built-in sort method, and be done with it. But a sorting operation is never better than $O(n \ log \ n)$ runtime, so we can do it using two pointers in just $O(n)$ time:</p>
+<pre><code class="language-ts">function sortedSquares(nums: number[]): number[] {
+  let left = 0;
+  let right = nums.length - 1;
+  let result = [];
+
+  while (left &lt;= right) {
+    if (Math.abs(nums[left]) &gt; Math.abs(nums[right])) {
+      result.push(nums[left++] ** 2);
+    } else {
+      result.push(nums[right--] ** 2);
+    }
+  }
+
+  return result.reverse();
+};
+</code></pre>
+<p>We compare the absolute value of the items that <code>left</code> and <code>right</code> are pointing to, and push the square of the greater one to our <code>result</code> array. And we return the reversed version of it. </p>
+<Note>
+The reason we return the reversed result is that the array is initially already sorted, and we get the largest absolute value first. The reason that works is related to how _two pointers_ work: as we start from both ends, we initially start with the smallest and largest values in the array.
+</Note>
+
+<p>Because we only make one pass through the array while comparing, and then later reversing, it ends up being $O(n)$, a better runtime than $O(n \ log \ n)$.</p>
+<p>That is for the concept of Two Pointers.<br>The first problem we&#39;ll see in this chapter will be <a href="https://leetcode.com/problems/valid-palindrome" target="_blank" rel="noopener noreferrer">Valid Palindrome</a>, which requires a more careful approach than the simplified version shown here.<br>Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Thu, 29 Feb 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Longest Consecutive Sequence]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-02-27/08-lm.png" alt="Cover image"></p>
