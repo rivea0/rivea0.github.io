@@ -4,9 +4,128 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 29 Feb 2024 10:30:32 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 02 Mar 2024 19:07:47 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Valid Palindrome]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-02/10-lm.png" alt="Cover image"></p>
+<p>The description for this problem is:</p>
+<blockquote>
+<p>A phrase is a <strong>palindrome</strong> if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.</p>
+<p>Given a string <code>s</code>, return <code>true</code> <em>if it is a <strong>palindrome</strong>, or</em> <code>false</code> <em>otherwise</em>.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">isPalindrome(&#39;A man, a plan, a canal: Panama&#39;);
+// -&gt; true
+// Because &quot;amanaplanacanalpanama&quot; is a palindrome.
+
+isPalindrome(&#39; &#39;);
+// -&gt; true
+// Since an empty string reads the same forward and backward, it is a palindrome.
+</code></pre>
+<hr>
+<p>As we&#39;ve seen in the introduction to the <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers" target="_blank" rel="noopener noreferrer">Two Pointers</a> technique, checking for palindromes can be done easily. But here, we need to check only the <em>alphanumeric</em> and <em>lowercase</em> characters.</p>
+<p>So, we can build a string getting those characters first, then use our two pointers to see if it&#39;s a palindrome or not:</p>
+<pre><code class="language-ts">function isPalindrome(s: string): boolean {
+  let str = &#39;&#39;;
+  for (const letter of s.toLowerCase()) {
+    if (letter &gt;= &#39;a&#39; &amp;&amp; letter &lt;= &#39;z&#39; || letter &gt;= &#39;0&#39; &amp;&amp; letter &lt;= &#39;9&#39;) {
+      str += letter;
+    }
+  }
+
+  let left = 0;
+  let right = str.length - 1;
+
+  while (left &lt;= right) {
+    if (str[left++] !== str[right--]) {
+      return false;
+    }
+  }
+
+  return true;
+};
+</code></pre>
+<p>First, we iterate through each letter in the lowercase version of <code>s</code>, and concatenate it if it is alphanumeric, that is, if it is in the boundaries between <code>&#39;a&#39;</code> and <code>&#39;z&#39;</code>, or <code>&#39;0&#39;</code> and <code>&#39;9&#39;</code>.</p>
+<p>Then we initialize two pointers: <code>left</code> to start at the beginning and <code>right</code> to start at the end of our new string. We check if two characters are different from each other, in that case, we immediately return <code>false</code>, otherwise when the iteration is over, we return <code>true</code>.</p>
+<p>Python version of this code might look like this:</p>
+<pre><code class="language-python">class Solution:
+    def isPalindrome(self, s: str) -&gt; bool:
+        new_s = &#39;&#39;.join([i for i in s.lower() if i.isalnum()])
+
+        left = 0
+        right = len(new_s) - 1
+
+        while left &lt;= right:
+            if (new_s[left] != new_s[right]):
+                return False
+            left += 1
+            right -= 1
+
+        return True
+</code></pre>
+<p>This time we get the alphanumeric characters with a handy method named <a href="https://docs.python.org/3/library/stdtypes.html#str.isalnum" target="_blank" rel="noopener noreferrer"><code>str.isalnum()</code></a> and using <a href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions" target="_blank" rel="noopener noreferrer">list comprehensions</a>.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity for this version is $O(n)$, because we iterate through the array once for each loop. The space complexity is $O(n)$ because in the worst case where all characters are alphanumeric, we need as much space as <code>s</code> for our newly created string.</p>
+<hr>
+<p>There is another solution where we don&#39;t need $O(n)$ space. We can still use the two pointers technique, and we can do it without creating additional space for building a result string.</p>
+<pre><code class="language-ts">function isPalindrome(s: string): boolean {
+  let left = 0;
+  let right = s.length - 1;
+
+  while (left &lt;= right) {
+    while (left &lt; right &amp;&amp; !isAlphaNum(s[left])) { 
+      left++; 
+    }
+    while (right &gt; left &amp;&amp; !isAlphaNum(s[right])) { 
+      right--; 
+    }
+     
+    if (s[left++].toLowerCase() !== s[right--].toLowerCase()) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+
+function isAlphaNum(c: string) {
+    return (c &gt;= &#39;a&#39; &amp;&amp; c &lt;= &#39;z&#39;) || (c &gt;= &#39;A&#39; &amp;&amp; c &lt;= &#39;Z&#39;) || (c &gt;= &#39;0&#39; &amp;&amp; c &lt;= &#39;9&#39;);
+}
+</code></pre>
+<p>Here we refactored checking if a character is alphanumeric—more properly, also checking for the uppercase characters. We increment the <code>left</code> pointer until it&#39;s alphanumeric, and likewise, we decrement the <code>right</code> pointer until it&#39;s alphanumeric too. Then, we just do the same as the first version, we check if two characters from both ends are the same, if not, return <code>false</code> immediately. </p>
+<p>Here is the Python version:</p>
+<pre><code class="language-python">class Solution:
+    def isPalindrome(self, s: str) -&gt; bool:
+        left = 0
+        right = len(s) - 1
+
+        while left &lt; right:
+            while left &lt; right and not s[left].isalnum():
+                left += 1
+            while right &gt; left and not s[right].isalnum():
+                right -= 1
+            if s[left].lower() != s[right].lower():
+                return False
+
+            left += 1
+            right -= 1
+
+        return True
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity of this version is still $O(n)$ as we iterate through all the characters in the string. However, we don&#39;t need to keep an extra string, so the space complexity is just $O(1)$.</p>
+<hr>
+<p>You can see <a href="https://youtu.be/jJXJ16kPFWg?t=340&si=LWYKjwIeDm6-jwOb" target="_blank" rel="noopener noreferrer">NeetCode&#39;s video</a> for more explanation on this second solution with $O(1)$ space complexity.</p>
+<p>Next problem is called <a href="https://leetcode.com/problems/3sum" target="_blank" rel="noopener noreferrer">3Sum</a>, until then, don&#39;t forget to breathe, and happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-valid-palindrome</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-valid-palindrome</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 02 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 2: Two Pointers]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-02-29/09-lm-ch2.png" alt="Cover image"></p>
@@ -62,7 +181,7 @@ The reason we return the reversed result is that the array is initially already 
 </Note>
 
 <p>Because we only make one pass through the array while comparing, and then later reversing, it ends up being $O(n)$, a better runtime than $O(n \ log \ n)$.</p>
-<p>That is for the concept of Two Pointers.<br>The first problem we&#39;ll see in this chapter will be <a href="https://leetcode.com/problems/valid-palindrome" target="_blank" rel="noopener noreferrer">Valid Palindrome</a>, which requires a more careful approach than the simplified version shown here.<br>Until then, happy coding.</p>
+<p>The first problem we&#39;ll see in this chapter will be <a href="https://leetcode.com/problems/valid-palindrome" target="_blank" rel="noopener noreferrer">Valid Palindrome</a>, which requires a more careful approach than the simplified version shown here.<br>Until then, happy coding.</p>
 ]]></description>
             <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers</link>
             <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers</guid>

@@ -1,0 +1,148 @@
+---
+title: "LeetCode Meditations: Valid Palindrome"
+tags: [Computer Science, Python, TypeScript]
+description: Solving the LeetCode Valid Palindrome problem.
+slug: leetcode-meditations-valid-palindrome
+date: 2024-03-02
+---
+
+![Cover image](/blog/post-images/2024-03-02/10-lm.png)
+
+The description for this problem is:
+
+> A phrase is a **palindrome** if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.
+>
+> Given a string `s`, return `true` _if it is a **palindrome**, or_ `false` _otherwise_.
+
+For example:
+
+```ts
+isPalindrome('A man, a plan, a canal: Panama');
+// -> true
+// Because "amanaplanacanalpanama" is a palindrome.
+
+isPalindrome(' ');
+// -> true
+// Since an empty string reads the same forward and backward, it is a palindrome.
+```
+
+---
+
+As we've seen in the introduction to the [Two Pointers](https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers) technique, checking for palindromes can be done easily. But here, we need to check only the _alphanumeric_ and _lowercase_ characters.
+
+So, we can build a string getting those characters first, then use our two pointers to see if it's a palindrome or not:
+
+```ts
+function isPalindrome(s: string): boolean {
+  let str = '';
+  for (const letter of s.toLowerCase()) {
+    if (letter >= 'a' && letter <= 'z' || letter >= '0' && letter <= '9') {
+      str += letter;
+    }
+  }
+
+  let left = 0;
+  let right = str.length - 1;
+
+  while (left <= right) {
+    if (str[left++] !== str[right--]) {
+      return false;
+    }
+  }
+
+  return true;
+};
+```
+
+First, we iterate through each letter in the lowercase version of `s`, and concatenate it if it is alphanumeric, that is, if it is in the boundaries between `'a'` and `'z'`, or `'0'` and `'9'`.
+
+Then we initialize two pointers: `left` to start at the beginning and `right` to start at the end of our new string. We check if two characters are different from each other, in that case, we immediately return `false`, otherwise when the iteration is over, we return `true`.
+
+Python version of this code might look like this:
+
+```python
+class Solution:
+    def isPalindrome(self, s: str) -> bool:
+        new_s = ''.join([i for i in s.lower() if i.isalnum()])
+
+        left = 0
+        right = len(new_s) - 1
+
+        while left <= right:
+            if (new_s[left] != new_s[right]):
+                return False
+            left += 1
+            right -= 1
+
+        return True
+```
+
+This time we get the alphanumeric characters with a handy method named [`str.isalnum()`](https://docs.python.org/3/library/stdtypes.html#str.isalnum) and using [list comprehensions](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions).
+
+#### Time and space complexity
+The time complexity for this version is $O(n)$, because we iterate through the array once for each loop. The space complexity is $O(n)$ because in the worst case where all characters are alphanumeric, we need as much space as `s` for our newly created string.
+
+---
+
+There is another solution where we don't need $O(n)$ space. We can still use the two pointers technique, and we can do it without creating additional space for building a result string.
+
+```ts
+function isPalindrome(s: string): boolean {
+  let left = 0;
+  let right = s.length - 1;
+
+  while (left <= right) {
+    while (left < right && !isAlphaNum(s[left])) { 
+      left++; 
+    }
+    while (right > left && !isAlphaNum(s[right])) { 
+      right--; 
+    }
+     
+    if (s[left++].toLowerCase() !== s[right--].toLowerCase()) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+
+function isAlphaNum(c: string) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
+}
+```
+
+Here we refactored checking if a character is alphanumeric—more properly, also checking for the uppercase characters. We increment the `left` pointer until it's alphanumeric, and likewise, we decrement the `right` pointer until it's alphanumeric too. Then, we just do the same as the first version, we check if two characters from both ends are the same, if not, return `false` immediately. 
+
+Here is the Python version:
+
+```python
+class Solution:
+    def isPalindrome(self, s: str) -> bool:
+        left = 0
+        right = len(s) - 1
+
+        while left < right:
+            while left < right and not s[left].isalnum():
+                left += 1
+            while right > left and not s[right].isalnum():
+                right -= 1
+            if s[left].lower() != s[right].lower():
+                return False
+
+            left += 1
+            right -= 1
+
+        return True
+
+```
+
+#### Time and space complexity
+The time complexity of this version is still $O(n)$ as we iterate through all the characters in the string. However, we don't need to keep an extra string, so the space complexity is just $O(1)$.
+
+---
+
+You can see [NeetCode's video](https://youtu.be/jJXJ16kPFWg?t=340&si=LWYKjwIeDm6-jwOb) for more explanation on this second solution with $O(1)$ space complexity.
+
+Next problem is called [3Sum](https://leetcode.com/problems/3sum), until then, don't forget to breathe, and happy coding.
