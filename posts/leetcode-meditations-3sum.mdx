@@ -1,0 +1,134 @@
+---
+title: "LeetCode Meditations: 3Sum"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode 3Sum problem.
+slug: leetcode-meditations-3sum
+date: 2024-03-04
+---
+
+![Cover image](/blog/post-images/2024-03-04/11-lm.png)
+
+Let's start with the description for this one:
+
+> Given an integer array `nums`, return all the triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, and `j != k`, and `nums[i] + nums[j] + nums[k] == 0`.
+> 
+> Notice that the solution set must not contain duplicate triplets.
+
+For example:
+
+```ts
+threeSum([-1, 0, 1, 2, -1, -4]);
+// -> [ [-1, -1, 2], [-1, 0, 1] ]
+
+threeSum([0, 1, 1]);
+// []
+
+threeSum([0, 0, 0]);
+// [ [0, 0, 0] ]
+```
+
+---
+
+First of all, let's admit, this problem is a bit challenging. The first thing that comes to mind is that we can brute force our way to find all three. But in order to do that, we need to create three nested loops, which is not a good idea. 
+Still, we can try it, but beware; it is <mark>terrifying</mark>:
+
+```ts
+function threeSum(nums: number[]): number[][] {
+  let s: Set<string> = new Set();
+  for (let i = 0; i < nums.length; i++) {
+    for (let j = i + 1; j < nums.length; j++) {
+      for (let k = j + 1; k < nums.length; k++) {
+        if (nums[i] + nums[j] + nums[k] === 0) {
+          let triplets = JSON.stringify([nums[i], nums[j], nums[k]].sort((a, b) => a - b));
+          if (!s.has(triplets)) { 
+            s.add(triplets) 
+          }
+        }
+      }
+    }
+  }
+
+  return [...s].map(item => JSON.parse(item));
+};
+```
+
+<Note>
+Because [arrays are objects in JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array), even though two arrays might look the same, they will be different objects, so our set `s` won't hold unique values, that's why I used `JSON.stringify()` to use their stringified values instead. 
+
+For example:
+
+```js
+let s = new Set();
+let arr1 = [1, 2, 3];
+let arr2 = [1, 2, 3];
+
+s.add(arr1);
+
+if (!s.has(arr2)) {
+  s.add(arr2);
+}
+
+console.log(s); 
+// -> Set(2) { [ 1, 2, 3 ], [ 1, 2, 3 ] }
+
+// But what we want is Set(1) { [ 1, 2, 3 ] }.
+```
+</Note>
+
+It passes the most of the tests, but as expected, it results in a **Time Limit Exceeded** error in one of them. And, it has a $O(n^3)$ time complexity.
+
+So, let's take a deep breath and look at another approach.
+
+---
+
+We can start with the sorted version of `nums`. Then, starting with the first number as the first value for the three numbers that add up to `0`, we can use the [Two Pointers technique](https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers) to find the rest of the two values. 
+
+```ts
+function threeSum(nums: number[]): number[][] {
+  let result: number[][] = [];
+  nums = nums.sort((a, b) => a - b);
+
+  for (let i = 0; i < nums.length; i++) {
+    // Ignore the number if it's not the first value and a duplicate
+    if (i > 0 && nums[i] === nums[i - 1]) {
+      continue;
+    }
+
+    let left = i + 1;
+    let right = nums.length - 1;
+
+    while (left < right) {
+      let sum = nums[i] + nums[left] + nums[right];
+
+      if (sum > 0) {
+        right--;
+      } else if (sum < 0) {
+        left++;
+      } else {
+        result.push([nums[i], nums[left], nums[right]]);
+        left++;
+        while (nums[left] === nums[left - 1] && left < right) {
+          left++;
+        }
+      }
+    }
+  }
+
+  return result;
+};
+```
+
+The outer `for` loop picks a value for the first number to make the sum. Then, with `left` and `right` pointers, we check if the sum equals our target value of `0`, if it's greater than `0`, we decrement `right` to find a smaller value for that position; and if the sum is less than `0`, we increment `left` to find a greater value. Otherwise, if we find a triplet that adds up to `0`, we add it to our `result` array, and continue incrementing `left`. Note that we need another `while` loop at this point to ignore a duplicate.
+
+This solution comes from [NeetCode](https://neetcode.io), who does a great explanation of it in [this video](https://www.youtube.com/watch?v=jzZsG8n2R9A). 
+
+#### Time and space complexity
+
+The time complexity for this solution is $O(n^2)$ because as we iterate through each item, we have an inner loop (`while (left < right)`) that iterates through $n - 1$ items in the worst case. 
+Note that we have a sorting operation that takes $O(n \ log \ n)$ time, but in this case, $n^2$ will dominate.
+
+The space complexity is $O(1)$ as we don't need additional space.
+
+---
+
+Next up is the problem [Container with Most Water](https://leetcode.com/problems/container-with-most-water/), until then, happy coding.
