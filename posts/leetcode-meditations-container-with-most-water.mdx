@@ -1,0 +1,100 @@
+---
+title: "LeetCode Meditations: Container with Most Water"
+tags: [Computer Science, Python, TypeScript]
+description: Solving the LeetCode Container with Most Water problem.
+slug: leetcode-meditations-container-with-most-water
+date: 2024-03-05
+---
+
+![Cover image](/blog/post-images/2024-03-05/12-lm.png)
+
+The description for this problem states:
+
+> You are given an integer array `height` of length `n`. There are `n` vertical lines drawn such that the two endpoints of the `ith` line are `(i, 0)` and `(i, height[i])`.
+>
+> Find two lines that together with the x-axis form a container, such that the container contains the most water.
+>
+> Return _the maximum amount of water a container can store_.
+>
+> **Notice** that you may not slant the container.
+
+For example:
+
+![Example 1](https://s3-lc-upload.s3.amazonaws.com/uploads/2018/07/17/question_11.jpg)
+
+```ts
+let height = [1, 8, 6, 2, 5, 4, 8, 3, 7];
+
+maxArea(height);
+// -> 49
+// The above vertical lines are represented by array [1, 8, 6, 2, 5, 4, 8, 3, 7]. In this case, the max area of water (blue section) the container can contain is 49.
+```
+
+---
+
+What we are looking for is the largest interval where the two heights have the smallest difference.
+
+To put it another way, we want the _width_ and the _height_ to be the largest possible values.
+
+The good thing is that we can do it with the [Two Pointers technique](https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers).
+
+We can keep `left` and `right` pointers that point to the two ends of the array. As we calculate the current area, we can update the maximum area. And, we need to update our pointers according to which height is less: if the left one is less than the right one, we'll increment `left`, otherwise, we'll continue decrementing `right`:
+
+```ts
+function maxArea(height: number[]): number {
+  let left = 0;
+  let right = height.length - 1;
+  let maximumArea = 0;
+
+  while (left < right) {
+    let containerWidth = right - left;
+    let containerHeight = Math.min(height[right], height[left]);
+    let currentArea = containerWidth * containerHeight;
+
+    if (currentArea > maximumArea) {
+      maximumArea = currentArea;
+    }
+
+    height[left] < height[right] ? left++ : right--;
+  }
+
+  return maximumArea;
+}
+```
+
+<Note>
+We can use `Math.max()` to calculate `maximumArea` as well.
+</Note>
+
+The Python version is also similar:
+
+```python
+class Solution:
+    def maxArea(self, height: List[int]) -> int:
+        left = 0
+        right = len(height) - 1
+        maximum_area = 0
+
+        while left < right:
+            container_width = right - left
+            container_height = min(height[right], height[left])
+            current_area = container_width * container_height
+
+            if current_area > maximum_area:
+                maximum_area = current_area
+
+            if height[left] < height[right]:
+                left += 1 
+            else:
+                right -= 1
+        
+        return maximum_area
+```
+
+#### Time and space complexity
+
+The time complexity for this solution is $O(n)$ as we iterate through all the items in the array. The space complexity is just $O(1)$ because we don't need additional storage.
+
+---
+
+This was the last problem in this chapter. Next up, we'll look at the [Sliding Window](https://leetcodethehardway.com/tutorials/basic-topics/sliding-window) technique. Until then, happy coding.

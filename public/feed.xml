@@ -4,9 +4,197 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 02 Mar 2024 19:07:47 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 05 Mar 2024 17:17:30 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Container with Most Water]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-05/12-lm.png" alt="Cover image"></p>
+<p>The description for this problem states:</p>
+<blockquote>
+<p>You are given an integer array <code>height</code> of length <code>n</code>. There are <code>n</code> vertical lines drawn such that the two endpoints of the <code>ith</code> line are <code>(i, 0)</code> and <code>(i, height[i])</code>.</p>
+<p>Find two lines that together with the x-axis form a container, such that the container contains the most water.</p>
+<p>Return <em>the maximum amount of water a container can store</em>.</p>
+<p><strong>Notice</strong> that you may not slant the container.</p>
+</blockquote>
+<p>For example:</p>
+<p><img src="https://s3-lc-upload.s3.amazonaws.com/uploads/2018/07/17/question_11.jpg" alt="Example 1"></p>
+<pre><code class="language-ts">let height = [1, 8, 6, 2, 5, 4, 8, 3, 7];
+
+maxArea(height);
+// -&gt; 49
+// The above vertical lines are represented by array [1, 8, 6, 2, 5, 4, 8, 3, 7]. In this case, the max area of water (blue section) the container can contain is 49.
+</code></pre>
+<hr>
+<p>What we are looking for is the largest interval where the two heights have the smallest difference.</p>
+<p>To put it another way, we want the <em>width</em> and the <em>height</em> to be the largest possible values.</p>
+<p>The good thing is that we can do it with the <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers" target="_blank" rel="noopener noreferrer">Two Pointers technique</a>.</p>
+<p>We can keep <code>left</code> and <code>right</code> pointers that point to the two ends of the array. As we calculate the current area, we can update the maximum area. And, we need to update our pointers according to which height is less: if the left one is less than the right one, we&#39;ll increment <code>left</code>, otherwise, we&#39;ll continue decrementing <code>right</code>:</p>
+<pre><code class="language-ts">function maxArea(height: number[]): number {
+  let left = 0;
+  let right = height.length - 1;
+  let maximumArea = 0;
+
+  while (left &lt; right) {
+    let containerWidth = right - left;
+    let containerHeight = Math.min(height[right], height[left]);
+    let currentArea = containerWidth * containerHeight;
+
+    if (currentArea &gt; maximumArea) {
+      maximumArea = currentArea;
+    }
+
+    height[left] &lt; height[right] ? left++ : right--;
+  }
+
+  return maximumArea;
+}
+</code></pre>
+<Note>
+We can use `Math.max()` to calculate `maximumArea` as well.
+</Note>
+
+<p>The Python version is also similar:</p>
+<pre><code class="language-python">class Solution:
+    def maxArea(self, height: List[int]) -&gt; int:
+        left = 0
+        right = len(height) - 1
+        maximum_area = 0
+
+        while left &lt; right:
+            container_width = right - left
+            container_height = min(height[right], height[left])
+            current_area = container_width * container_height
+
+            if current_area &gt; maximum_area:
+                maximum_area = current_area
+
+            if height[left] &lt; height[right]:
+                left += 1 
+            else:
+                right -= 1
+        
+        return maximum_area
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity for this solution is $O(n)$ as we iterate through all the items in the array. The space complexity is just $O(1)$ because we don&#39;t need additional storage.</p>
+<hr>
+<p>This was the last problem in this chapter. Next up, we&#39;ll look at the <a href="https://leetcodethehardway.com/tutorials/basic-topics/sliding-window" target="_blank" rel="noopener noreferrer">Sliding Window</a> technique. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-container-with-most-water</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-container-with-most-water</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 05 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[LeetCode Meditations: 3Sum]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-04/11-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for this one:</p>
+<blockquote>
+<p>Given an integer array <code>nums</code>, return all the triplets <code>[nums[i], nums[j], nums[k]]</code> such that <code>i != j</code>, <code>i != k</code>, and <code>j != k</code>, and <code>nums[i] + nums[j] + nums[k] == 0</code>.</p>
+<p>Notice that the solution set must not contain duplicate triplets.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">threeSum([-1, 0, 1, 2, -1, -4]);
+// -&gt; [ [-1, -1, 2], [-1, 0, 1] ]
+
+threeSum([0, 1, 1]);
+// []
+
+threeSum([0, 0, 0]);
+// [ [0, 0, 0] ]
+</code></pre>
+<hr>
+<p>First of all, let&#39;s admit, this problem is a bit challenging. The first thing that comes to mind is that we can brute force our way to find all three. But in order to do that, we need to create three nested loops, which is not a good idea.<br>Still, we can try it, but beware; it is <mark>terrifying</mark>:</p>
+<pre><code class="language-ts">function threeSum(nums: number[]): number[][] {
+  let s: Set&lt;string&gt; = new Set();
+  for (let i = 0; i &lt; nums.length; i++) {
+    for (let j = i + 1; j &lt; nums.length; j++) {
+      for (let k = j + 1; k &lt; nums.length; k++) {
+        if (nums[i] + nums[j] + nums[k] === 0) {
+          let triplets = JSON.stringify([nums[i], nums[j], nums[k]].sort((a, b) =&gt; a - b));
+          if (!s.has(triplets)) { 
+            s.add(triplets) 
+          }
+        }
+      }
+    }
+  }
+
+  return [...s].map(item =&gt; JSON.parse(item));
+};
+</code></pre>
+<Note>
+Because [arrays are objects in JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array), even though two arrays might look the same, they will be different objects, so our set `s` won't hold unique values, that's why I used `JSON.stringify()` to use their stringified values instead. 
+
+<p>For example:</p>
+<pre><code class="language-js">let s = new Set();
+let arr1 = [1, 2, 3];
+let arr2 = [1, 2, 3];
+
+s.add(arr1);
+
+if (!s.has(arr2)) {
+  s.add(arr2);
+}
+
+console.log(s); 
+// -&gt; Set(2) { [ 1, 2, 3 ], [ 1, 2, 3 ] }
+
+// But what we want is Set(1) { [ 1, 2, 3 ] }.
+</code></pre>
+</Note>
+
+<p>It passes the most of the tests, but as expected, it results in a <strong>Time Limit Exceeded</strong> error in one of them. And, it has a $O(n^3)$ time complexity.</p>
+<p>So, let&#39;s take a deep breath and look at another approach.</p>
+<hr>
+<p>We can start with the sorted version of <code>nums</code>. Then, starting with the first number as the first value for the three numbers that add up to <code>0</code>, we can use the <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers" target="_blank" rel="noopener noreferrer">Two Pointers technique</a> to find the rest of the two values. </p>
+<pre><code class="language-ts">function threeSum(nums: number[]): number[][] {
+  let result: number[][] = [];
+  nums = nums.sort((a, b) =&gt; a - b);
+
+  for (let i = 0; i &lt; nums.length; i++) {
+    // Ignore the number if it&#39;s not the first value and a duplicate
+    if (i &gt; 0 &amp;&amp; nums[i] === nums[i - 1]) {
+      continue;
+    }
+
+    let left = i + 1;
+    let right = nums.length - 1;
+
+    while (left &lt; right) {
+      let sum = nums[i] + nums[left] + nums[right];
+
+      if (sum &gt; 0) {
+        right--;
+      } else if (sum &lt; 0) {
+        left++;
+      } else {
+        result.push([nums[i], nums[left], nums[right]]);
+        left++;
+        while (nums[left] === nums[left - 1] &amp;&amp; left &lt; right) {
+          left++;
+        }
+      }
+    }
+  }
+
+  return result;
+};
+</code></pre>
+<p>The outer <code>for</code> loop picks a value for the first number to make the sum. Then, with <code>left</code> and <code>right</code> pointers, we check if the sum equals our target value of <code>0</code>, if it&#39;s greater than <code>0</code>, we decrement <code>right</code> to find a smaller value for that position; and if the sum is less than <code>0</code>, we increment <code>left</code> to find a greater value. Otherwise, if we find a triplet that adds up to <code>0</code>, we add it to our <code>result</code> array, and continue incrementing <code>left</code>. Note that we need another <code>while</code> loop at this point to ignore a duplicate.</p>
+<p>This solution comes from <a href="https://neetcode.io" target="_blank" rel="noopener noreferrer">NeetCode</a>, who does a great explanation of it in <a href="https://www.youtube.com/watch?v=jzZsG8n2R9A" target="_blank" rel="noopener noreferrer">this video</a>. </p>
+<h4>Time and space complexity</h4>
+<p>The time complexity for this solution is $O(n^2)$ because as we iterate through each item, we have an inner loop (<code>while (left &lt; right)</code>) that iterates through $n - 1$ items in the worst case.<br>Note that we have a sorting operation that takes $O(n \ log \ n)$ time, but in this case, $n^2$ will dominate.</p>
+<p>The space complexity is $O(1)$ as we don&#39;t need additional space.</p>
+<hr>
+<p>Next up is the problem <a href="https://leetcode.com/problems/container-with-most-water/" target="_blank" rel="noopener noreferrer">Container with Most Water</a>, until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-3sum</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-3sum</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Mon, 04 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Valid Palindrome]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-02/10-lm.png" alt="Cover image"></p>
