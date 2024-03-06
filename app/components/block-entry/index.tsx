@@ -5,7 +5,8 @@ type Props =
   | {
       title: string
       href: string
-      date?: Date
+      date?: Date,
+      dateInfo?: string
     }
   // | {
   //     skeleton: true
@@ -16,7 +17,7 @@ export default function BlockEntry(props: Props) {
   //   return <li className={styles.skeleton} />
   // }
 
-  const { title, href, date } = props
+  const { title, href, date, dateInfo } = props
 
   return (
     <li className={styles.item}>
@@ -31,6 +32,7 @@ export default function BlockEntry(props: Props) {
           <div className={styles.wrapper}>
             {date && (
               <span className={styles.date}>
+                {dateInfo && dateInfo} {' '}
                 {date.toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',

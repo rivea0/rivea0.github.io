@@ -1,5 +1,6 @@
 'use client'
 
+import Link from '@components/link'
 import { useState } from 'react'
 import clsx from 'clsx'
 import BlockEntry from '@components/block-entry'
@@ -61,13 +62,23 @@ export default function PostsList(props: Props) {
       >
         Clear filter
       </button>
-
       </details>
 
       <ul className={styles.container}>
+        <BlockEntry
+          key="lm"
+          href="leetcode-meditations"
+          title="🌳 LeetCode Meditations"
+          date={new Date(posts.find(p => p.slug.startsWith('leetcode-meditations') && p.date)?.date)}
+          dateInfo="Latest post:"
+        />
+
         {/* {posts.slice(0, paginate ? showMore : undefined) */}
         {posts
           .filter(p => {
+          if (p.slug.startsWith('leetcode-meditations')) {
+            return undefined;
+          }
           if (filterTopic === '') return p
           return p.tags.includes(filterTopic) ? p : undefined
         }).map((post) => {
