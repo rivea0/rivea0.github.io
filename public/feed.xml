@@ -4,9 +4,98 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 05 Mar 2024 17:17:30 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 09 Mar 2024 14:02:08 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations — Chapter 3: Sliding Window]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-09/13-lm-ch3.png" alt="Cover image"></p>
+<p>Now that we&#39;re familiar with the <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers" target="_blank" rel="noopener noreferrer">Two Pointers technique</a>, we can add another one to our toolbox: the Sliding Window.<br>It&#39;s usually used for operations done on the subsets of a given data. It also comes in two flavors: <strong>fixed window size</strong> and <strong>dynamic window size</strong>.</p>
+<h4>Fixed window size</h4>
+<p>If we have a size constraint in a given problem, say, we need to check a $k$-sized subarray, sliding window is an appropriate technique to use.</p>
+<p>For example, getting the maximum subarray (of size $k$) sum of a given array can be done like this:</p>
+<p><img src="/blog/post-images/2024-03-09/sliding-window-fixed.gif" alt="Sliding window fixed"></p>
+<p>Note that the window size is $k$, and it doesn&#39;t change throughout the operation, hence, <em>fixed size</em>.</p>
+<p>A very cool thing to notice here is that with each <em>slide</em>, what happens to our sum is that we <em>add</em> the right element, and <em>decrease</em> the left element.</p>
+<p>Let&#39;s look at an example for getting the maximum sum of subarray with given size <code>k</code>:</p>
+<pre><code class="language-typescript">function maxSubarray(numbers: number[], k: number) {
+  if (numbers.length &lt; k) {
+    return 0;
+  }
+
+  let currentSum = 0;
+
+  // Initial sum of the first window 
+  for (let i = 0; i &lt; k; i++) {
+    currentSum += numbers[i];
+  }
+
+  let maxSum = currentSum;
+
+  let left = 0;
+  let right = k;
+
+  while (right &lt; numbers.length) {
+    currentSum = currentSum - numbers[left++] + numbers[right++];
+    maxSum = Math.max(maxSum, currentSum);
+  }
+
+  return maxSum;
+}
+</code></pre>
+<Note>
+Updating the pointers can be done outside the brackets as well, like this:
+
+<pre><code class="language-ts">while (right &lt; numbers.length) {
+  currentSum = currentSum - numbers[left] + numbers[right];
+  maxSum = Math.max(maxSum, currentSum);
+  left++;
+  right++;
+}
+</code></pre>
+<p>Since the <a href="https://www.programiz.com/article/increment-decrement-operator-difference-prefix-postfix" target="_blank" rel="noopener noreferrer">postfix operator</a> returns the value first, they can be used inside the brackets to be slightly more concise.<br></Note></p>
+<p>Here, we first get the initial sum of our window using the <code>for</code> loop, and set it as the maximum sum.</p>
+<p>Then we initialize two pointers: <code>left</code> that points to the left end of the window, and <code>right</code> that points to the right end of the window. As we loop, we update our <code>currentSum</code>, decreasing the <code>left</code> value, and adding the <code>right</code> value. When our current sum is more than the maximum sum, <code>maxSum</code> variable is updated as well.</p>
+<h4>Dynamic window size</h4>
+<p>As opposed to the fixed window size version, the size of the window changes dynamically this time.</p>
+<p>For example, let&#39;s take a brief look at the problem <a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock" target="_blank" rel="noopener noreferrer">Best Time to Buy and Sell Stock</a> that we&#39;ll see in detail later on.<br>We need to choose a day to buy a stock, and sell it in the <em>future</em>. The numbers in the array are prices, and we need to buy the stock at as low a price as we can, and sell it as high as we can.</p>
+<p>We can initialize <code>left</code> and <code>right</code> pointers again, but this time, we&#39;ll update them depending on a condition. When the left item is less than the one on the right, that means it&#39;s good, we can buy and sell at those prices, so we get their difference and update our <code>maxDiff</code> variable that holds the maximum difference between the two.<br>If, however, the left one is greater than the right one, we update our <code>left</code> pointer to be where the <code>right</code> is at.<br>In both cases, we&#39;ll continue updating <code>right</code> until we reach the end of the array.</p>
+<p>With the blue arrow indicating the left pointer, and the red the right one, the process looks like this:</p>
+<p><img src="/blog/post-images/2024-03-09/sliding-window-dynamic.gif" alt="Sliding window dynamic"></p>
+<p>The solution looks like this:</p>
+<pre><code class="language-ts">function maxProfit(prices: number[]): number {
+  let left = 0;
+  let right = left + 1;
+  let maxDiff = 0;
+
+  while (right &lt; prices.length) {
+    if (prices[left] &lt; prices[right]) {
+      let diff = prices[right] - prices[left];
+      maxDiff = Math.max(maxDiff, diff);
+    } else {
+      left = right;
+    }
+
+    right++;
+  }
+
+  return maxDiff;
+};
+</code></pre>
+<Note>
+This one is also called **fast/catch-up** version of dynamic sliding window, because the `left` pointer jumps to catch up with the `right` pointer in the `else` block.
+</Note>
+
+<h5>Time and space complexity</h5>
+<p>Both examples have the same time and space complexity: The time complexity is $O(n)$ because in the worst case we iterate through all the elements in the array. The space complexity is $O(1)$ as we don&#39;t need additional space.</p>
+<hr>
+<p>Even though it might be slightly disorienting, sliding window technique is not too hard to fall from our grasp, so we can take a deep breath. The first problem of this chapter is <a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" target="_blank" rel="noopener noreferrer">Best Time to Buy and Sell Stock</a> that we already mentioned, but we&#39;ll see in detail in the next post. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-3-sliding-window</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-3-sliding-window</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 09 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Container with Most Water]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-05/12-lm.png" alt="Cover image"></p>
