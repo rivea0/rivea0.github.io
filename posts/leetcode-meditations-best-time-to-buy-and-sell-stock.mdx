@@ -1,0 +1,74 @@
+---
+title: "LeetCode Meditations: Best Time to Buy and Sell Stock"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Best Time to Buy and Sell Stock problem.
+slug: leetcode-meditations-best-time-to-buy-and-sell-stock
+date: 2024-03-10
+---
+
+![Cover image](/blog/post-images/2024-03-10/14-lm.png)
+
+_Make sure to read [the Sliding Window post](https://rivea0.github.io/blog/leetcode-meditations-chapter-3-sliding-window) first!_
+
+---
+
+The description for this problem states:
+
+> You are given an array `prices` where `prices[i]` is the price of a given stock on the `ith` day.
+> 
+> You want to maximize your profit by choosing a **single day** to buy one stock and choosing a **different day in the future** to sell that stock.
+>
+> Return _the maximum profit you can achieve from this transaction_. If you cannot achieve any profit, return `0`.
+
+For example:
+
+```ts
+maxProfit([7, 1, 5, 3, 6, 4]);
+// -> 5
+// Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6-1 = 5.
+// Note that buying on day 2 and selling on day 1 is not allowed because you must buy before you sell.
+
+
+maxProfit([7, 6, 4, 3, 1]);
+// -> 0
+// In this case, no transactions are done and the max profit = 0.
+```
+
+---
+
+This problem is a perfect example where we can use the sliding window technique. But one important thing to notice is that we need to sell the stock at a _future_ date; that is, _the right end of our window should be at least one step ahead of the left end_.
+
+We can initialize `left` and `right` pointers (_remember [the Two Pointers technique](https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers)?_); `left` at the first index, `right` at `left + 1`. If the price on the left is less than the one on the right, that means we can make a profit, so we can get their difference and update the maximum difference that we keep track of. Otherwise, we'll just update `left` to be where `right` is, because `right` will be the minimum value we have seen so far. Either way, we'll update the `right` pointer until it points to the last element.
+
+It looks like this in TypeScript:
+
+```ts
+function maxProfit(prices: number[]): number {
+  let left = 0;
+  let right = left + 1;
+  let maxDiff = 0;
+
+  while (right < prices.length) {
+    if (prices[left] < prices[right]) {
+      let diff = prices[right] - prices[left];
+      maxDiff = Math.max(maxDiff, diff);
+    } else {
+      left = right;
+    }
+
+    right++;
+  }
+
+  return maxDiff;
+};
+```
+
+This is an example of the **dynamically sized sliding window** technique, where we adjust our window size dynamically based on conditions, instead of keeping it fixed to some value. It's specifically a version of **fast/catch-up** because while the `right` pointer is always increasing, the `left` pointer _jumps_ to catch up with the `right` pointer in the `else` block.
+
+#### Time and space complexity
+
+The time complexity for this solution is $O(n)$ because we iterate once through the items of the array. And, the space complexity is $O(1)$ as we don't use any additional space where the size depends on the size of the input array.
+
+---
+
+That's it for this problem, we can take a deep breath now. Next up is [Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters) — until then, happy coding.
