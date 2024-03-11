@@ -4,9 +4,91 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 10 Mar 2024 19:04:28 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 11 Mar 2024 17:45:43 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Longest Substring without Repeating Characters]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-11/15-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for this problem:</p>
+<blockquote>
+<p>Given a string <code>s</code>, find the length of the <strong>longest</strong> <strong>substring</strong> without repeating characters.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">lengthOfLongestSubstring(&#39;abcabcbb&#39;);
+// -&gt; 3
+// The answer is &quot;abc&quot;, with the length of 3.
+
+
+lengthOfLongestSubstring(&#39;bbbbb&#39;);
+// -&gt; 1
+// The answer is &quot;b&quot;, with the length of 1.
+
+
+lengthOfLongestSubstring(&#39;pwwkew&#39;);
+// -&gt; 3
+// The answer is &quot;wke&quot;, with the length of 3.
+// Notice that the answer must be a substring, &quot;pwke&quot; is a subsequence and not a substring.
+</code></pre>
+<hr>
+<p>Since this is a problem that is under the <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-3-sliding-window" target="_blank" rel="noopener noreferrer">Sliding Window</a> topic, my first intuition was to initialize <code>left</code> and <code>right</code> pointers, and keep growing the window until we see a duplicate character. If we see one, we can increase <code>left</code> one step, and let <code>right</code> be where <code>left</code> is. And, we need to clear the set that keeps our unique letters as we&#39;re starting our search for a new substring anew. Otherwise, we&#39;ll just add the letters we see to our set, and keep increasing the right pointer; that is, increasing our window size from the right end. We&#39;ll also update our maximum length:</p>
+<pre><code class="language-ts">function lengthOfLongestSubstring(s: string): number {
+  let letters = new Set();
+  let left = 0;
+  let right = 0;
+  let maxLength = 0;
+
+  while (right &lt; s.length) {
+    if (letters.has(s[right])) {
+      left++;
+      right = left;
+      letters.clear();
+    } else {
+      letters.add(s[right]);
+      right++;
+    }
+
+    maxLength = Math.max(maxLength, right - left);
+  }
+
+  return maxLength;
+};
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity for this solution is $O(n)$ as we iterate through the elements in the string once. The space complexity is also $O(n)$ as <code>letters</code> can contain all the letters in the string in a worst-case scenario where all the letters are unique, making its growth proportional to our input string.</p>
+<p>Now, let&#39;s take a deep breath because it turns out, there is a slightly better approach.</p>
+<hr>
+<pre><code class="language-ts">function lengthOfLongestSubstring(s: string): number {
+  let letters = new Set();
+  let left = 0;
+  let right = 0;
+  let maxLength = 0;
+
+  while (right &lt; s.length) {
+    while (letters.has(s[right])) {
+      letters.delete(s[left]);
+      left++;
+    } 
+
+    letters.add(s[right]);
+    maxLength = Math.max(maxLength, (right - left) + 1);
+    right++;
+  }
+
+  return maxLength;
+};
+</code></pre>
+<p>This solution is adapted from <a href="https://youtu.be/wiGpQwVHdE0" target="_blank" rel="noopener noreferrer">NeetCode</a>. This time we don&#39;t reset the entire substring when we find a duplicate as we did in the first version, and we remove only the repeating characters from the set instead of completely emptying it.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity of this version is $O(n)$ again as we iterate through all the characters. The space complexity is also $O(n)$; however, this version is more efficient than the first one, mainly given the reason that we don&#39;t wipe out the whole set when a duplicate is found.</p>
+<hr>
+<p>Next up is <a href="https://leetcode.com/problems/longest-repeating-character-replacement" target="_blank" rel="noopener noreferrer">Longest Repeating Character Replacement</a>, until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-longest-substring-without-repeating-characters</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-longest-substring-without-repeating-characters</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Mon, 11 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Best Time to Buy and Sell Stock]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-10/14-lm.png" alt="Cover image"></p>

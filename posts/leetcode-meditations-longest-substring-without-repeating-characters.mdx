@@ -1,0 +1,100 @@
+---
+title: "LeetCode Meditations: Longest Substring without Repeating Characters"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Longest Substring without Repeating Characters problem.
+slug: leetcode-meditations-longest-substring-without-repeating-characters
+date: 2024-03-11
+---
+
+![Cover image](/blog/post-images/2024-03-11/15-lm.png)
+
+Let's start with the description for this problem:
+
+> Given a string `s`, find the length of the **longest** **substring** without repeating characters.
+
+For example:
+
+```ts
+lengthOfLongestSubstring('abcabcbb');
+// -> 3
+// The answer is "abc", with the length of 3.
+
+
+lengthOfLongestSubstring('bbbbb');
+// -> 1
+// The answer is "b", with the length of 1.
+
+
+lengthOfLongestSubstring('pwwkew');
+// -> 3
+// The answer is "wke", with the length of 3.
+// Notice that the answer must be a substring, "pwke" is a subsequence and not a substring.
+```
+
+---
+
+Since this is a problem that is under the [Sliding Window](https://rivea0.github.io/blog/leetcode-meditations-chapter-3-sliding-window) topic, my first intuition was to initialize `left` and `right` pointers, and keep growing the window until we see a duplicate character. If we see one, we can increase `left` one step, and let `right` be where `left` is. And, we need to clear the set that keeps our unique letters as we're starting our search for a new substring anew. Otherwise, we'll just add the letters we see to our set, and keep increasing the right pointer; that is, increasing our window size from the right end. We'll also update our maximum length:
+
+```ts
+function lengthOfLongestSubstring(s: string): number {
+  let letters = new Set();
+  let left = 0;
+  let right = 0;
+  let maxLength = 0;
+
+  while (right < s.length) {
+    if (letters.has(s[right])) {
+      left++;
+      right = left;
+      letters.clear();
+    } else {
+      letters.add(s[right]);
+      right++;
+    }
+
+    maxLength = Math.max(maxLength, right - left);
+  }
+
+  return maxLength;
+};
+```
+
+#### Time and space complexity
+
+The time complexity for this solution is $O(n)$ as we iterate through the elements in the string once. The space complexity is also $O(n)$ as `letters` can contain all the letters in the string in a worst-case scenario where all the letters are unique, making its growth proportional to our input string.
+
+Now, let's take a deep breath because it turns out, there is a slightly better approach.
+
+---
+
+```ts
+function lengthOfLongestSubstring(s: string): number {
+  let letters = new Set();
+  let left = 0;
+  let right = 0;
+  let maxLength = 0;
+
+  while (right < s.length) {
+    while (letters.has(s[right])) {
+      letters.delete(s[left]);
+      left++;
+    } 
+
+    letters.add(s[right]);
+    maxLength = Math.max(maxLength, (right - left) + 1);
+    right++;
+  }
+
+  return maxLength;
+};
+```
+
+This solution is adapted from [NeetCode](https://youtu.be/wiGpQwVHdE0). This time we don't reset the entire substring when we find a duplicate as we did in the first version, and we remove only the repeating characters from the set instead of completely emptying it.
+
+#### Time and space complexity
+
+The time complexity of this version is $O(n)$ again as we iterate through all the characters. The space complexity is also $O(n)$; however, this version is more efficient than the first one, mainly given the reason that we don't wipe out the whole set when a duplicate is found.
+
+---
+
+Next up is [Longest Repeating Character Replacement](https://leetcode.com/problems/longest-repeating-character-replacement), until then, happy coding.
