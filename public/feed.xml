@@ -4,7 +4,7 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 15 Mar 2024 14:22:57 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 15 Mar 2024 14:29:41 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
         <item>
@@ -67,6 +67,8 @@ If `s[right]` is `'B'`, its charCode is `66`, subtracting it from the charCode o
 </code></pre>
 <p>Now, <code>right - left + 1</code> is the length of our current window.<br><code>Math.max(...count)</code> will give us the maximum number of times a character occurs within our current window, that is, the number of the <em>longest repeating letters</em>.<br>Subtracting it from the length of our window will give us the number of potential replacements we can make.<br>Remember that we can replace a character at most <code>k</code> times within a window, so, if the number of our potential replacements surpasses <code>k</code>, then we need to <em>slide</em> our window; that is, update the <code>left</code> pointer, also decreasing the value at the <code>left</code>&#39;s index in the <code>count</code> array.</p>
 <p>We&#39;ll also keep track of our <code>maxLength</code> as we increase our window&#39;s length, and return it at the end as the result.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity for this solution is $O(n)$ as we loop through each character in <code>s</code>. The amount of space we additionally require for the <code>count</code> array is constant, of length 26, so the space complexity will be $O(1)$.</p>
 <hr>
 <p>This solution is adapted from <a href="https://www.youtube.com/watch?v=gqXU1UyA8pk&t=925s" target="_blank" rel="noopener noreferrer">NeetCode</a>, where he also mentions a slight optimization.</p>
 <p>I think this was a challenging problem, so it&#39;s time for another deep breath. Next up is the last problem <a href="https://leetcode.com/problems/minimum-window-substring/" target="_blank" rel="noopener noreferrer">Minimum Window Substring</a> in the Sliding Window chapter, until then, happy coding.</p>

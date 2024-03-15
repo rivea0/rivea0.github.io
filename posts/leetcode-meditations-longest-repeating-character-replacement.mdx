@@ -89,6 +89,10 @@ Remember that we can replace a character at most `k` times within a window, so, 
 
 We'll also keep track of our `maxLength` as we increase our window's length, and return it at the end as the result.
 
+#### Time and space complexity
+
+The time complexity for this solution is $O(n)$ as we loop through each character in `s`. The amount of space we additionally require for the `count` array is constant, of length 26, so the space complexity will be $O(1)$.
+
 ---
 
 This solution is adapted from [NeetCode](https://www.youtube.com/watch?v=gqXU1UyA8pk&t=925s), where he also mentions a slight optimization.
