@@ -1,0 +1,96 @@
+---
+title: "LeetCode Meditations: Longest Repeating Character Replacement"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Longest Repeating Character Replacement problem.
+slug: leetcode-meditations-longest-repeating-character-replacement
+date: 2024-03-15
+---
+
+![Cover image](/blog/post-images/2024-03-15/16-lm.png)
+
+The description for [this problem](https://leetcode.com/problems/longest-repeating-character-replacement/description/) says:
+
+> You are given a string `s` and an integer `k`. You can choose any character of the string and change it to any other uppercase English character. You can perform this operation at most `k` times.
+>
+> Return _the length of the longest substring containing the same letter you can get after performing the above operations_.
+
+For example:
+
+```ts
+characterReplacement('ABAB', 2);
+// -> 4
+// Explanation: Replace the two 'A's with two 'B's or vice versa.
+
+
+characterReplacement('AABABBA', 1);
+// -> 4
+// Explanation: Replace the one 'A' in the middle with 'B' and form "AABBBBA".
+// The substring "BBBB" has the longest repeating letters, which is 4.
+// There may exists other ways to achieve this answer too.
+```
+
+---
+
+This one is, I think, very tough, even though it's labeled as medium difficulty.
+
+Let's take a deep breath, and look at one solution:
+
+
+```ts
+function characterReplacement(s: string, k: number): number {
+  let count = Array.from({ length : 26 }, () => 0);
+  let left = 0;
+  let right = 0;
+  let maxLength = 0;
+
+  while (right < s.length) {
+    count[s[right].charCodeAt(0) - 'A'.charCodeAt(0)]++;
+    while ((right - left + 1) - Math.max(...count) > k) {
+      count[s[left].charCodeAt(0) - 'A'.charCodeAt(0)]--;
+      left++;
+    }
+
+    maxLength = Math.max(right - left + 1, maxLength);
+    right++;
+  }
+
+  return maxLength;
+};
+```
+
+<Note>
+`s[right].charCodeAt(0) - 'A'.charCodeAt(0)` calculates the _index_ of the **uppercase** character in the `count` array.
+So, if `s[right]` is `'A'`, `s[right].charCodeAt(0)` is `65`, and the result of the calculation is `0`, making it the first index.
+If `s[right]` is `'B'`, its charCode is `66`, subtracting it from the charCode of `'A'` makes it the index `1`, etc.
+
+Also, see the [Group Anagrams problem](https://rivea0.github.io/blog/leetcode-meditations-group-anagrams), which uses a similar technique.
+</Note>
+
+What we start with is an array to represent the frequency of characters that occur in the substrings we'll look at. We initialize `count` with length `26` for each letter, each one initially having the value of `0`.
+
+Then, we'll use [the sliding window technique](https://rivea0.github.io/blog/leetcode-meditations-chapter-3-sliding-window) to check for substrings, so we'll initialize `left` and `right` pointers starting from the very first character's index: `0`.
+We'll also need to keep `maxLength` to keep track of the substring with the maximum length.
+
+Then, as we look through each substring, we'll increase the character's count in the `count` array. 
+
+One important—and, maybe the most confusing—part is here:
+
+```ts
+while ((right - left + 1) - Math.max(...count) > k) {
+  count[s[left].charCodeAt(0) - 'A'.charCodeAt(0)]--;
+  left++;
+}
+```
+
+Now, `right - left + 1` is the length of our current window. 
+`Math.max(...count)` will give us the maximum number of times a character occurs within our current window, that is, the number of the _longest repeating letters_.
+Subtracting it from the length of our window will give us the number of potential replacements we can make.
+Remember that we can replace a character at most `k` times within a window, so, if the number of our potential replacements surpasses `k`, then we need to _slide_ our window; that is, update the `left` pointer, also decreasing the value at the `left`'s index in the `count` array.
+
+We'll also keep track of our `maxLength` as we increase our window's length, and return it at the end as the result.
+
+---
+
+This solution is adapted from [NeetCode](https://www.youtube.com/watch?v=gqXU1UyA8pk&t=925s), where he also mentions a slight optimization.
+
+I think this was a challenging problem, so it's time for another deep breath. Next up is the last problem [Minimum Window Substring](https://leetcode.com/problems/minimum-window-substring/) in the Sliding Window chapter, until then, happy coding.

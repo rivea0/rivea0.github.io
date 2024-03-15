@@ -4,9 +4,78 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 11 Mar 2024 17:45:43 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 15 Mar 2024 14:22:57 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Longest Repeating Character Replacement]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-15/16-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/longest-repeating-character-replacement/description/" target="_blank" rel="noopener noreferrer">this problem</a> says:</p>
+<blockquote>
+<p>You are given a string <code>s</code> and an integer <code>k</code>. You can choose any character of the string and change it to any other uppercase English character. You can perform this operation at most <code>k</code> times.</p>
+<p>Return <em>the length of the longest substring containing the same letter you can get after performing the above operations</em>.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">characterReplacement(&#39;ABAB&#39;, 2);
+// -&gt; 4
+// Explanation: Replace the two &#39;A&#39;s with two &#39;B&#39;s or vice versa.
+
+
+characterReplacement(&#39;AABABBA&#39;, 1);
+// -&gt; 4
+// Explanation: Replace the one &#39;A&#39; in the middle with &#39;B&#39; and form &quot;AABBBBA&quot;.
+// The substring &quot;BBBB&quot; has the longest repeating letters, which is 4.
+// There may exists other ways to achieve this answer too.
+</code></pre>
+<hr>
+<p>This one is, I think, very tough, even though it&#39;s labeled as medium difficulty.</p>
+<p>Let&#39;s take a deep breath, and look at one solution:</p>
+<pre><code class="language-ts">function characterReplacement(s: string, k: number): number {
+  let count = Array.from({ length : 26 }, () =&gt; 0);
+  let left = 0;
+  let right = 0;
+  let maxLength = 0;
+
+  while (right &lt; s.length) {
+    count[s[right].charCodeAt(0) - &#39;A&#39;.charCodeAt(0)]++;
+    while ((right - left + 1) - Math.max(...count) &gt; k) {
+      count[s[left].charCodeAt(0) - &#39;A&#39;.charCodeAt(0)]--;
+      left++;
+    }
+
+    maxLength = Math.max(right - left + 1, maxLength);
+    right++;
+  }
+
+  return maxLength;
+};
+</code></pre>
+<Note>
+`s[right].charCodeAt(0) - 'A'.charCodeAt(0)` calculates the _index_ of the **uppercase** character in the `count` array.
+So, if `s[right]` is `'A'`, `s[right].charCodeAt(0)` is `65`, and the result of the calculation is `0`, making it the first index.
+If `s[right]` is `'B'`, its charCode is `66`, subtracting it from the charCode of `'A'` makes it the index `1`, etc.
+
+<p>Also, see the <a href="https://rivea0.github.io/blog/leetcode-meditations-group-anagrams" target="_blank" rel="noopener noreferrer">Group Anagrams problem</a>, which uses a similar technique.<br></Note></p>
+<p>What we start with is an array to represent the frequency of characters that occur in the substrings we&#39;ll look at. We initialize <code>count</code> with length <code>26</code> for each letter, each one initially having the value of <code>0</code>.</p>
+<p>Then, we&#39;ll use <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-3-sliding-window" target="_blank" rel="noopener noreferrer">the sliding window technique</a> to check for substrings, so we&#39;ll initialize <code>left</code> and <code>right</code> pointers starting from the very first character&#39;s index: <code>0</code>.<br>We&#39;ll also need to keep <code>maxLength</code> to keep track of the substring with the maximum length.</p>
+<p>Then, as we look through each substring, we&#39;ll increase the character&#39;s count in the <code>count</code> array. </p>
+<p>One important—and, maybe the most confusing—part is here:</p>
+<pre><code class="language-ts">while ((right - left + 1) - Math.max(...count) &gt; k) {
+  count[s[left].charCodeAt(0) - &#39;A&#39;.charCodeAt(0)]--;
+  left++;
+}
+</code></pre>
+<p>Now, <code>right - left + 1</code> is the length of our current window.<br><code>Math.max(...count)</code> will give us the maximum number of times a character occurs within our current window, that is, the number of the <em>longest repeating letters</em>.<br>Subtracting it from the length of our window will give us the number of potential replacements we can make.<br>Remember that we can replace a character at most <code>k</code> times within a window, so, if the number of our potential replacements surpasses <code>k</code>, then we need to <em>slide</em> our window; that is, update the <code>left</code> pointer, also decreasing the value at the <code>left</code>&#39;s index in the <code>count</code> array.</p>
+<p>We&#39;ll also keep track of our <code>maxLength</code> as we increase our window&#39;s length, and return it at the end as the result.</p>
+<hr>
+<p>This solution is adapted from <a href="https://www.youtube.com/watch?v=gqXU1UyA8pk&t=925s" target="_blank" rel="noopener noreferrer">NeetCode</a>, where he also mentions a slight optimization.</p>
+<p>I think this was a challenging problem, so it&#39;s time for another deep breath. Next up is the last problem <a href="https://leetcode.com/problems/minimum-window-substring/" target="_blank" rel="noopener noreferrer">Minimum Window Substring</a> in the Sliding Window chapter, until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-longest-repeating-character-replacement</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-longest-repeating-character-replacement</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Fri, 15 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Longest Substring without Repeating Characters]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-11/15-lm.png" alt="Cover image"></p>
