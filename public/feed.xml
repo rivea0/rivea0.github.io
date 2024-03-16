@@ -4,9 +4,138 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 15 Mar 2024 14:29:41 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 16 Mar 2024 21:15:24 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Minimum Window Substring]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-16/17-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/minimum-window-substring" target="_blank" rel="noopener noreferrer">Minimum Window String</a>:</p>
+<blockquote>
+<p>Given two strings <code>s</code> and <code>t</code> of lengths <code>m</code> and <code>n</code> respectively, return <em>the <strong>minimum window</strong></em> <strong><em>substring</em></strong> <em>of</em> <code>s</code> <em>such that every character in</em> <code>t</code> <em>(<strong>including duplicates</strong>) is included in the window</em>. If there is no such substring, return <em>the empty string</em> <code>&quot;&quot;</code>.</p>
+<p>The testcases will be generated such that the answer is <strong>unique</strong>.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">minWindow(&#39;ADOBECODEBANC&#39;, &#39;ABC&#39;);
+// -&gt; &#39;BANC&#39;
+// The minimum window substring &quot;BANC&quot; includes &#39;A&#39;, &#39;B&#39;, and &#39;C&#39; from string t.
+
+
+minWindow(&#39;a&#39;, &#39;a&#39;);
+// -&gt; &#39;a&#39;
+// The entire string s is the minimum window.
+
+
+minWindow(&#39;a&#39;, &#39;aa&#39;);
+// -&gt; &#39;&#39;
+// Both &#39;a&#39;s from t must be included in the window.
+// Since the largest window of s only has one &#39;a&#39;, return empty string.
+</code></pre>
+<p>This is the first problem in this series that is labeled as having the difficulty level of hard, and rightly so.</p>
+<p>Let&#39;s look at one solution in TypeScript:</p>
+<pre><code class="language-ts">function minWindow(s: string, t: string): string {
+  if (t === &#39;&#39;) {
+    return &#39;&#39;;
+  }
+
+  let countT = new Map();
+  let window = new Map();
+
+  for (let i = 0; i &lt; t.length; i++) {
+    if (countT.has(t[i])) {
+      countT.set(t[i], countT.get(t[i]) + 1);
+    } else {
+      countT.set(t[i], 0);
+    }
+  }
+
+  let have = 0;
+  let need = countT.size;
+  let result = &#39;&#39;;
+  let resultLength = Infinity;
+  let left = 0;
+  let right = 0;
+
+  while (right &lt; s.length) {
+    let char = s[right];
+    if (window.has(char)) {
+      window.set(char, window.get(char) + 1);
+    } else {
+      window.set(char, 0);
+    }
+
+    if (countT.has(char) &amp;&amp; window.get(char) === countT.get(char)) {
+      have++;
+    }
+
+    while (have === need) {
+      if ((right - left + 1) &lt; resultLength) {
+        result = s.slice(left, right + 1);
+        resultLength = right - left + 1;
+      }
+
+      window.set(s[left], window.get(s[left]) - 1);
+
+      if (countT.has(s[left]) &amp;&amp; window.get(s[left]) &lt; countT.get(s[left])) {
+        have--;
+      }
+
+      left++;
+    }
+
+    right++;
+  }
+
+  if (resultLength !== Infinity) {
+    return result;
+  } else {
+    return &#39;&#39;;
+  }
+};
+</code></pre>
+<p>This solution is adapted from <a href="https://www.youtube.com/watch?v=jSto0O4AJbM" target="_blank" rel="noopener noreferrer">NeetCode</a>.</p>
+<p>First, we need to handle the case where <code>t</code> is empty; if so, we&#39;ll return an empty string.</p>
+<p>We start by initializing two hash maps to hold characters for <code>t</code> and our current window. For example, if <code>t</code> is <code>&#39;ABC&#39;</code>, then <code>countT</code> will be this:</p>
+<pre><code class="language-js">Map(3) { &#39;A&#39; =&gt; 0, &#39;B&#39; =&gt; 0, &#39;C&#39; =&gt; 0 }
+</code></pre>
+<p>We&#39;ll have a variable named <code>have</code> to keep track of how many of the letters in <code>t</code> we have in our current window.<br>We also initialize a <code>need</code> variable with the size of <code>countT</code> to keep track of how many letters we <em>need</em> to <em>have</em>.<br>Then, we&#39;ll have <code>result</code> and <code>resultLength</code> that will be keeping track of the <em>minimum window substring</em> we&#39;ve seen so far.</p>
+<Note>
+`resultLength` is first initialized to (positive) `Infinity`, which is a good start if we want it to have the minimum value as a result. If we were to go for the maximum value, we could initialize it as `-Infinity`.
+</Note>
+
+<p>Then, starting with both <code>left</code> and <code>right</code> pointers pointing to the first index, we&#39;ll add each character to our <code>window</code> hash map. If the number of times the current character occurs in <code>t</code> is the same as the number of times it occurs in our current window, we&#39;ll increment our <code>have</code> variable.</p>
+<p>That&#39;s good so far. Now let&#39;s look at this part:</p>
+<pre><code class="language-ts">while (have === need) {
+  if ((right - left + 1) &lt; resultLength) {
+    result = s.slice(left, right + 1);
+    resultLength = right - left + 1;
+  }
+
+  window.set(s[left], window.get(s[left]) - 1);
+
+  if (countT.has(s[left]) &amp;&amp; window.get(s[left]) &lt; countT.get(s[left])) {
+    have--;
+  }
+
+  left++;
+}
+</code></pre>
+<p>Once what we <em>have</em> is equal to what we <em>need</em>, we&#39;ll do these things while they are still equal:</p>
+<p>We&#39;ll first update our minimum result values (<code>result</code> and <code>resultLength</code>) if the length of our current window is less than their previous values.</p>
+<p>Then, we&#39;ll see if we can do better. We&#39;ll first decrement the value of the left character in <code>window</code>. If it reaches below the value in <code>countT</code>, then we decrement our <code>have</code> variable because we lack that character in our current window at this point.<br>Note that, here, we&#39;ll only decrement the <code>have</code> variable when a character occurs <em>less than</em> the number of times it occurs in <code>t</code>. We can have more, we&#39;ll be fine with that. For example, if <code>t</code> is <code>&#39;ABC&#39;</code>, we&#39;ll be fine with having more than one <code>&#39;A&#39;</code>s in our current window.</p>
+<p>Then, at this point, we&#39;ll also need to increment our <code>left</code> pointer so that we shrink our <code>window</code> and see if we can do better when it comes to the minimum value.</p>
+<p>Once we have what we need, we&#39;ll return our result string, which is <code>s</code> sliced from the <code>left</code> index up to (and including) the <code>right</code> index.</p>
+<p>However, if we don&#39;t have a result, we&#39;ll just return an empty string. And, that&#39;s all there is to it.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity of this solution is $O(n)$, as we have two main loops, one iterating over the elements of <code>t</code>, the other over the elements of <code>s</code>; each one has $O(n)$ time complexity, making the overall time complexity $O(n)$.<br>The space complexity is $O(1)$, because the hash maps will be the dominant additional space, and they are constant, each having 26 items in total.</p>
+<hr>
+<p>With the hardest (so far!), and the last problem of <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-3-sliding-window" target="_blank" rel="noopener noreferrer">the Sliding Window chapter</a> behind, we can finally start a new chapter on stacks. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-minimum-window-substring</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-minimum-window-substring</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 16 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Longest Repeating Character Replacement]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-15/16-lm.png" alt="Cover image"></p>
@@ -81,7 +210,7 @@ If `s[right]` is `'B'`, its charCode is `66`, subtracting it from the charCode o
         <item>
             <title><![CDATA[LeetCode Meditations: Longest Substring without Repeating Characters]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-11/15-lm.png" alt="Cover image"></p>
-<p>Let&#39;s start with the description for this problem:</p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/longest-substring-without-repeating-characters" target="_blank" rel="noopener noreferrer">this problem</a>:</p>
 <blockquote>
 <p>Given a string <code>s</code>, find the length of the <strong>longest</strong> <strong>substring</strong> without repeating characters.</p>
 </blockquote>
@@ -165,7 +294,7 @@ lengthOfLongestSubstring(&#39;pwwkew&#39;);
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-10/14-lm.png" alt="Cover image"></p>
 <p><em>Make sure to read <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-3-sliding-window" target="_blank" rel="noopener noreferrer">the Sliding Window post</a> first!</em></p>
 <hr>
-<p>The description for this problem states:</p>
+<p>The description for <a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock" target="_blank" rel="noopener noreferrer">this problem</a> states:</p>
 <blockquote>
 <p>You are given an array <code>prices</code> where <code>prices[i]</code> is the price of a given stock on the <code>ith</code> day.</p>
 <p>You want to maximize your profit by choosing a <strong>single day</strong> to buy one stock and choosing a <strong>different day in the future</strong> to sell that stock.</p>
@@ -308,7 +437,7 @@ This one is also called **fast/catch-up** version of dynamic sliding window, bec
         <item>
             <title><![CDATA[LeetCode Meditations: Container with Most Water]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-05/12-lm.png" alt="Cover image"></p>
-<p>The description for this problem states:</p>
+<p>The description for <a href="https://leetcode.com/problems/container-with-most-water" target="_blank" rel="noopener noreferrer">this problem</a> states:</p>
 <blockquote>
 <p>You are given an integer array <code>height</code> of length <code>n</code>. There are <code>n</code> vertical lines drawn such that the two endpoints of the <code>ith</code> line are <code>(i, 0)</code> and <code>(i, height[i])</code>.</p>
 <p>Find two lines that together with the x-axis form a container, such that the container contains the most water.</p>
@@ -387,7 +516,7 @@ We can use `Math.max()` to calculate `maximumArea` as well.
         <item>
             <title><![CDATA[LeetCode Meditations: 3Sum]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-04/11-lm.png" alt="Cover image"></p>
-<p>Let&#39;s start with the description for this one:</p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/3sum" target="_blank" rel="noopener noreferrer">this one</a>:</p>
 <blockquote>
 <p>Given an integer array <code>nums</code>, return all the triplets <code>[nums[i], nums[j], nums[k]]</code> such that <code>i != j</code>, <code>i != k</code>, and <code>j != k</code>, and <code>nums[i] + nums[j] + nums[k] == 0</code>.</p>
 <p>Notice that the solution set must not contain duplicate triplets.</p>
@@ -496,7 +625,7 @@ console.log(s);
         <item>
             <title><![CDATA[LeetCode Meditations: Valid Palindrome]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-02/10-lm.png" alt="Cover image"></p>
-<p>The description for this problem is:</p>
+<p>The description for <a href="https://leetcode.com/problems/valid-palindrome" target="_blank" rel="noopener noreferrer">this problem</a> is:</p>
 <blockquote>
 <p>A phrase is a <strong>palindrome</strong> if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.</p>
 <p>Given a string <code>s</code>, return <code>true</code> <em>if it is a <strong>palindrome</strong>, or</em> <code>false</code> <em>otherwise</em>.</p>

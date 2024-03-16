@@ -1,0 +1,161 @@
+---
+title: "LeetCode Meditations: Minimum Window Substring"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Minimum Window Substring problem.
+slug: leetcode-meditations-minimum-window-substring
+date: 2024-03-16
+---
+
+![Cover image](/blog/post-images/2024-03-16/17-lm.png)
+
+Let's start with the description for [Minimum Window String](https://leetcode.com/problems/minimum-window-substring):
+
+> Given two strings `s` and `t` of lengths `m` and `n` respectively, return _the **minimum window**_ **_substring_** _of_ `s` _such that every character in_ `t` _(**including duplicates**) is included in the window_. If there is no such substring, return _the empty string_ `""`.
+>
+> The testcases will be generated such that the answer is **unique**.
+
+For example:
+
+```ts
+minWindow('ADOBECODEBANC', 'ABC');
+// -> 'BANC'
+// The minimum window substring "BANC" includes 'A', 'B', and 'C' from string t.
+
+
+minWindow('a', 'a');
+// -> 'a'
+// The entire string s is the minimum window.
+
+
+minWindow('a', 'aa');
+// -> ''
+// Both 'a's from t must be included in the window.
+// Since the largest window of s only has one 'a', return empty string.
+```
+
+This is the first problem in this series that is labeled as having the difficulty level of hard, and rightly so.
+
+Let's look at one solution in TypeScript:
+
+```ts
+function minWindow(s: string, t: string): string {
+  if (t === '') {
+    return '';
+  }
+
+  let countT = new Map();
+  let window = new Map();
+
+  for (let i = 0; i < t.length; i++) {
+    if (countT.has(t[i])) {
+      countT.set(t[i], countT.get(t[i]) + 1);
+    } else {
+      countT.set(t[i], 0);
+    }
+  }
+
+  let have = 0;
+  let need = countT.size;
+  let result = '';
+  let resultLength = Infinity;
+  let left = 0;
+  let right = 0;
+
+  while (right < s.length) {
+    let char = s[right];
+    if (window.has(char)) {
+      window.set(char, window.get(char) + 1);
+    } else {
+      window.set(char, 0);
+    }
+
+    if (countT.has(char) && window.get(char) === countT.get(char)) {
+      have++;
+    }
+
+    while (have === need) {
+      if ((right - left + 1) < resultLength) {
+        result = s.slice(left, right + 1);
+        resultLength = right - left + 1;
+      }
+
+      window.set(s[left], window.get(s[left]) - 1);
+
+      if (countT.has(s[left]) && window.get(s[left]) < countT.get(s[left])) {
+        have--;
+      }
+
+      left++;
+    }
+
+    right++;
+  }
+
+  if (resultLength !== Infinity) {
+    return result;
+  } else {
+    return '';
+  }
+};
+```
+
+This solution is adapted from [NeetCode](https://www.youtube.com/watch?v=jSto0O4AJbM).
+
+First, we need to handle the case where `t` is empty; if so, we'll return an empty string.
+
+We start by initializing two hash maps to hold characters for `t` and our current window. For example, if `t` is `'ABC'`, then `countT` will be this:
+
+```js
+Map(3) { 'A' => 0, 'B' => 0, 'C' => 0 }
+```
+
+We'll have a variable named `have` to keep track of how many of the letters in `t` we have in our current window.
+We also initialize a `need` variable with the size of `countT` to keep track of how many letters we _need_ to _have_.
+Then, we'll have `result` and `resultLength` that will be keeping track of the _minimum window substring_ we've seen so far.
+
+<Note>
+`resultLength` is first initialized to (positive) `Infinity`, which is a good start if we want it to have the minimum value as a result. If we were to go for the maximum value, we could initialize it as `-Infinity`.
+</Note>
+
+Then, starting with both `left` and `right` pointers pointing to the first index, we'll add each character to our `window` hash map. If the number of times the current character occurs in `t` is the same as the number of times it occurs in our current window, we'll increment our `have` variable.
+
+That's good so far. Now let's look at this part:
+
+```ts
+while (have === need) {
+  if ((right - left + 1) < resultLength) {
+    result = s.slice(left, right + 1);
+    resultLength = right - left + 1;
+  }
+
+  window.set(s[left], window.get(s[left]) - 1);
+
+  if (countT.has(s[left]) && window.get(s[left]) < countT.get(s[left])) {
+    have--;
+  }
+
+  left++;
+}
+```
+
+Once what we _have_ is equal to what we _need_, we'll do these things while they are still equal:
+
+We'll first update our minimum result values (`result` and `resultLength`) if the length of our current window is less than their previous values.
+
+Then, we'll see if we can do better. We'll first decrement the value of the left character in `window`. If it reaches below the value in `countT`, then we decrement our `have` variable because we lack that character in our current window at this point. 
+Note that, here, we'll only decrement the `have` variable when a character occurs _less than_ the number of times it occurs in `t`. We can have more, we'll be fine with that. For example, if `t` is `'ABC'`, we'll be fine with having more than one `'A'`s in our current window.
+
+Then, at this point, we'll also need to increment our `left` pointer so that we shrink our `window` and see if we can do better when it comes to the minimum value.
+
+Once we have what we need, we'll return our result string, which is `s` sliced from the `left` index up to (and including) the `right` index.
+
+However, if we don't have a result, we'll just return an empty string. And, that's all there is to it.
+
+#### Time and space complexity
+
+The time complexity of this solution is $O(n)$, as we have two main loops, one iterating over the elements of `t`, the other over the elements of `s`; each one has $O(n)$ time complexity, making the overall time complexity $O(n)$.
+The space complexity is $O(1)$, because the hash maps will be the dominant additional space, and they are constant, each having 26 items in total.
+
+---
+
+With the hardest (so far!), and the last problem of [the Sliding Window chapter](https://rivea0.github.io/blog/leetcode-meditations-chapter-3-sliding-window) behind, we can finally start a new chapter on stacks. Until then, happy coding.
