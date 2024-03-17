@@ -4,9 +4,111 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 16 Mar 2024 21:15:24 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 17 Mar 2024 16:54:48 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations — Chapter 4: Stack]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-17/19-lm-ch4.png" alt="Cover image"></p>
+<p>A stack data type is perhaps one of the most well-known ones. A stack of books might be a good example to visualize, however, insertion and deletion can only happen from the one end. A stack operates through the last-in first-out (LIFO) principle: the last item to go in is the first to go out.</p>
+<p>Usually we&#39;ll have methods for <em>pushing</em> an element onto the stack, and <em>popping</em> an element from the stack.</p>
+<p>For example, let&#39;s say we&#39;re looking for valid parentheses in a given string (more on <a href="https://leetcode.com/problems/valid-parentheses" target="_blank" rel="noopener noreferrer">that problem</a> in the next post), and the operation we&#39;ll do goes like this:</p>
+<p>As we iterate over the characters in the string, we <em>push</em> the character onto the stack. If we pushed a closing parenthesis (one of <code>)</code>, <code>}</code>, or <code>]</code>), then, if the previous pushed element is its opening pair, we&#39;ll <em>pop</em> that pair from the stack.</p>
+<p>If, at the end, the stack is empty, the string consists of valid parentheses.</p>
+<p>It looks like this:</p>
+<p><img src="/blog/post-images/2024-03-17/stack.gif" alt="Stack for checking valid parentheses"></p>
+<hr>
+<p>A stack can be implemented as an array or a linked list; but using linked lists is more common because with arrays, we have a potential <em>stack overflow</em> when we predefine a maximum stack size. On the other hand, linked lists are not static when it comes to memory, so they are a good candidate to implement stacks. </p>
+<p>Linked lists are also efficient because we are using one end of the stack for insertion and deletion, and doing these are constant time operations. </p>
+<hr>
+<p>Let&#39;s look at one easy stack implementation in Python.</p>
+<p>Now, we can use a <code>list</code>, but <a href="https://docs.python.org/3/faq/design.html#how-are-lists-implemented-in-cpython" target="_blank" rel="noopener noreferrer">a list in Python is implemented as a dynamic array underneath</a>, so at one point, pushing an item can be $O(n)$ operation if the list needs to be copied into another memory location. For that reason, we&#39;ll use a <a href="https://docs.python.org/3/library/collections.html#collections.deque" target="_blank" rel="noopener noreferrer"><code>deque</code></a>, which is implemented as a doubly-linked list, so that we know push and pop operations will be $O(1)$.</p>
+<pre><code class="language-python">from collections import deque
+
+class Stack:
+    def __init__(self):
+        self._stack = deque()
+
+    def push(self, item):
+        self._stack.append(item)
+
+    def pop(self):
+        return self._stack.pop()
+
+    def peek(self):
+        return self._stack[-1]
+
+    def is_empty(self):
+        return not bool(len(self._stack))
+
+    def size(self):
+        return len(self._stack)
+</code></pre>
+<p>In addition to <code>push</code> and <code>pop</code>, we&#39;ll also usually have a function like <code>peek</code> to get the topmost item in the stack, <code>is_empty</code> to check if the stack is empty, and <code>size</code> to get the size of the stack.</p>
+<hr>
+<p>We can also do it using JavaScript. Now, we can do it using an array, but we want to use a linked list instead. Since we don&#39;t have a robust built-in library like Python this time, we&#39;ll implement a very simple version of it ourselves.<br>Even though we haven&#39;t seen linked lists in this series so far, the basic idea is that we have nodes, each of which having a <code>data</code> value, and a <code>next</code> pointer pointing to the next node.</p>
+<p>Let&#39;s create a simple node first:</p>
+<pre><code class="language-js">class Node {
+  constructor(data) {
+    this.data = data;
+    this.next = null;
+  }
+}
+</code></pre>
+<p>We can write our stack now:</p>
+<pre><code class="language-js">class Stack {
+  constructor() {
+    this.top = null;
+    this.length = 0;
+  }
+
+  push(item) {
+    const node = new Node(item);
+    node.next = this.top;
+    this.top = node;
+    this.length++;
+  }
+
+  pop() {
+    if (this.isEmpty()) { return null; }
+
+    const data = this.top.data;
+    this.top = this.top.next;
+    this.length--;
+
+    return data;
+  }
+
+  peek() {
+    if (this.isEmpty()) { return null; }
+
+    return this.top.data;
+  }
+
+  isEmpty() {
+    return this.size() === 0;
+  }
+
+  size() {
+    return this.length;
+  }
+}
+</code></pre>
+<h5>Time and space complexity</h5>
+<p>Each method we defined has $O(1)$ time complexity, and it would be the same if we were to use an array as well. However, as mentioned above, arrays have limitations in that having to allocate a predefined stack size can lead to a stack overflow. And if we were to use a dynamic array, the whole array might need to be copied to go into another memory location after a certain size is reached, leading to $O(n)$ time. So, linked lists are ideal to implement a stack data type.</p>
+<p>The space complexity is linear —$O(n)$—, the stack will grow linearly with the number of items in it.</p>
+<hr>
+<p>The first and only problem in this chapter is <a href="https://leetcode.com/problems/valid-parentheses" target="_blank" rel="noopener noreferrer">Valid Parentheses</a>, which we had a small peek into. Until then, happy coding.</p>
+<h6>References</h6>
+<p><a href="https://medium.com/basecs/stacks-and-overflows-dbcf7854dc67" target="_blank" rel="noopener noreferrer">https://medium.com/basecs/stacks-and-overflows-dbcf7854dc67</a></p>
+<p><a href="https://brilliant.org/wiki/stacks/" target="_blank" rel="noopener noreferrer">https://brilliant.org/wiki/stacks/</a></p>
+<p><a href="https://realpython.com/how-to-implement-python-stack/#using-collectionsdeque-to-create-a-python-stack" target="_blank" rel="noopener noreferrer">https://realpython.com/how-to-implement-python-stack/#using-collectionsdeque-to-create-a-python-stack</a></p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-4-stack</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-4-stack</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 17 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Minimum Window Substring]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-16/17-lm.png" alt="Cover image"></p>

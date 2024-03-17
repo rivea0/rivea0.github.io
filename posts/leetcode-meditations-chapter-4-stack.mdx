@@ -1,0 +1,137 @@
+---
+title: "LeetCode Meditations — Chapter 4: Stack"
+tags: [Computer Science, Python, JavaScript]
+description: The fourth chapter of LeetCode Meditation series.
+slug: leetcode-meditations-chapter-4-stack
+date: 2024-03-17
+---
+
+![Cover image](/blog/post-images/2024-03-17/19-lm-ch4.png)
+
+
+A stack data type is perhaps one of the most well-known ones. A stack of books might be a good example to visualize, however, insertion and deletion can only happen from the one end. A stack operates through the last-in first-out (LIFO) principle: the last item to go in is the first to go out.
+
+Usually we'll have methods for _pushing_ an element onto the stack, and _popping_ an element from the stack.
+
+For example, let's say we're looking for valid parentheses in a given string (more on [that problem](https://leetcode.com/problems/valid-parentheses) in the next post), and the operation we'll do goes like this:
+
+As we iterate over the characters in the string, we _push_ the character onto the stack. If we pushed a closing parenthesis (one of `)`, `}`, or `]`), then, if the previous pushed element is its opening pair, we'll _pop_ that pair from the stack.
+
+If, at the end, the stack is empty, the string consists of valid parentheses.
+
+It looks like this:
+
+![Stack for checking valid parentheses](/blog/post-images/2024-03-17/stack.gif)
+
+---
+
+A stack can be implemented as an array or a linked list; but using linked lists is more common because with arrays, we have a potential _stack overflow_ when we predefine a maximum stack size. On the other hand, linked lists are not static when it comes to memory, so they are a good candidate to implement stacks. 
+
+Linked lists are also efficient because we are using one end of the stack for insertion and deletion, and doing these are constant time operations. 
+
+---
+
+Let's look at one easy stack implementation in Python.
+
+Now, we can use a `list`, but [a list in Python is implemented as a dynamic array underneath](https://docs.python.org/3/faq/design.html#how-are-lists-implemented-in-cpython), so at one point, pushing an item can be $O(n)$ operation if the list needs to be copied into another memory location. For that reason, we'll use a [`deque`](https://docs.python.org/3/library/collections.html#collections.deque), which is implemented as a doubly-linked list, so that we know push and pop operations will be $O(1)$.
+
+```python
+from collections import deque
+
+class Stack:
+    def __init__(self):
+        self._stack = deque()
+
+    def push(self, item):
+        self._stack.append(item)
+
+    def pop(self):
+        return self._stack.pop()
+
+    def peek(self):
+        return self._stack[-1]
+
+    def is_empty(self):
+        return not bool(len(self._stack))
+
+    def size(self):
+        return len(self._stack)
+```
+
+In addition to `push` and `pop`, we'll also usually have a function like `peek` to get the topmost item in the stack, `is_empty` to check if the stack is empty, and `size` to get the size of the stack.
+
+---
+
+We can also do it using JavaScript. Now, we can do it using an array, but we want to use a linked list instead. Since we don't have a robust built-in library like Python this time, we'll implement a very simple version of it ourselves.
+Even though we haven't seen linked lists in this series so far, the basic idea is that we have nodes, each of which having a `data` value, and a `next` pointer pointing to the next node.
+
+Let's create a simple node first:
+
+```js
+class Node {
+  constructor(data) {
+    this.data = data;
+    this.next = null;
+  }
+}
+```
+
+We can write our stack now:
+
+```js
+class Stack {
+  constructor() {
+    this.top = null;
+    this.length = 0;
+  }
+
+  push(item) {
+    const node = new Node(item);
+    node.next = this.top;
+    this.top = node;
+    this.length++;
+  }
+
+  pop() {
+    if (this.isEmpty()) { return null; }
+
+    const data = this.top.data;
+    this.top = this.top.next;
+    this.length--;
+
+    return data;
+  }
+
+  peek() {
+    if (this.isEmpty()) { return null; }
+
+    return this.top.data;
+  }
+
+  isEmpty() {
+    return this.size() === 0;
+  }
+
+  size() {
+    return this.length;
+  }
+}
+```
+
+##### Time and space complexity
+
+Each method we defined has $O(1)$ time complexity, and it would be the same if we were to use an array as well. However, as mentioned above, arrays have limitations in that having to allocate a predefined stack size can lead to a stack overflow. And if we were to use a dynamic array, the whole array might need to be copied to go into another memory location after a certain size is reached, leading to $O(n)$ time. So, linked lists are ideal to implement a stack data type.
+
+The space complexity is linear —$O(n)$—, the stack will grow linearly with the number of items in it.
+
+---
+
+The first and only problem in this chapter is [Valid Parentheses](https://leetcode.com/problems/valid-parentheses), which we had a small peek into. Until then, happy coding.
+
+###### References
+
+https://medium.com/basecs/stacks-and-overflows-dbcf7854dc67
+
+https://brilliant.org/wiki/stacks/
+
+https://realpython.com/how-to-implement-python-stack/#using-collectionsdeque-to-create-a-python-stack
