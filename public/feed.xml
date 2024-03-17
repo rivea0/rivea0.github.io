@@ -4,7 +4,7 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 17 Mar 2024 16:54:48 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 17 Mar 2024 17:05:40 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
         <item>
@@ -44,7 +44,7 @@ class Stack:
     def size(self):
         return len(self._stack)
 </code></pre>
-<p>In addition to <code>push</code> and <code>pop</code>, we&#39;ll also usually have a function like <code>peek</code> to get the topmost item in the stack, <code>is_empty</code> to check if the stack is empty, and <code>size</code> to get the size of the stack.</p>
+<p>In addition to <code>push</code> and <code>pop</code>, we&#39;ll also usually have functions like <code>peek</code> to get the topmost item in the stack, <code>is_empty</code> to check if the stack is empty, and <code>size</code> to get the size of the stack.</p>
 <hr>
 <p>We can also do it using JavaScript. Now, we can do it using an array, but we want to use a linked list instead. Since we don&#39;t have a robust built-in library like Python this time, we&#39;ll implement a very simple version of it ourselves.<br>Even though we haven&#39;t seen linked lists in this series so far, the basic idea is that we have nodes, each of which having a <code>data</code> value, and a <code>next</code> pointer pointing to the next node.</p>
 <p>Let&#39;s create a simple node first:</p>
@@ -98,7 +98,7 @@ class Stack:
 <p>Each method we defined has $O(1)$ time complexity, and it would be the same if we were to use an array as well. However, as mentioned above, arrays have limitations in that having to allocate a predefined stack size can lead to a stack overflow. And if we were to use a dynamic array, the whole array might need to be copied to go into another memory location after a certain size is reached, leading to $O(n)$ time. So, linked lists are ideal to implement a stack data type.</p>
 <p>The space complexity is linear —$O(n)$—, the stack will grow linearly with the number of items in it.</p>
 <hr>
-<p>The first and only problem in this chapter is <a href="https://leetcode.com/problems/valid-parentheses" target="_blank" rel="noopener noreferrer">Valid Parentheses</a>, which we had a small peek into. Until then, happy coding.</p>
+<p>The first and only problem in this chapter is <a href="https://leetcode.com/problems/valid-parentheses" target="_blank" rel="noopener noreferrer">Valid Parentheses</a>, until then, happy coding.</p>
 <h6>References</h6>
 <p><a href="https://medium.com/basecs/stacks-and-overflows-dbcf7854dc67" target="_blank" rel="noopener noreferrer">https://medium.com/basecs/stacks-and-overflows-dbcf7854dc67</a></p>
 <p><a href="https://brilliant.org/wiki/stacks/" target="_blank" rel="noopener noreferrer">https://brilliant.org/wiki/stacks/</a></p>
