@@ -4,9 +4,103 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 17 Mar 2024 17:05:40 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 19 Mar 2024 09:42:00 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Valid Parentheses]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-19/20-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/valid-parentheses" target="_blank" rel="noopener noreferrer">this problem</a> says:</p>
+<blockquote>
+<p>Given a string <code>s</code> containing just the characters <code>&#39;(&#39;</code>, <code>&#39;)&#39;</code>, <code>&#39;{&#39;</code>, <code>&#39;}&#39;</code>, <code>&#39;[&#39;</code> and <code>&#39;]&#39;</code>, determine if the input string is valid.</p>
+<p>An input string is valid if:</p>
+<ol>
+<li>Open brackets must be closed by the same type of brackets.</li>
+<li>Open brackets must be closed in the correct order.</li>
+<li>Every close bracket has a corresponding open bracket of the same type.</li>
+</ol>
+</blockquote>
+<p>For example: </p>
+<pre><code class="language-ts">isValid(&#39;()&#39;);
+// -&gt; true
+
+
+isValid(&#39;()[]{}&#39;);
+// -&gt; true
+
+
+isValid(&#39;(]&#39;);
+// -&gt; false
+</code></pre>
+<hr>
+<p>The first idea that comes to mind is, perhaps, adding each parenthesis in the string to a stack, and once we come to one of the closing parentheses, we can check if the previous parenthesis is its opening pair. If so, we can pop them both off the stack. If we are left with an empty stack at the end, that means all the parentheses match, so we can return <code>true</code>; otherwise, we&#39;ll return <code>false</code>.</p>
+<p>For example, if our string is <code>([{}])</code> (which is valid), it will look like this:</p>
+<p><img src="/blog/post-images/2024-03-17/stack.gif" alt="Stack for checking valid parentheses"></p>
+<p>My initial solution in TypeScript looked like this:</p>
+<pre><code class="language-ts">function isValid(s: string): boolean {
+  let stack = [];
+  const opening = [&#39;(&#39;, &#39;{&#39;, &#39;[&#39;];
+  const closing = [&#39;)&#39;, &#39;}&#39;, &#39;]&#39;];
+  for (const c of s) {
+    stack.push(c);
+    if (closing.includes(c)) {
+      let prevItem = stack[stack.length - 2];
+      if (opening.includes(prevItem) &amp;&amp; 
+          opening.indexOf(prevItem) === closing.indexOf(c)) {
+            stack.pop();
+            stack.pop();
+      }
+    }
+  }
+
+  if (!stack.length) {
+    return true;
+  }
+
+  return false;
+};
+</code></pre>
+<p>However, there is a slightly better way, where we can use a hash table for parentheses, mapping the closing ones to their opening pairs. We also don&#39;t have to push every character onto the stack, and can return immediately when the parentheses don&#39;t match:</p>
+<pre><code class="language-ts">function isValid(s: string): boolean {
+  let stack = [];
+  const parentheses = {
+    &#39;)&#39;: &#39;(&#39;,
+    &#39;]&#39;: &#39;[&#39;,
+    &#39;}&#39;: &#39;{&#39;
+  }
+  for (const c of s) {
+    // If it&#39;s a closing parenthesis
+    if (c in parentheses) { 
+      // If the stack is not empty and the previous item on the stack is its opening pair
+      if (stack.length &amp;&amp; stack[stack.length - 1] === parentheses[c]) {
+        stack.pop();
+      } else {
+        return false;
+      }
+    } else {
+      stack.push(c);
+    }
+  }
+
+  if (!stack.length) {
+    return true;
+  }
+
+  return false;
+};
+</code></pre>
+<p>Here, as we iterate through the characters of <code>s</code>, if it&#39;s an opening parenthesis, we&#39;ll just push it to our stack. When we come to a closing parenthesis, if our stack is not empty and the last item we added to our stack matches the opening pair of the closing one we&#39;re looking at, we can just pop it off the stack. Otherwise, it&#39;s not a matching pair, so we can return <code>false</code> immediately. </p>
+<p>At the end, if our stack is empty, we can return <code>true</code>, otherwise we&#39;ll return <code>false</code>.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity for this solution is $O(n)$ because in the worst case where each character in the input string is an opening parenthesis, we&#39;ll loop through the entire string, so the runtime growth is proportionate to its length.<br>The space complexity is $O(n)$ because of our stack, which, in the worst case, will have all the characters in the input string.</p>
+<hr>
+<p>Next up, we&#39;ll start a new chapter on <a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" target="_blank" rel="noopener noreferrer">Binary Search</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-valid-parentheses</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-valid-parentheses</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 19 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 4: Stack]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-17/19-lm-ch4.png" alt="Cover image"></p>
