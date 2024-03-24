@@ -1,0 +1,51 @@
+---
+title: "LeetCode Meditations — Chapter 5: Binary Search"
+tags: [Computer Science, TypeScript, JavaScript]
+description: The fifth chapter of LeetCode Meditation series.
+slug: leetcode-meditations-chapter-5-binary-search
+date: 2024-03-24
+---
+
+![Cover image](/blog/post-images/2024-03-24/20-lm-ch5.png)
+
+Binary search is one of the most well-known algorithms. It's also a [divide-and-conquer algorithm](https://brilliant.org/wiki/divide-and-conquer/), where we break the problem into smaller components.
+
+The crux of binary search is to find a target element in a given sorted array.
+We have two pointers: `high` to point to the largest element, and `low` to point to the smallest element. We first initialize them for the whole array itself, with `high` being the last index and `low` being the first index. Then, we calculate the midpoint. If the target is greater than the midpoint, then we adjust our `low` pointer to point to the `mid + 1`, otherwise if the target is less than the midpoint, we adjust `high` to be `mid - 1`. With each iteration, we eliminate half the array until the midpoint equals target or the `low` pointer passes `high`. 
+
+If we find the index of the target, we can return it as soon as we find it; otherwise, we can just return `-1` to indicate that the target doesn't exist in the array.
+
+For example, if we have a `nums` array `[-1, 0, 3, 5, 9, 12]` and our `target` is `9`, the operation looks like this:
+
+![Binary search example](/blog/post-images/2024-03-24/binary-search.gif)
+
+We can write it in TypeScript like this: 
+
+```ts
+function search(nums: number[], target: number): number {
+  let high = nums.length - 1;
+  let low = 0;
+
+  while (high >= low) {
+    let mid = Math.floor((high + low) / 2);
+
+    if (target > nums[mid]) {
+      low = mid + 1;
+    } else if (target < nums[mid]) {
+      high = mid - 1;
+    } else {
+      return mid;
+    }
+  }
+
+  return -1;
+};
+```
+
+##### Time and space complexity
+
+The time complexity of a binary search algorithm is $O(log \ n)$ in the worst case. (For example, if the target is not in the array, we'll be halving the array until there is one element left.) The space complexity is $O(1)$ as we don't need extra space.
+
+---
+
+The first problem in this chapter will be [Find Minimum in Rotated Sorted Array](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array), until then, happy coding.

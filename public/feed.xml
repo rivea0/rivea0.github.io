@@ -4,12 +4,50 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 19 Mar 2024 09:42:00 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 24 Mar 2024 16:32:34 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
         <item>
+            <title><![CDATA[LeetCode Meditations — Chapter 5: Binary Search]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-24/20-lm-ch5.png" alt="Cover image"></p>
+<p>Binary search is one of the most well-known algorithms. It&#39;s also a <a href="https://brilliant.org/wiki/divide-and-conquer/" target="_blank" rel="noopener noreferrer">divide-and-conquer algorithm</a>, where we break the problem into smaller components.</p>
+<p>The crux of binary search is to find a target element in a given sorted array.<br>We have two pointers: <code>high</code> to point to the largest element, and <code>low</code> to point to the smallest element. We first initialize them for the whole array itself, with <code>high</code> being the last index and <code>low</code> being the first index. Then, we calculate the midpoint. If the target is greater than the midpoint, then we adjust our <code>low</code> pointer to point to the <code>mid + 1</code>, otherwise if the target is less than the midpoint, we adjust <code>high</code> to be <code>mid - 1</code>. With each iteration, we eliminate half the array until the midpoint equals target or the <code>low</code> pointer passes <code>high</code>. </p>
+<p>If we find the index of the target, we can return it as soon as we find it; otherwise, we can just return <code>-1</code> to indicate that the target doesn&#39;t exist in the array.</p>
+<p>For example, if we have a <code>nums</code> array <code>[-1, 0, 3, 5, 9, 12]</code> and our <code>target</code> is <code>9</code>, the operation looks like this:</p>
+<p><img src="/blog/post-images/2024-03-24/binary-search.gif" alt="Binary search example"></p>
+<p>We can write it in TypeScript like this: </p>
+<pre><code class="language-ts">function search(nums: number[], target: number): number {
+  let high = nums.length - 1;
+  let low = 0;
+
+  while (high &gt;= low) {
+    let mid = Math.floor((high + low) / 2);
+
+    if (target &gt; nums[mid]) {
+      low = mid + 1;
+    } else if (target &lt; nums[mid]) {
+      high = mid - 1;
+    } else {
+      return mid;
+    }
+  }
+
+  return -1;
+};
+</code></pre>
+<h5>Time and space complexity</h5>
+<p>The time complexity of a binary search algorithm is $O(log \ n)$ in the worst case. (For example, if the target is not in the array, we&#39;ll be halving the array until there is one element left.) The space complexity is $O(1)$ as we don&#39;t need extra space.</p>
+<hr>
+<p>The first problem in this chapter will be <a href="https://leetcode.com/problems/find-minimum-in-rotated-sorted-array" target="_blank" rel="noopener noreferrer">Find Minimum in Rotated Sorted Array</a>, until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-5-binary-search</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-5-binary-search</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 24 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
+        <item>
             <title><![CDATA[LeetCode Meditations: Valid Parentheses]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-19/20-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-19/19-lm.png" alt="Cover image"></p>
 <p>The description for <a href="https://leetcode.com/problems/valid-parentheses" target="_blank" rel="noopener noreferrer">this problem</a> says:</p>
 <blockquote>
 <p>Given a string <code>s</code> containing just the characters <code>&#39;(&#39;</code>, <code>&#39;)&#39;</code>, <code>&#39;{&#39;</code>, <code>&#39;}&#39;</code>, <code>&#39;[&#39;</code> and <code>&#39;]&#39;</code>, determine if the input string is valid.</p>
@@ -103,7 +141,7 @@ isValid(&#39;(]&#39;);
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 4: Stack]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-17/19-lm-ch4.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-17/18-lm-ch4.png" alt="Cover image"></p>
 <p>A stack data type is perhaps one of the most well-known ones. A stack of books might be a good example to visualize, however, insertion and deletion can only happen from the one end. A stack operates through the last-in first-out (LIFO) principle: the last item to go in is the first to go out.</p>
 <p>Usually we&#39;ll have methods for <em>pushing</em> an element onto the stack, and <em>popping</em> an element from the stack.</p>
 <p>For example, let&#39;s say we&#39;re looking for valid parentheses in a given string (more on <a href="https://leetcode.com/problems/valid-parentheses" target="_blank" rel="noopener noreferrer">that problem</a> in the next post), and the operation we&#39;ll do goes like this:</p>
