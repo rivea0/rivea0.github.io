@@ -1,0 +1,126 @@
+---
+title: "LeetCode Meditations: Find Minimum in Rotated Sorted Array"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Find Minimum in Rotated Sorted Array problem.
+slug: leetcode-meditations-find-minimum-in-rotated-sorted-array
+date: 2024-03-26
+---
+
+![Cover image](/blog/post-images/2024-03-26/21-lm.png)
+
+Let's start with the description for [this problem](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array):
+
+> Suppose an array of length `n` sorted in ascending order is **rotated** between `1` and `n` times. For example, the array `nums = [0,1,2,4,5,6,7]` might become:
+>
+> - `[4,5,6,7,0,1,2]` if it was rotated `4` times.
+> - `[0,1,2,4,5,6,7]` if it was rotated `7` times.
+>
+> Notice that **rotating** an array `[a[0], a[1], a[2], ..., a[n-1]]` 1 time results in the array `[a[n-1], a[0], a[1], a[2], ..., a[n-2]]`.
+>
+> Given the sorted rotated array `nums` of **unique** elements, return _the minimum element of this array_.
+>
+> You must write an algorithm that runs in `O(log n) time.`
+
+
+For example:
+
+```ts
+findMin([3, 4, 5, 1, 2]);
+// -> 1
+// The original array was [1, 2, 3, 4, 5] rotated 3 times.
+
+
+findMin([4, 5, 6, 7, 0, 1, 2]);
+// -> 0
+// The original array was [0, 1, 2, 4, 5, 6, 7] and it was rotated 4 times.
+
+
+findMin([11, 13, 15, 17]);
+// -> 11
+// The original array was [11, 13, 15, 17] and it was rotated 4 times.
+```
+
+For instance, moving the rightmost element to the left once is one rotation. 
+
+---
+
+It is easy to find a linear solution using linear search, like this:
+
+```ts
+function findMin(nums: number[]): number {
+  let min = Infinity;
+
+  for (let n of nums) {
+    min = Math.min(min, n);
+  }
+
+  return min;
+};
+```
+
+Or, given that the numbers are sorted, we can find the first element where the number on the left side is larger:
+
+```ts
+function findMin(nums: number[]): number {
+  for (let i = 0; i < nums.length; i++) {
+    if (i - 1 >= 0 && nums[i - 1] > nums[i]) {
+      return nums[i];
+    }
+  }
+
+  // Not rotated or rotated (nums.length * n) times.
+  // So the minimum element is the first one.
+  return nums[0];
+};
+```
+
+However, the problem specifically asks for a solution with  logarithmic time complexity.
+
+Let's take a deep breath, and think about one approach.
+
+---
+
+We can think of the minimum element as the pivot point where the array was rotated. With this pivot, we have two sorted portions of the array: left and right.
+
+Binary search can still be useful here. We'll initialize `low` and `high` pointers to the `0`th and the last index respectively. We can leverage the fact that the both portions are sorted, so if the value at `low` is less than the value at `high`, that means either the array is not rotated at all or the number of times it's rotated is a multiple of its size. Either way, the array is fully sorted, so we can return the first element and be done with it.
+
+Otherwise, we'll go on with the usual binary search, where we calculate the midpoint first. Once the midpoint is less than the element to the left of it, that means it is the pivot, so we can just return that midpoint. However, if it's greater than the value that `high` points to, it means we need to search the right portion, so we update `low` to be `mid + 1`. Otherwise, we need to search the left portion, so we'll update `high` to be `mid - 1`.
+
+Here's one way to write it in TypeScript:
+
+```ts
+function findMin(nums: number[]): number {
+  let low = 0;
+  let high = nums.length - 1;
+
+  // Not rotated or rotated (nums.length * n) times
+  if (nums[low] <= nums[high]) {
+    return nums[low];
+  }
+
+  while (high >= low) {
+    let mid = Math.floor((high + low) / 2);
+
+    if (nums[mid] < nums[mid - 1]) {
+      return nums[mid];
+    }
+
+    if (nums[mid] > nums[high]) {
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+};
+```
+
+---
+
+#### Time and space complexity
+
+The time complexity is $O(log \ n)$ as we use binary search. With each iteration, we divide the search space in half, which results in logarithmic time complexity. We don't use any additional data structures that will grow proportionally with the input size, so the space complexity is $O(1)$.
+
+---
+
+The next problem is [Search in Rotated Sorted Array](https://leetcode.com/problems/search-in-rotated-sorted-array), until then, happy coding.
+

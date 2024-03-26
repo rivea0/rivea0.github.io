@@ -4,9 +4,106 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 24 Mar 2024 16:32:34 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 26 Mar 2024 14:49:08 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Find Minimum in Rotated Sorted Array]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-26/21-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/find-minimum-in-rotated-sorted-array" target="_blank" rel="noopener noreferrer">this problem</a>:</p>
+<blockquote>
+<p>Suppose an array of length <code>n</code> sorted in ascending order is <strong>rotated</strong> between <code>1</code> and <code>n</code> times. For example, the array <code>nums = [0,1,2,4,5,6,7]</code> might become:</p>
+<ul>
+<li><code>[4,5,6,7,0,1,2]</code> if it was rotated <code>4</code> times.</li>
+<li><code>[0,1,2,4,5,6,7]</code> if it was rotated <code>7</code> times.</li>
+</ul>
+<p>Notice that <strong>rotating</strong> an array <code>[a[0], a[1], a[2], ..., a[n-1]]</code> 1 time results in the array <code>[a[n-1], a[0], a[1], a[2], ..., a[n-2]]</code>.</p>
+<p>Given the sorted rotated array <code>nums</code> of <strong>unique</strong> elements, return <em>the minimum element of this array</em>.</p>
+<p>You must write an algorithm that runs in <code>O(log n) time.</code></p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">findMin([3, 4, 5, 1, 2]);
+// -&gt; 1
+// The original array was [1, 2, 3, 4, 5] rotated 3 times.
+
+
+findMin([4, 5, 6, 7, 0, 1, 2]);
+// -&gt; 0
+// The original array was [0, 1, 2, 4, 5, 6, 7] and it was rotated 4 times.
+
+
+findMin([11, 13, 15, 17]);
+// -&gt; 11
+// The original array was [11, 13, 15, 17] and it was rotated 4 times.
+</code></pre>
+<p>For instance, moving the rightmost element to the left once is one rotation. </p>
+<hr>
+<p>It is easy to find a linear solution using linear search, like this:</p>
+<pre><code class="language-ts">function findMin(nums: number[]): number {
+  let min = Infinity;
+
+  for (let n of nums) {
+    min = Math.min(min, n);
+  }
+
+  return min;
+};
+</code></pre>
+<p>Or, given that the numbers are sorted, we can find the first element where the number on the left side is larger:</p>
+<pre><code class="language-ts">function findMin(nums: number[]): number {
+  for (let i = 0; i &lt; nums.length; i++) {
+    if (i - 1 &gt;= 0 &amp;&amp; nums[i - 1] &gt; nums[i]) {
+      return nums[i];
+    }
+  }
+
+  // Not rotated or rotated (nums.length * n) times.
+  // So the minimum element is the first one.
+  return nums[0];
+};
+</code></pre>
+<p>However, the problem specifically asks for a solution with  logarithmic time complexity.</p>
+<p>Let&#39;s take a deep breath, and think about one approach.</p>
+<hr>
+<p>We can think of the minimum element as the pivot point where the array was rotated. With this pivot, we have two sorted portions of the array: left and right.</p>
+<p>Binary search can still be useful here. We&#39;ll initialize <code>low</code> and <code>high</code> pointers to the <code>0</code>th and the last index respectively. We can leverage the fact that the both portions are sorted, so if the value at <code>low</code> is less than the value at <code>high</code>, that means either the array is not rotated at all or the number of times it&#39;s rotated is a multiple of its size. Either way, the array is fully sorted, so we can return the first element and be done with it.</p>
+<p>Otherwise, we&#39;ll go on with the usual binary search, where we calculate the midpoint first. Once the midpoint is less than the element to the left of it, that means it is the pivot, so we can just return that midpoint. However, if it&#39;s greater than the value that <code>high</code> points to, it means we need to search the right portion, so we update <code>low</code> to be <code>mid + 1</code>. Otherwise, we need to search the left portion, so we&#39;ll update <code>high</code> to be <code>mid - 1</code>.</p>
+<p>Here&#39;s one way to write it in TypeScript:</p>
+<pre><code class="language-ts">function findMin(nums: number[]): number {
+  let low = 0;
+  let high = nums.length - 1;
+
+  // Not rotated or rotated (nums.length * n) times
+  if (nums[low] &lt;= nums[high]) {
+    return nums[low];
+  }
+
+  while (high &gt;= low) {
+    let mid = Math.floor((high + low) / 2);
+
+    if (nums[mid] &lt; nums[mid - 1]) {
+      return nums[mid];
+    }
+
+    if (nums[mid] &gt; nums[high]) {
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+};
+</code></pre>
+<hr>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(log \ n)$ as we use binary search. With each iteration, we divide the search space in half, which results in logarithmic time complexity. We don&#39;t use any additional data structures that will grow proportionally with the input size, so the space complexity is $O(1)$.</p>
+<hr>
+<p>The next problem is <a href="https://leetcode.com/problems/search-in-rotated-sorted-array" target="_blank" rel="noopener noreferrer">Search in Rotated Sorted Array</a>, until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-find-minimum-in-rotated-sorted-array</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-find-minimum-in-rotated-sorted-array</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 26 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 5: Binary Search]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-24/20-lm-ch5.png" alt="Cover image"></p>
