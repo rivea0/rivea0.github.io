@@ -4,9 +4,96 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 26 Mar 2024 14:49:08 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 28 Mar 2024 23:41:16 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Search in Rotated Sorted Array]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-29/22-lm.png" alt="Cover image"></p>
+<p>The description for this problem states:</p>
+<blockquote>
+<p>There is an integer array <code>nums</code> sorted in ascending order (with <strong>distinct</strong> values).</p>
+<p>Prior to being passed to your function, <code>nums</code> is <strong>possibly rotated</strong> at an unknown pivot index <code>k</code> (<code>1 &lt;= k &lt; nums.length</code>) such that the resulting array is <code>[nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]</code> (<strong>0-indexed</strong>). For example, <code>[0,1,2,4,5,6,7]</code> might be rotated at pivot index <code>3</code> and become <code>[4,5,6,7,0,1,2]</code>.</p>
+<p>Given the array <code>nums</code> <strong>after</strong> the possible rotation and an integer <code>target</code>, return <em>the index of</em> <code>target</code> <em>if it is in</em> <code>nums</code><em>, or</em> <code>-1</code> <em>if it is not in</em> <code>nums</code>.</p>
+<p>You must write an algorithm with <code>O(log n)</code> runtime complexity.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">search([4, 5, 6, 7, 0, 1, 2], 0);
+// -&gt; 4
+
+
+search([4, 5, 6, 7, 0, 1, 2], 3);
+// -&gt; -1
+
+
+search([1], 0);
+// -&gt; -1
+</code></pre>
+<hr>
+<p>This one is really a hard problem where we have to think of all the cases that can possibly occur.<br>We&#39;ll use binary search, and similar to the <a href="https://rivea0.github.io/blog/leetcode-meditations-find-minimum-in-rotated-sorted-array" target="_blank" rel="noopener noreferrer">previous problem</a>, we&#39;ll consider two sorted portions in the array: left and right. Also, as with binary search, we&#39;ll have two pointers <code>low</code> and <code>high</code> pointing to the <code>0</code>th and the last index respectively.<br>With normal binary search, we search the right portion only when the middle element is less than the target; and search the left portion when the middle element is more than the target. But here, things are different.</p>
+<p>If we&#39;re in a sorted portion, we&#39;ll search the right if:</p>
+<ul>
+<li>the target is greater than the middle element</li>
+</ul>
+<p>or </p>
+<ul>
+<li>the target is less than the value that <code>low</code> points to.</li>
+</ul>
+<p>Otherwise, we&#39;ll go left.</p>
+<p>Else if we&#39;re not in a sorted portion, we&#39;ll search the left if:</p>
+<ul>
+<li>the target is less than the middle element</li>
+</ul>
+<p>or </p>
+<ul>
+<li>the target is greater than the value that <code>high</code> points to.</li>
+</ul>
+<p>Otherwise, we&#39;ll go right.</p>
+<Note>
+**Searching the right** refers to updating `low` to be `mid + 1`, and **searching the left** refers to updating `high` to be `mid - 1`.
+</Note>
+
+<p>Here is a solution in TypeScript:</p>
+<pre><code class="language-ts">function search(nums: number[], target: number): number {
+  let low = 0;
+  let high = nums.length - 1;
+
+  while (high &gt;= low) {
+    let mid = Math.floor((high + low) / 2);
+
+    if (nums[mid] === target) {
+      return mid;
+    }
+
+    if (nums[low] &lt;= nums[mid]) {
+      if (target &gt; nums[mid] || target &lt; nums[low]) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    } else {
+      if (target &lt; nums[mid] || target &gt; nums[high]) {
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+  }
+
+  return -1;
+};
+</code></pre>
+<p>It might look confusing and hard to wrap your mind around at first, because it is. I find this problem to be one of the most challenging ones in this series so far. It means that it&#39;s now time to take a deep breath.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(log \ n)$ as we use binary search, halving the search space with each iteration. The space complexity is $O(1)$ because we don&#39;t make use of any extra space that proportionally grows with the input size.</p>
+<hr>
+<p>Next up, we&#39;ll start a chapter on Linked Lists. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-search-in-rotated-sorted-array</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-search-in-rotated-sorted-array</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Fri, 29 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Find Minimum in Rotated Sorted Array]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-26/21-lm.png" alt="Cover image"></p>
