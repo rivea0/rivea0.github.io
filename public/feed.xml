@@ -4,9 +4,395 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 28 Mar 2024 23:41:16 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 31 Mar 2024 16:09:40 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations — Chapter 6: Linked Lists]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-03-31/23-lm-ch6.png" alt="Cover image"></p>
+<p>A linked list is a linear data structure that you&#39;re likely to be familiar with. It is also a dynamic data structure that can grow and shrink dynamically, so unlike arrays, there&#39;s no need to allocate memory beforehand.</p>
+<p>An important part of a linked list is the <em>head pointer</em> that points to the beginning of the list. There may or may not be a <em>tail pointer</em> that also points to the end of the list. </p>
+<p>The core ingredient of a linked list is a simple node, which consists of two parts: data and the next pointer.<br>So, it is an important idea to remember: <em>a node only knows about its data and its neighbor.</em></p>
+<p>The very last node in the linked list points to <code>null</code> to indicate it&#39;s the end of the list.</p>
+<p>However, there are different types of linked lists that differ from each other slightly, so let&#39;s briefly take a look at them.</p>
+<hr>
+<h4>Singly linked lists</h4>
+<p>The core idea with singly linked lists is that each node, along with the data it has, have a pointer that points <em>only</em> to the next node:</p>
+<pre><code class="language-js">class Node {
+  constructor(data) {
+    this.data = data;
+    this.next = null;
+  }
+}
+</code></pre>
+<p>And here is an example where we have three nodes, holding the values <code>1</code>, <code>2</code>, and <code>3</code> consecutively:</p>
+<p><img src="/blog/post-images/2024-03-31/singly-ll.gif" alt="Singly linked list example"></p>
+<p>Here is a simple implementation of a singly linked list in JavaScript:</p>
+<pre><code class="language-js">class SinglyLinkedList {
+  constructor() {
+    this.head = null;
+    this.tail = null;
+    this.length = 0;
+  }
+
+  // Add value to the end of the list
+  append(value) {
+    let node = new Node(value);
+    // If the list is empty
+    if (this.head === null) {
+      this.head = node;
+      this.tail = this.head;
+    } else {
+      this.tail.next = node;
+      this.tail = node;
+    }
+    
+    this.length++;
+    return this;
+  }
+
+  // Add value to the beginning of the list
+  prepend(value) {
+    let node = new Node(value);
+    // If the list is empty
+    if (this.head === null) {
+      this.head = node;
+      this.tail = this.head;
+    } else {
+      node.next = this.head;
+      this.head = node;
+    }
+    
+    this.length++;
+    return this;
+  }
+
+  remove(value) {
+    // If the list is empty, return null
+    if (this.head === null) { 
+      return null; 
+    }
+
+    // If it is the first element
+    if (this.head.data === value) {
+      this.head = this.head.next;
+      this.length--;
+      // If it is the only element 
+      // (we don&#39;t have anything after removing it)
+      if (this.head === null) {
+        this.tail = null;
+      } 
+      return;
+    }
+
+    let currentNode = this.head;
+    
+    while (currentNode.next) {
+      if (currentNode.next.data === value) {
+        currentNode.next = currentNode.next.next;
+        // If it is the last element, update tail
+        if (currentNode.next === null) {
+          this.tail = currentNode;
+        } 
+        this.length--;
+        return;
+      }
+      currentNode = currentNode.next;
+    }
+  }
+
+  search(value) {
+    let currentNode = this.head;
+
+    while (currentNode) {
+      if (currentNode.data === value) {
+        return currentNode;
+      }
+      currentNode = currentNode.next;
+    }
+
+    // If the value does not exist, return null
+    return null;
+  }
+
+  printList() {
+    let values = [];
+    let currentNode = this.head;
+    while (currentNode) {
+      values.push(currentNode.data);
+      currentNode = currentNode.next;
+    }
+    
+    console.log(values);
+  }
+}
+</code></pre>
+<Note>
+We'll keep a tail pointer in all these examples for convenience. It [doesn't hurt](https://softwareengineering.stackexchange.com/a/301863) to have a tail pointer.
+</Note>
+
+<hr>
+<h4>Doubly linked lists</h4>
+<p>Doubly linked lists differ from the &quot;singly&quot; ones in that each node also have another pointer that points to the previous element.</p>
+<p>So, this time, a single node will look different:</p>
+<pre><code class="language-js">class Node {
+  constructor(data) {
+    this.data = data;
+    this.next = null;
+    this.previous = null;
+  }
+}
+</code></pre>
+<p>Here is the same example as above, but as a doubly linked list:</p>
+<p><img src="/blog/post-images/2024-03-31/doubly-ll.gif" alt="Doubly linked list example"></p>
+<p>A simple implementation might look like this:</p>
+<pre><code class="language-js">class DoublyLinkedList {
+  constructor() {
+    this.head = null;
+    this.tail = null;
+    this.length = 0;
+  }
+
+  // Add value to the end of the list
+  append(value) {
+    let node = new Node(value);
+    // If the list is empty
+    if (this.head === null) {
+      this.head = node;
+      this.tail = this.head;
+    } else {
+      node.previous = this.tail;
+      this.tail.next = node;
+      this.tail = node;
+    }
+    
+    this.length++;
+    return this;
+  }
+
+  // Add value to the beginning of the list
+  prepend(value) {
+    let node = new Node(value);
+    // If the list is empty
+    if (this.head === null) {
+      this.head = node;
+      this.tail = this.head;
+    } else {
+      this.head.previous = node;
+      node.next = this.head;
+      this.head = node;
+    }
+    
+    this.length++;
+    return this;
+  }
+
+  remove(value) {
+    // If the list is empty, return null
+    if (this.head === null) { 
+      return null;
+    }
+
+    let currentNode = this.head;
+
+    // If it is the first element
+    if (currentNode.data === value) {
+      this.head = currentNode.next;
+      // If the removed element is not the only one,
+      // make the previous pointer of the new head null
+      if (this.head) {
+        this.head.previous = null;
+      // If the removed element was the only element,
+      // point the tail to null as well
+      } else {
+        this.tail = null;
+      }
+      this.length--;
+      return;
+    }
+
+    while (currentNode) {
+      if (currentNode.data === value) {
+        if (currentNode.previous) {
+          currentNode.previous.next = currentNode.next;
+        }
+        if (currentNode.next) {
+          currentNode.next.previous = currentNode.previous;
+        // If it&#39;s the last element in the list, update tail
+        // to point to the previous node
+        } else {
+          this.tail = currentNode.previous;
+        }
+        
+        this.length--;
+        return;
+      }
+    
+      currentNode = currentNode.next;
+    }
+  }
+
+  search(value) {
+    let currentNode = this.head;
+    while (currentNode) {
+      if (currentNode.data === value) {
+        return currentNode;
+      }
+      currentNode = currentNode.next;
+    }
+
+    // If the value does not exist, return null
+    return null;
+  }
+
+  printList() {
+    let values = [];
+    let currentNode = this.head;
+    
+    while (currentNode) {
+      values.push(currentNode.data);
+      currentNode = currentNode.next;
+    }
+    
+    console.log(values);
+  }
+}
+</code></pre>
+<hr>
+<h4>Circular linked lists</h4>
+<p>With circular linked lists, we have the last node also pointing to the first element, creating circularity.</p>
+<p>We&#39;ll only look at the singly circular linked list for simplicity&#39;s sake, so our node will look the same as in the first example:</p>
+<pre><code class="language-js">class Node {
+  constructor(data) {
+    this.data = data;
+    this.next = null;
+  }
+}
+</code></pre>
+<p>The same example, in a circular linked list fashion:</p>
+<p><img src="/blog/post-images/2024-03-31/circular-ll.gif" alt="Circular linked list example"></p>
+<p>Here is a simple implementation:</p>
+<pre><code class="language-js">class CircularLinkedList {
+  constructor() {
+    this.head = null;
+    this.tail = null;
+  }
+
+  // Add value to the &quot;end&quot; of the list
+  append(value) {
+    let node = new Node(value);
+    // If the list is empty
+    if (this.head === null) {
+      this.head = node;
+      this.tail = node;
+      // As the only node in the list, it should point to itself
+      node.next = node;
+    } else {
+      // As the &quot;last&quot; node, it should point to the head (this.tail.next)
+      node.next = this.tail.next;
+      this.tail.next = node;
+      this.tail = node;
+    }
+  }
+
+  // Add value to the beginning of the list
+  prepend(value) {
+    let node = new Node(value);
+    node.next = this.head;
+    // Update last node&#39;s next pointer to point to the new node
+    this.tail.next = node;
+    this.head = node;
+  }  
+
+  remove(value) {
+    // If the list is empty, return null
+    if (this.head === null) { 
+      return null; 
+    }
+
+    // If it is the first element
+    if (this.head.data === value) {
+      // If it&#39;s the only element
+      if (this.head.next === this.head) {
+        this.head = null;
+        this.tail = null;
+        return;
+      }
+      this.head = this.head.next;
+      this.tail.next = this.head;
+      this.length--;
+      return;
+    }
+
+    let currentNode = this.head;
+    let prevNode = null;
+
+    // Iterate until you find the value or
+    // you don&#39;t find it after traversing the whole list
+    while (currentNode.data !== value || prevNode === null) {
+      if (currentNode.next === this.head) { 
+        break; 
+      }
+      prevNode = currentNode;
+      currentNode = currentNode.next;
+    }
+
+    if (currentNode.data === value) {
+      // If there is a previous node before the element to be removed,
+      // update the previous node&#39;s next pointer to point to
+      // the one after the element to be removed
+      // (unlink it)
+      if (prevNode) {
+        prevNode.next = currentNode.next;
+        // If the element to be removed is the last one,
+        // update tail to be the previous node
+        if (this.tail === currentNode) {
+          this.tail = prevNode;
+        }
+      // If the element to be removed is the first one in the list
+      } else {
+        // If it&#39;s the only one in the list
+        if (this.head.next === this.head) {
+          this.head = null;
+          this.tail = null;
+        } else {
+          this.head = this.head.next;
+          this.tail.next = this.head;
+        }
+      }
+    }
+  }
+
+  printList() {
+    let nodes = [];
+    let currentNode = this.head;
+    if (this.head === null) { 
+      console.log(nodes); 
+      return;
+    }
+
+    // Traverse the list once to add the values, 
+    // don&#39;t go in circles
+    do {
+      nodes.push(currentNode.data);
+      currentNode = currentNode.next;
+    } while (currentNode !== this.head);
+
+    console.log(nodes);
+  }
+}
+</code></pre>
+<h5>Time and space complexity</h5>
+<p>With linked lists, the time complexity for accessing an element is in the worst case $O(n)$.<br><em>Prepending</em> and <em>appending</em> an element depends on whether we have a tail pointer; if we have it, then, both operations are $O(1)$ as we only need to arrange pointers.<br>However, if we don&#39;t have a tail pointer, <em>appending</em> an element requires traversing the whole list, so it is an $O(n)$ operation.<br>Removing an element is similar, in the worst case, it is $O(n)$.</p>
+<p>The space complexity is linear—$O(n)$—, the amount of data to store grows linearly with the number of nodes in the list.</p>
+<hr>
+<p>The first problem in this chapter is <a href="https://leetcode.com/problems/reverse-linked-list/description/" target="_blank" rel="noopener noreferrer">Reverse Linked List</a>, until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-6-linked-lists</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-6-linked-lists</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 31 Mar 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Search in Rotated Sorted Array]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-29/22-lm.png" alt="Cover image"></p>

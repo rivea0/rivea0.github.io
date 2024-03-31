@@ -1,0 +1,432 @@
+---
+title: "LeetCode Meditations — Chapter 6: Linked Lists"
+tags: [Computer Science, JavaScript]
+description: The sixth chapter of LeetCode Meditation series.
+slug: leetcode-meditations-chapter-6-linked-lists
+date: 2024-03-31
+---
+
+![Cover image](/blog/post-images/2024-03-31/23-lm-ch6.png)
+
+A linked list is a linear data structure that you're likely to be familiar with. It is also a dynamic data structure that can grow and shrink dynamically, so unlike arrays, there's no need to allocate memory beforehand.
+
+An important part of a linked list is the _head pointer_ that points to the beginning of the list. There may or may not be a _tail pointer_ that also points to the end of the list. 
+
+The core ingredient of a linked list is a simple node, which consists of two parts: data and the next pointer. 
+So, it is an important idea to remember: _a node only knows about its data and its neighbor._
+
+The very last node in the linked list points to `null` to indicate it's the end of the list.
+
+However, there are different types of linked lists that differ from each other slightly, so let's briefly take a look at them.
+
+---
+
+#### Singly linked lists
+
+The core idea with singly linked lists is that each node, along with the data it has, have a pointer that points _only_ to the next node:
+
+```js
+class Node {
+  constructor(data) {
+    this.data = data;
+    this.next = null;
+  }
+}
+```
+
+And here is an example where we have three nodes, holding the values `1`, `2`, and `3` consecutively:
+
+![Singly linked list example](/blog/post-images/2024-03-31/singly-ll.gif)
+
+Here is a simple implementation of a singly linked list in JavaScript:
+
+```js
+class SinglyLinkedList {
+  constructor() {
+    this.head = null;
+    this.tail = null;
+    this.length = 0;
+  }
+
+  // Add value to the end of the list
+  append(value) {
+    let node = new Node(value);
+    // If the list is empty
+    if (this.head === null) {
+      this.head = node;
+      this.tail = this.head;
+    } else {
+      this.tail.next = node;
+      this.tail = node;
+    }
+    
+    this.length++;
+    return this;
+  }
+
+  // Add value to the beginning of the list
+  prepend(value) {
+    let node = new Node(value);
+    // If the list is empty
+    if (this.head === null) {
+      this.head = node;
+      this.tail = this.head;
+    } else {
+      node.next = this.head;
+      this.head = node;
+    }
+    
+    this.length++;
+    return this;
+  }
+
+  remove(value) {
+    // If the list is empty, return null
+    if (this.head === null) { 
+      return null; 
+    }
+
+    // If it is the first element
+    if (this.head.data === value) {
+      this.head = this.head.next;
+      this.length--;
+      // If it is the only element 
+      // (we don't have anything after removing it)
+      if (this.head === null) {
+        this.tail = null;
+      } 
+      return;
+    }
+
+    let currentNode = this.head;
+    
+    while (currentNode.next) {
+      if (currentNode.next.data === value) {
+        currentNode.next = currentNode.next.next;
+        // If it is the last element, update tail
+        if (currentNode.next === null) {
+          this.tail = currentNode;
+        } 
+        this.length--;
+        return;
+      }
+      currentNode = currentNode.next;
+    }
+  }
+
+  search(value) {
+    let currentNode = this.head;
+
+    while (currentNode) {
+      if (currentNode.data === value) {
+        return currentNode;
+      }
+      currentNode = currentNode.next;
+    }
+
+    // If the value does not exist, return null
+    return null;
+  }
+
+  printList() {
+    let values = [];
+    let currentNode = this.head;
+    while (currentNode) {
+      values.push(currentNode.data);
+      currentNode = currentNode.next;
+    }
+    
+    console.log(values);
+  }
+}
+```
+
+<Note>
+We'll keep a tail pointer in all these examples for convenience. It [doesn't hurt](https://softwareengineering.stackexchange.com/a/301863) to have a tail pointer.
+</Note>
+
+---
+
+#### Doubly linked lists
+
+Doubly linked lists differ from the "singly" ones in that each node also have another pointer that points to the previous element.
+
+So, this time, a single node will look different:
+
+```js
+class Node {
+  constructor(data) {
+    this.data = data;
+    this.next = null;
+    this.previous = null;
+  }
+}
+```
+
+Here is the same example as above, but as a doubly linked list:
+
+![Doubly linked list example](/blog/post-images/2024-03-31/doubly-ll.gif)
+
+A simple implementation might look like this:
+
+```js
+class DoublyLinkedList {
+  constructor() {
+    this.head = null;
+    this.tail = null;
+    this.length = 0;
+  }
+
+  // Add value to the end of the list
+  append(value) {
+    let node = new Node(value);
+    // If the list is empty
+    if (this.head === null) {
+      this.head = node;
+      this.tail = this.head;
+    } else {
+      node.previous = this.tail;
+      this.tail.next = node;
+      this.tail = node;
+    }
+    
+    this.length++;
+    return this;
+  }
+
+  // Add value to the beginning of the list
+  prepend(value) {
+    let node = new Node(value);
+    // If the list is empty
+    if (this.head === null) {
+      this.head = node;
+      this.tail = this.head;
+    } else {
+      this.head.previous = node;
+      node.next = this.head;
+      this.head = node;
+    }
+    
+    this.length++;
+    return this;
+  }
+
+  remove(value) {
+    // If the list is empty, return null
+    if (this.head === null) { 
+      return null;
+    }
+
+    let currentNode = this.head;
+
+    // If it is the first element
+    if (currentNode.data === value) {
+      this.head = currentNode.next;
+      // If the removed element is not the only one,
+      // make the previous pointer of the new head null
+      if (this.head) {
+        this.head.previous = null;
+      // If the removed element was the only element,
+      // point the tail to null as well
+      } else {
+        this.tail = null;
+      }
+      this.length--;
+      return;
+    }
+
+    while (currentNode) {
+      if (currentNode.data === value) {
+        if (currentNode.previous) {
+          currentNode.previous.next = currentNode.next;
+        }
+        if (currentNode.next) {
+          currentNode.next.previous = currentNode.previous;
+        // If it's the last element in the list, update tail
+        // to point to the previous node
+        } else {
+          this.tail = currentNode.previous;
+        }
+        
+        this.length--;
+        return;
+      }
+    
+      currentNode = currentNode.next;
+    }
+  }
+
+  search(value) {
+    let currentNode = this.head;
+    while (currentNode) {
+      if (currentNode.data === value) {
+        return currentNode;
+      }
+      currentNode = currentNode.next;
+    }
+
+    // If the value does not exist, return null
+    return null;
+  }
+
+  printList() {
+    let values = [];
+    let currentNode = this.head;
+    
+    while (currentNode) {
+      values.push(currentNode.data);
+      currentNode = currentNode.next;
+    }
+    
+    console.log(values);
+  }
+}
+```
+
+---
+
+#### Circular linked lists
+
+With circular linked lists, we have the last node also pointing to the first element, creating circularity.
+
+We'll only look at the singly circular linked list for simplicity's sake, so our node will look the same as in the first example:
+
+```js
+class Node {
+  constructor(data) {
+    this.data = data;
+    this.next = null;
+  }
+}
+```
+
+The same example, in a circular linked list fashion:
+
+![Circular linked list example](/blog/post-images/2024-03-31/circular-ll.gif)
+
+Here is a simple implementation:
+
+```js
+class CircularLinkedList {
+  constructor() {
+    this.head = null;
+    this.tail = null;
+  }
+
+  // Add value to the "end" of the list
+  append(value) {
+    let node = new Node(value);
+    // If the list is empty
+    if (this.head === null) {
+      this.head = node;
+      this.tail = node;
+      // As the only node in the list, it should point to itself
+      node.next = node;
+    } else {
+      // As the "last" node, it should point to the head (this.tail.next)
+      node.next = this.tail.next;
+      this.tail.next = node;
+      this.tail = node;
+    }
+  }
+
+  // Add value to the beginning of the list
+  prepend(value) {
+    let node = new Node(value);
+    node.next = this.head;
+    // Update last node's next pointer to point to the new node
+    this.tail.next = node;
+    this.head = node;
+  }  
+
+  remove(value) {
+    // If the list is empty, return null
+    if (this.head === null) { 
+      return null; 
+    }
+
+    // If it is the first element
+    if (this.head.data === value) {
+      // If it's the only element
+      if (this.head.next === this.head) {
+        this.head = null;
+        this.tail = null;
+        return;
+      }
+      this.head = this.head.next;
+      this.tail.next = this.head;
+      this.length--;
+      return;
+    }
+
+    let currentNode = this.head;
+    let prevNode = null;
+
+    // Iterate until you find the value or
+    // you don't find it after traversing the whole list
+    while (currentNode.data !== value || prevNode === null) {
+      if (currentNode.next === this.head) { 
+        break; 
+      }
+      prevNode = currentNode;
+      currentNode = currentNode.next;
+    }
+
+    if (currentNode.data === value) {
+      // If there is a previous node before the element to be removed,
+      // update the previous node's next pointer to point to
+      // the one after the element to be removed
+      // (unlink it)
+      if (prevNode) {
+        prevNode.next = currentNode.next;
+        // If the element to be removed is the last one,
+        // update tail to be the previous node
+        if (this.tail === currentNode) {
+          this.tail = prevNode;
+        }
+      // If the element to be removed is the first one in the list
+      } else {
+        // If it's the only one in the list
+        if (this.head.next === this.head) {
+          this.head = null;
+          this.tail = null;
+        } else {
+          this.head = this.head.next;
+          this.tail.next = this.head;
+        }
+      }
+    }
+  }
+
+  printList() {
+    let nodes = [];
+    let currentNode = this.head;
+    if (this.head === null) { 
+      console.log(nodes); 
+      return;
+    }
+
+    // Traverse the list once to add the values, 
+    // don't go in circles
+    do {
+      nodes.push(currentNode.data);
+      currentNode = currentNode.next;
+    } while (currentNode !== this.head);
+
+    console.log(nodes);
+  }
+}
+```
+
+##### Time and space complexity
+
+With linked lists, the time complexity for accessing an element is in the worst case $O(n)$. 
+_Prepending_ and _appending_ an element depends on whether we have a tail pointer; if we have it, then, both operations are $O(1)$ as we only need to arrange pointers.
+However, if we don't have a tail pointer, _appending_ an element requires traversing the whole list, so it is an $O(n)$ operation.
+Removing an element is similar, in the worst case, it is $O(n)$.
+
+The space complexity is linear—$O(n)$—, the amount of data to store grows linearly with the number of nodes in the list.
+
+---
+
+The first problem in this chapter is [Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/description/), until then, happy coding.
