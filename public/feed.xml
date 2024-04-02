@@ -4,9 +4,145 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 31 Mar 2024 16:09:40 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 02 Apr 2024 10:15:58 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Reverse Linked List]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-02/24-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/reverse-linked-list" target="_blank" rel="noopener noreferrer">Reverse Linked List</a> states:</p>
+<blockquote>
+<p>Given the <code>head</code> of a singly linked list, reverse the list, and return <em>the reversed list</em>.</p>
+</blockquote>
+<p>For example:</p>
+<p><img src="https://assets.leetcode.com/uploads/2021/02/19/rev1ex1.jpg" alt="Reversing linked list example image"></p>
+<hr>
+<p>From a single node&#39;s perspective, what we need to do is to update the next pointer to point to the previous node. But, before that, we need to hold on to the original next node, otherwise we&#39;ll unlink it, and lose all the data.</p>
+<p>So, as we traverse the linked list, we need to keep a pointer to the next node, and update the next pointer to point to the previous node:</p>
+<pre><code class="language-ts">let nextNode = currentNode.next;
+currentNode.next = prevNode;
+</code></pre>
+<p>Then, we&#39;ll go to the next node in the list. It will look like this:</p>
+<pre><code class="language-ts">prevNode = currentNode;
+currentNode = nextNode;
+</code></pre>
+<p>All in all, the whole function is just about it:</p>
+<pre><code class="language-ts">/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+function reverseList(head: ListNode | null): ListNode | null {
+  let prevNode: ListNode | null = null;
+  let currentNode: ListNode | null = head;
+
+  while (currentNode) {
+    let nextNode = currentNode.next;
+    currentNode.next = prevNode;
+    prevNode = currentNode;
+    currentNode = nextNode;
+  }
+
+  return prevNode;
+};
+</code></pre>
+<hr>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(n)$ because we traverse the whole list. Even though arranging pointers is an $O(1)$ operation, since we do it for each node, the overall time complexity is $O(n)$.</p>
+<p>The space complexity is $O(1)$ because we don&#39;t have any additional space requirements that will grow with the input size.</p>
+<hr>
+<h5>Recursive solution(s)</h5>
+<p>We can also solve this problem recursively; however, while the time complexity stays the same, the space complexity will be worse: $O(n)$.<br>This is usually the case with recursive solutions, even though we gain on elegance, there is a space tradeoff.</p>
+<p>This one looks very similar to the iterative solution. We&#39;ll keep pointers to the current and previous nodes. Our base case is when the current node is null, in that case we&#39;ll return the previous node. Otherwise, we&#39;ll just update the current node&#39;s next pointer to point to the previous node.</p>
+<p>It will look like this:</p>
+<pre><code class="language-ts">/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+function reverseList(head: ListNode | null): ListNode | null {
+  function reverse(currentNode: ListNode | null, prevNode: ListNode | null) {
+    if (currentNode === null) {
+      return prevNode;
+    } else {
+      let nextNode = currentNode.next;
+      currentNode.next = prevNode;
+
+      return reverse(nextNode, currentNode);
+    }
+  }
+
+  return reverse(head, null);
+};
+</code></pre>
+<hr>
+<p>There is also another recursive solution where we don&#39;t keep a pointer to the previous node, as in <a href="https://youtu.be/G0_I-ZF0S38?si=ab7zCuMXFTNXUAV_&t=289" target="_blank" rel="noopener noreferrer">this example from NeetCode</a>.</p>
+<p>This one was a bit tough for me to understand initially.<br>But, it&#39;s again important to think about solving the subproblem.<br>Our base case is when the <code>head</code> is <code>null</code>: we&#39;ll just return <code>null</code>.</p>
+<p>Now, it&#39;s time to take a deep breath, and think about the subproblem.</p>
+<p>From one node&#39;s perspective, what does <em>reversing</em> look like?</p>
+<p>So, if we&#39;re just one node (<code>head</code>), and there is a next node after us (<code>head.next</code>), we need to point the next pointer of that next node to us:</p>
+<pre><code class="language-ts">head.next.next = head;
+</code></pre>
+<p>But <strong>before that</strong>, that next node should have been reversed already:</p>
+<pre><code class="language-ts">reverseList(head.next);
+</code></pre>
+<p>That&#39;s fine so far. However, we need our base case to work, so we have to set <em>our</em> next pointer to <code>null</code>:</p>
+<pre><code class="language-ts">head.next = null;
+</code></pre>
+<p>Remember that we &quot;reversed&quot; the next node, with <code>reverseList(head.next)</code>? Now it&#39;s supposed to be the new head, so we&#39;ll return it.</p>
+<p>Solving the subproblem solves the whole problem in this sense, so the function will look like this:</p>
+<pre><code class="language-ts">/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+function reverseList(head: ListNode | null): ListNode | null {
+  if (head === null) {
+    return null;
+  }
+
+  let currentNode: ListNode | null = head;
+
+  if (head.next) {
+    currentNode = reverseList(head.next);
+    head.next.next = head;
+  }
+
+  head.next = null;
+
+  return currentNode;
+};
+</code></pre>
+<p>It&#39;s a bit challenging to grasp initially, but it makes sense when you work through it; well, that&#39;s recursion.</p>
+<hr>
+<p>This was a great opener for the Linked Lists chapter. Next up is <a href="https://leetcode.com/problems/merge-two-sorted-lists" target="_blank" rel="noopener noreferrer">Merge Two Sorted Lists</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-reverse-linked-list</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-reverse-linked-list</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 02 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 6: Linked Lists]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-03-31/23-lm-ch6.png" alt="Cover image"></p>
