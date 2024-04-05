@@ -4,9 +4,113 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 02 Apr 2024 10:15:58 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 05 Apr 2024 15:28:34 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Merge Two Sorted Lists]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-05/25-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/merge-two-sorted-lists" target="_blank" rel="noopener noreferrer">Merge Two Sorted Lists</a> says:</p>
+<blockquote>
+<p>You are given the heads of two sorted linked lists <code>list1</code> and <code>list2</code>.</p>
+<p>Merge the two lists into one <strong>sorted</strong> list. The list should be made by splicing together the nodes of the first two lists.</p>
+<p>Return <em>the head of the merged linked list</em>.</p>
+</blockquote>
+<p>For example:</p>
+<p><img src="https://assets.leetcode.com/uploads/2020/10/03/merge_ex1.jpg" alt="Example for merging two sorted lists"></p>
+<pre><code class="language-ts">mergeTwoLists([1, 2, 4], [1, 3, 4]);
+// -&gt; [1, 1, 2, 3, 4, 4]
+
+
+mergeTwoLists([], []);
+// -&gt; []
+
+
+mergeTwoLists([], [0]);
+// -&gt; [0]
+</code></pre>
+<hr>
+<p>First, let&#39;s think about how we would do it with a simple array. We would have two pointers: one for the first array, and the other for the second.<br>As we iterate through them both simultaneously, we&#39;d get the smaller value in our result array. At the end of the iteration, if there are some more elements left in one of the arrays (in case of different lengths), we&#39;d simply add them all as well.</p>
+<p>Let&#39;s write a pseudocode of how we would go about doing it:</p>
+<pre><code>i = 0
+j = 0
+result = []
+
+while i &lt; arr1.length and j &lt; arr2.length:
+    if arr1[i] &lt; arr2[j]:
+        add arr1[i] to result
+        i = i + 1
+    else:
+        add arr2[j] to result
+        j = j + 1
+
+while i &lt; arr1.length:
+    add arr1[i] to result
+    i = i + 1
+
+while j &lt; arr2.length:
+    add arr2[j] to result
+    j = j + 1
+</code></pre>
+<p>The solution for this problem looks very similar, only difference is that we&#39;ll do it with a linked list. Let&#39;s look at it in TypeScript:</p>
+<pre><code class="language-ts">/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+function mergeTwoLists(
+  list1: ListNode | null,
+  list2: ListNode | null
+): ListNode | null {
+  // Start with an initial node with value 0
+  let result = new ListNode(0);
+  let currentNode = result;
+
+  while (list1 !== null &amp;&amp; list2 !== null) {
+    if (list1.val &lt; list2.val) {
+      currentNode.next = list1;
+      list1 = list1.next;
+    } else {
+      currentNode.next = list2;
+      list2 = list2.next;
+    }
+
+    currentNode = currentNode.next;
+  }
+
+  if (list1 !== null) {
+    currentNode.next = list1;
+  }
+
+  if (list2 !== null) {
+    currentNode.next = list2;
+  }
+
+  // Go past the first dummy value of 0
+  return result.next;
+}
+</code></pre>
+<p>We initialize <code>result</code> with a node that holds the value of <code>0</code>. We&#39;ll also keep a pointer to <code>currentNode</code> that initially points to the head of <code>result</code>.<br>As we traverse the lists, we&#39;ll <em>link</em> the smaller value first by pointing <code>currentNode</code>&#39;s <code>next</code> pointer to that value.</p>
+<p>If, at the end, we haven&#39;t finished looking at all the nodes in one of the lists (in case of different lengths), we&#39;ll simply link the rest of it.</p>
+<p>To return, we need to go past the first initial dummy node with the value <code>0</code>, so we&#39;ll return <code>result.next</code> which starts with the actual value that we added from one of the lists. And, we&#39;re done.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(m + n)$ —where $m$ is the length of the first list, and $n$ is the length of the second list— because we need to &quot;touch&quot; each node in each list once. </p>
+<p>The space complexity is $O(n)$ because of the <code>result</code> list we hold: its size will grow with the input size.</p>
+<hr>
+<p>Next up is a slightly more challenging problem called <a href="https://leetcode.com/problems/reorder-list" target="_blank" rel="noopener noreferrer">Reorder List</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-merge-two-sorted-lists</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-merge-two-sorted-lists</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Fri, 05 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Reverse Linked List]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-02/24-lm.png" alt="Cover image"></p>

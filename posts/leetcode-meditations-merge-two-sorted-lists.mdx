@@ -1,0 +1,128 @@
+---
+title: "LeetCode Meditations: Merge Two Sorted Lists"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Merge Two Sorted Lists problem.
+slug: leetcode-meditations-merge-two-sorted-lists
+date: 2024-04-05
+---
+
+![Cover image](/blog/post-images/2024-04-05/25-lm.png)
+
+The description for [Merge Two Sorted Lists](https://leetcode.com/problems/merge-two-sorted-lists) says:
+
+> You are given the heads of two sorted linked lists `list1` and `list2`.
+>
+> Merge the two lists into one **sorted** list. The list should be made by splicing together the nodes of the first two lists.
+>
+> Return _the head of the merged linked list_.
+
+For example:
+
+![Example for merging two sorted lists](https://assets.leetcode.com/uploads/2020/10/03/merge_ex1.jpg)
+
+```ts
+mergeTwoLists([1, 2, 4], [1, 3, 4]);
+// -> [1, 1, 2, 3, 4, 4]
+
+
+mergeTwoLists([], []);
+// -> []
+
+
+mergeTwoLists([], [0]);
+// -> [0]
+```
+
+---
+
+First, let's think about how we would do it with a simple array. We would have two pointers: one for the first array, and the other for the second.
+As we iterate through them both simultaneously, we'd get the smaller value in our result array. At the end of the iteration, if there are some more elements left in one of the arrays (in case of different lengths), we'd simply add them all as well.
+
+Let's write a pseudocode of how we would go about doing it:
+
+```
+i = 0
+j = 0
+result = []
+
+while i < arr1.length and j < arr2.length:
+    if arr1[i] < arr2[j]:
+        add arr1[i] to result
+        i = i + 1
+    else:
+        add arr2[j] to result
+        j = j + 1
+
+while i < arr1.length:
+    add arr1[i] to result
+    i = i + 1
+
+while j < arr2.length:
+    add arr2[j] to result
+    j = j + 1
+```
+
+The solution for this problem looks very similar, only difference is that we'll do it with a linked list. Let's look at it in TypeScript:
+
+```ts
+/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+function mergeTwoLists(
+  list1: ListNode | null,
+  list2: ListNode | null
+): ListNode | null {
+  // Start with an initial node with value 0
+  let result = new ListNode(0);
+  let currentNode = result;
+
+  while (list1 !== null && list2 !== null) {
+    if (list1.val < list2.val) {
+      currentNode.next = list1;
+      list1 = list1.next;
+    } else {
+      currentNode.next = list2;
+      list2 = list2.next;
+    }
+
+    currentNode = currentNode.next;
+  }
+
+  if (list1 !== null) {
+    currentNode.next = list1;
+  }
+
+  if (list2 !== null) {
+    currentNode.next = list2;
+  }
+
+  // Go past the first dummy value of 0
+  return result.next;
+}
+```
+
+We initialize `result` with a node that holds the value of `0`. We'll also keep a pointer to `currentNode` that initially points to the head of `result`.
+As we traverse the lists, we'll _link_ the smaller value first by pointing `currentNode`'s `next` pointer to that value.
+
+If, at the end, we haven't finished looking at all the nodes in one of the lists (in case of different lengths), we'll simply link the rest of it.
+
+To return, we need to go past the first initial dummy node with the value `0`, so we'll return `result.next` which starts with the actual value that we added from one of the lists. And, we're done.
+
+#### Time and space complexity
+
+The time complexity is $O(m + n)$ —where $m$ is the length of the first list, and $n$ is the length of the second list— because we need to "touch" each node in each list once. 
+
+The space complexity is $O(n)$ because of the `result` list we hold: its size will grow with the input size.
+
+---
+
+Next up is a slightly more challenging problem called [Reorder List](https://leetcode.com/problems/reorder-list). Until then, happy coding.
