@@ -4,9 +4,40 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 05 Apr 2024 15:28:34 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 06 Apr 2024 15:33:59 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations — Interlude: Fast & Slow Pointers]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-06/26-lm-interlude.png" alt="Cover image"></p>
+<p>Before we start the <a href="https://leetcode.com/problems/reorder-list/" target="_blank" rel="noopener noreferrer">next problem in the series</a>, let&#39;s take a quick look at a technique that comes in handy when it comes to working with linked lists.</p>
+<p>We can keep two pointers while traversing a linked list: fast and slow. While the fast one increases by two steps, the slow pointer will increase by just one step. </p>
+<h4>Finding the middle node of a linked list</h4>
+<p>When the fast pointer reaches the end of the list, the slow pointer will be at the &quot;middle&quot; node.</p>
+<p>Let&#39;s see it conceptually:</p>
+<pre><code class="language-js">let slow = head;
+let fast = head;
+
+while (fast !== null &amp;&amp; fast.next !== null) {
+  slow = slow.next;
+  fast = fast.next.next;
+}
+</code></pre>
+<p>We can think of a list like <code>[1, 2, 3, 4, 5]</code> (where each value is a node in the linked list).</p>
+<p>Both <code>fast</code> and <code>slow</code> start pointing to the head, that is, <code>1</code>.</p>
+<p>Then, we update the slow pointer one step, which will be <code>2</code>. And, <code>fast</code> will be at <code>3</code>.</p>
+<p>When we update <code>slow</code> again, it will be at <code>3</code>.<br>When the fast pointer increases, it will be two steps ahead, and its <code>next</code> pointer will point to the <code>null</code> value, at which point our loop will stop iterating. </p>
+<p><code>slow</code> will end up pointing to the node with the value <code>3</code>, which is the middle node.</p>
+<p><img src="/blog/post-images/2024-04-06/fast-and-slow.gif" alt="An example of fast and slow pointers"></p>
+<p>With an even number of nodes, there are two candidates for the middle node. For example, with a list like <code>[1, 2, 3, 4]</code>, our current implementation will find the middle as <code>3</code>.</p>
+<hr>
+<p>This technique is also useful to detect cycles in a linked list, but we&#39;ll see that in an upcoming problem.<br>For now, knowing that it exists is sufficient and makes our day better. Happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-interlude-fast-and-slow-pointers</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-interlude-fast-and-slow-pointers</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 06 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Merge Two Sorted Lists]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-05/25-lm.png" alt="Cover image"></p>

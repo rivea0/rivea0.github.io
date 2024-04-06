@@ -1,0 +1,49 @@
+---
+title: "LeetCode Meditations — Interlude: Fast & Slow Pointers"
+tags: [Computer Science, JavaScript]
+description: An interlude to LeetCode Meditation series.
+slug: leetcode-meditations-interlude-fast-and-slow-pointers
+date: 2024-04-06
+---
+
+![Cover image](/blog/post-images/2024-04-06/26-lm-interlude.png)
+
+Before we start the [next problem in the series](https://leetcode.com/problems/reorder-list/), let's take a quick look at a technique that comes in handy when it comes to working with linked lists.
+
+We can keep two pointers while traversing a linked list: fast and slow. While the fast one increases by two steps, the slow pointer will increase by just one step. 
+
+#### Finding the middle node of a linked list
+
+When the fast pointer reaches the end of the list, the slow pointer will be at the "middle" node.
+
+Let's see it conceptually:
+
+```js
+let slow = head;
+let fast = head;
+
+while (fast !== null && fast.next !== null) {
+  slow = slow.next;
+  fast = fast.next.next;
+}
+```
+
+We can think of a list like `[1, 2, 3, 4, 5]` (where each value is a node in the linked list).
+
+Both `fast` and `slow` start pointing to the head, that is, `1`.
+
+Then, we update the slow pointer one step, which will be `2`. And, `fast` will be at `3`.
+
+When we update `slow` again, it will be at `3`.
+When the fast pointer increases, it will be two steps ahead, and its `next` pointer will point to the `null` value, at which point our loop will stop iterating. 
+
+`slow` will end up pointing to the node with the value `3`, which is the middle node.
+
+![An example of fast and slow pointers](/blog/post-images/2024-04-06/fast-and-slow.gif)
+
+With an even number of nodes, there are two candidates for the middle node. For example, with a list like `[1, 2, 3, 4]`, our current implementation will find the middle as `3`.
+
+---
+
+This technique is also useful to detect cycles in a linked list, but we'll see that in an upcoming problem.
+For now, knowing that it exists is sufficient and makes our day better. Happy coding.
