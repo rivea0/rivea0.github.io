@@ -1,0 +1,240 @@
+---
+title: "LeetCode Meditations: Reorder List"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Reorder List problem.
+slug: leetcode-meditations-reorder-list
+date: 2024-04-07
+---
+
+![Cover image](/blog/post-images/2024-04-07/27-lm.png)
+
+Let's start with the description for [Reorder List](https://leetcode.com/problems/reorder-list):
+
+> You are given the head of a singly linked-list. The list can be represented as:
+> 
+> `L0 → L1 → … → Ln - 1 → Ln`
+>
+> _Reorder the list to be on the following form:_
+> 
+> `L0 → Ln → L1 → Ln - 1 → L2 → Ln - 2 → …`
+>
+> You may not modify the values in the list's nodes. Only nodes themselves may be changed.
+
+For example:
+
+![Example image](https://assets.leetcode.com/uploads/2021/03/04/reorder1linked-list.jpg)
+
+
+---
+
+My initial solution was to get every node inside an array first, then link each value to the linked list in an alternating order.
+
+Adding the values to an array is easy:
+
+```ts
+let nums = [];
+let current = head;
+
+while (current !== null) {
+  nums.push(current.val);
+  current = current.next;
+}
+```
+
+<Note>
+Since we shouldn't modify the `head` pointer in this case, we keep a `current` pointer pointing to `head`, and update its value in each iteration.
+</Note>
+
+Then, we can point our `current` pointer back to the `head` node, and slice `nums` to start from the second element (since `current` is already pointing to the first element). That's also easy:
+
+```ts
+current = head;
+nums = nums.slice(1);
+```
+
+Then, we can use the [Two Pointers technique](https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers) to link the elements in an alternating fashion. We can also keep a [flag variable](https://en.wikipedia.org/wiki/Sentinel_value) to know which direction (left or right) to go next.
+
+Since we're already pointing to the first element, we need to add the next item from the reversed portion (going left), so we can initialize this variable as `false`:
+
+```ts
+let goRight = false;
+```
+
+Then, as we update our `left` and `right` pointers, we can link our newly created `ListNode`, and flip the `goRight` flag accordingly.
+
+Overall, it looks like this:
+
+```ts
+/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+/**
+ Do not return anything, modify head in-place instead.
+ */
+function reorderList(head: ListNode | null): void {
+  let nums = [];
+  let current = head;
+
+  while (current !== null) {
+    nums.push(current.val);
+    current = current.next;
+  }
+
+  current = head;
+  nums = nums.slice(1);
+  let left = 0;
+  let right = nums.length - 1;
+  let goRight = false;
+
+  while (left <= right) {
+    if (goRight) {
+      current.next = new ListNode(nums[left++]);
+      goRight = false;
+    } else {
+      current.next = new ListNode(nums[right--]);
+      goRight = true;
+    }
+    current = current.next;
+  }
+};
+```
+
+#### Time and space complexity
+
+Adding each value to an array is an $O(n)$ operation since we visit every node in the linked list. Then, we'll traverse this array again to convert it back to a linked list — another $O(n)$ operation. Therefore, the time complexity of the overall function ends up being $O(n)$.
+The space complexity is also $O(n)$ because of the array we create to store the values.
+
+---
+
+There is another way to solve this problem, as shown by [NeetCode](https://youtu.be/S5bfdUTrKLM?si=S4SP6uJwQ-wYU8qP).
+
+In this version, we'll make use of the [Fast and Slow Pointers](https://rivea0.github.io/blog/leetcode-meditations-interlude-fast-and-slow-pointers) technique, where we initialize two pointers: `fast` and `slow`. `slow` will initially point to the `head`, while `fast` will point to `head.next`, and we'll update them until `fast` (or its `next` pointer) reaches the end, at which point `slow` stays at the middle node.
+
+```ts
+let slow = head;
+let fast = head.next;
+while (fast !== null && fast.next !== null) {
+  slow = slow.next;
+  fast = fast.next.next;
+}
+```
+
+Now that `slow` is at the middle node, we can partition the list into two. 
+However, we need to go through the second half in reverse order. So, we can get the head of this second half (which is `slow.next`), and point its `next` pointer to `null`. 
+
+```ts
+let second = slow.next;
+slow.next = null;
+```
+
+Then, we'll just iterate in reverse order. If you remember from [Reverse Linked List](https://rivea0.github.io/blog/leetcode-meditations-reverse-linked-list), this is how we're going to do it:
+
+```ts
+let prevNode = null;
+
+while (second !== null) {
+  let nextNode = second.next;
+  second.next = prevNode;
+  prevNode = second;
+  second = nextNode;
+}
+```
+
+Now that the second portion is reversed, we can go ahead and do the main job of merging all the nodes.
+
+After this reversing operation, the `prevNode` is now at the last node of the list (because `second` points to `null`). Now, we'll alternate pointers: pointing `left`'s `next` to the right, and `right`'s `next` to the left one.
+
+```ts
+let left = head;
+let right = prevNode;
+
+while (right !== null) {
+  let nextLeft = left.next;
+  let nextRight = right.next;
+  // Rearrange pointers alternatively
+  left.next = right;
+  right.next = nextLeft;
+  // Update pointers
+  left = nextLeft;
+  right = nextRight;
+}
+```
+
+<Note>
+Since the right pointer might reach `null` first (as the second half is likely to be shorter), we'll iterate until `right` is not `null`.
+</Note>
+
+
+All in all, the function will look like this:
+
+```ts
+/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+/**
+ Do not return anything, modify head in-place instead.
+ */
+function reorderList(head: ListNode | null): void {
+  // Get to the middle node
+  let slow = head;
+  let fast = head.next;
+  while (fast !== null && fast.next !== null) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+
+  // Get the head of the second half of the list
+  let second = slow.next;
+  slow.next = null;
+    
+  // Reverse the second half of the list
+  let prevNode = null;
+  while (second !== null) {
+    let nextNode = second.next;
+    second.next = prevNode;
+    prevNode = second;
+    second = nextNode;
+  }
+
+  let left = head;
+  let right = prevNode;
+
+  while (right !== null) {
+    let nextLeft = left.next;
+    let nextRight = right.next;
+    // Rearrange pointers alternatively
+    left.next = right;
+    right.next = nextLeft;
+    // Update pointers
+    left = nextLeft;
+    right = nextRight;
+  }
+};
+```
+
+#### Time and space complexity
+
+The time complexity is again $O(n)$ in this version, as we need to "touch" each node. However, space complexity is constant, that is, $O(1)$ as we don't need extra amount of space that will grow with the input size, which is better.
+
+---
+
+If you feel a bit dizzy after rearranging all those pointers, now it's time to take a breath. 
+The next problem will be [Remove Nth Node From End of List](https://leetcode.com/problems/remove-nth-node-from-end-of-list). Until then, happy coding.
