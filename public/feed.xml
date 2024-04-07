@@ -4,9 +4,141 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 07 Apr 2024 15:30:24 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 07 Apr 2024 22:13:20 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Remove Nth Node From the End of List]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-07/28-lm.png" alt="Cover image"></p>
+<p>The description for this problem says:</p>
+<blockquote>
+<p>Given the <code>head</code> of a linked list, remove the <code>nth</code> node from the end of the list and return its head.</p>
+</blockquote>
+<p>For example:</p>
+<p><img src="https://assets.leetcode.com/uploads/2020/10/03/remove_ex1.jpg" alt="Example image"></p>
+<pre><code>Input: head = [1, 2, 3, 4, 5], n = 2
+Output: [1, 2, 3, 5]
+</code></pre>
+<hr>
+<p>It seems like an easy question at first glance.<br>However, the tricky thing is that the nth node is counted from the back. </p>
+<p>Now, if we were to do it normally <strong>from the start of the list</strong>, we could just keep a count, and when the count reached the <code>n</code>th index, we could just unlink that node. Here is a basic example in JavaScript:</p>
+<pre><code class="language-js">function removeNode(head, n) {
+  if (head === null) {
+    return;
+  }
+
+  let currentNode = head;
+
+  if (n === 0) {
+    head = currentNode.next;
+    return;
+  }
+
+  let count = 0;
+  
+  while (currentNode !== null &amp;&amp; count &lt; n - 1) {
+    currentNode = currentNode.next;
+    count++;
+  }
+
+  if (currentNode === null || currentNode.next === null) {
+    return;  
+  }
+
+  let nextNode = currentNode.next.next;
+  currentNode.next = nextNode;
+
+  return head;
+}
+</code></pre>
+<Note>
+We're using `n` as a 0-based index in this example. If the index were to start from 1 as the actual problem demands, we'd have to modify our condition like this:
+
+<pre><code class="language-js">if (n === 1) {
+  head = currentNode.next;
+  return;
+}
+</code></pre>
+<p>and, use <code>count &lt; n - 2</code> instead of <code>count &lt; n - 1</code> in the <code>while</code> loop condition to point <code>currentNode</code> to the previous node.<br></Note></p>
+<hr>
+<p>However, we need to do it from the back of the list. We could try traversing in reverse, but there is a solution using the <a href="https://rivea0.github.io/blog/leetcode-meditations-interlude-fast-and-slow-pointers" target="_blank" rel="noopener noreferrer">fast and slow pointers technique</a> as shown by <a href="https://www.youtube.com/watch?v=XVuQxVej6y8" target="_blank" rel="noopener noreferrer">NeetCode</a>.</p>
+<p>First, we&#39;ll create a dummy node with value <code>0</code>, that I&#39;m going to call <code>result</code>:</p>
+<pre><code class="language-ts">let result = new ListNode(0);
+</code></pre>
+<p>Then, we&#39;ll point its <code>next</code> pointer to <code>head</code> to link the original list:</p>
+<pre><code class="language-ts">result.next = head;
+</code></pre>
+<p>Then, we&#39;ll initialize our <code>fast</code> and <code>slow</code> pointers:</p>
+<pre><code class="language-ts">let slow = result;
+let fast = head;
+</code></pre>
+<Note>
+While `fast` is pointing to the (actual) `head`, `slow` points to the dummy node `result`, appropriately as it needs to be behind `fast`. But, the reason is that it will be at the previous node of the node that we're going to remove.
+</Note>
+
+<p>Then, we&#39;ll bring our <code>fast</code> pointer to the <code>n</code>th node so that the number of nodes between it and the <code>slow</code> pointer is initially <code>n</code>:</p>
+<pre><code class="language-ts">while (n &gt; 0 &amp;&amp; fast !== null) {
+  fast = fast.next;
+  n--;
+}
+</code></pre>
+<p><em>For example, in the image given at the beginning, if <code>n</code> is <code>1</code>, <code>fast</code> will be at the node with the value <code>2</code>, while <code>slow</code> points to the dummy node with value <code>0</code>. The gap between them is exactly <code>n</code> — that is, 1.</em></p>
+<p>After that, we&#39;ll make the <code>slow</code> pointer catch up slowly. We&#39;ll also update <code>fast</code>, but the gap between them will stay as <code>n</code>:</p>
+<pre><code class="language-ts">while (fast !== null) {
+  slow = slow.next;
+  fast = fast.next;
+}
+</code></pre>
+<p>At this point when <code>fast</code> points to <code>null</code>, <code>slow</code> will be at the previous node of the node we need to remove.<br>So, the only thing to do is to point its <code>next</code> pointer to the next of the node-to-be-removed, essentially unlinking it:</p>
+<pre><code class="language-ts">slow.next = slow.next.next;
+</code></pre>
+<p>Eventually we can return the <code>head</code> which is pointed to by our dummy node&#39;s <code>next</code> pointer:</p>
+<pre><code class="language-ts">return result.next;
+</code></pre>
+<p>All in all, this is our solution in TypeScript:</p>
+<pre><code class="language-ts">/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+function removeNthFromEnd(head: ListNode | null, n: number): ListNode | null {
+  let result = new ListNode(0);
+  result.next = head;
+  let slow = result;
+  let fast = head;
+
+  while (n &gt; 0 &amp;&amp; fast !== null) {
+    fast = fast.next;
+    n--;
+  }
+
+  while (fast !== null) {
+    slow = slow.next;
+    fast = fast.next;
+  }
+
+  slow.next = slow.next.next;
+
+  return result.next;
+};
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>We need to &quot;touch&quot; each node, so the time complexity will be linear — $O(n)$.<br>The space complexity is $O(1)$ as we don&#39;t need extra space that grows with the input size. Note that <code>result</code> doesn&#39;t scale with the size of the input, it&#39;s just one node that has its <code>next</code> pointing to the head of the original list.</p>
+<hr>
+<p>The next problem is <a href="https://leetcode.com/problems/linked-list-cycle" target="_blank" rel="noopener noreferrer">Linked List Cycle</a> where the fast and slow pointers technique will be useful again. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-remove-nth-node-from-end-of-list</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-remove-nth-node-from-end-of-list</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 07 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Reorder List]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-07/27-lm.png" alt="Cover image"></p>
