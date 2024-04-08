@@ -1,0 +1,116 @@
+---
+title: "LeetCode Meditations: Linked List Cycle"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Linked List Cycle problem.
+slug: leetcode-meditations-linked-list-cycle
+date: 2024-04-08
+---
+
+![Cover image](/blog/post-images/2024-04-08/29-lm.png)
+
+Let's start with the description for [Linked List Cycle](https://leetcode.com/problems/linked-list-cycle):
+
+> Given `head`, the head of a linked list, determine if the linked list has a cycle in it.
+>
+> There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the `next` pointer. Internally, `pos` is used to denote the index of the node that tail's `next` pointer is connected to. **Note that `pos` is not passed as a parameter**.
+>
+> Return `true` _if there is a cycle in the linked list_. Otherwise, return `false`.
+
+For example:
+
+![Example image](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist.png)
+
+```
+Input: head = [3, 2, 0, -4], pos = 1
+Output: true
+Explanation: There is a cycle in the linked list, where the tail connects to the 1st node (0-indexed).
+```
+
+---
+
+One easy way to do it is using a [set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set). As we traverse the list, we can look up each node in the set, and if it's there, we know that there has to be a cycle so we can just return `true`.
+
+Here is how it looks like in TypeScript:
+
+```ts
+/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+function hasCycle(head: ListNode | null): boolean {
+  let nodes = new Set();
+  let currentNode = head;
+
+  while (currentNode !== null) {
+    if (nodes.has(currentNode)) {
+      return true;
+    }
+    nodes.add(currentNode);
+    currentNode = currentNode.next;
+  }
+
+  return false;
+};
+```
+
+#### Time and space complexity
+
+The time complexity of this solution is $O(n)$ as we go through every node in the list once. The space complexity is also $O(n)$ because we'll store each node in `nodes`, and its size will grow with the size of the linked list.
+
+---
+
+There is another way to solve this problem that is more memory efficient using [fast and slow pointers](https://rivea0.github.io/blog/leetcode-meditations-interlude-fast-and-slow-pointers), where we don't need to store an additional data structure at all:
+
+```ts
+/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+function hasCycle(head: ListNode | null): boolean {
+  let slow = head;
+  let fast = head;
+
+  while (fast !== null && fast.next !== null) {
+    slow = slow.next;
+    fast = fast.next.next;
+    if (slow === fast) {
+      return true;
+    }
+  }   
+
+  return false;
+};
+```
+
+We initialize both pointers at the head, and while `fast` (or its `next` pointer) is not `null`, we'll update them. Of course, while `slow` is moving one step at a time, `fast` is increasing by two steps. And, we return `true` if they both point to the same node, at which point we know there has to be a cycle. Otherwise, if `fast` ever points to `null`, we know that there is no cycle, so we can return `false`.
+
+This technique of detecting a cycle is also called [Floyd's tortoise and hare algorithm](https://en.wikipedia.org/wiki/Cycle_detection#Floyd's_tortoise_and_hare).
+
+The important thing is that when `slow` and `fast` catch up, they are going to be pointing to the same node.
+The reason that this works is that while `slow` increases the distance between it and `fast` by 1, `fast` decreases that distance by 2 — eventually making the overall distance between them 0.
+
+It makes more sense with an example such as the one given in [NeetCode's explanation](https://youtu.be/gBTe7lFR3vc?si=GfjvRmI9rEfYMDSe&t=339).
+
+#### Time and space complexity
+
+The time complexity is $O(n)$ where $n$ is the length of the cycle (we can imagine a worst case scenario where the last node points to the head). The good thing is that the space complexity is $O(1)$ because we don't need an additional data structure that will grow with the size of the input.
+
+---
+
+The last problem in this chapter will be [Merge K Sorted Lists](https://leetcode.com/problems/merge-k-sorted-lists). Until then, happy coding. 

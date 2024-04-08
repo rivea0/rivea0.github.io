@@ -4,9 +4,99 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 07 Apr 2024 22:13:20 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 08 Apr 2024 13:55:18 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Linked List Cycle]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-08/29-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/linked-list-cycle" target="_blank" rel="noopener noreferrer">Linked List Cycle</a>:</p>
+<blockquote>
+<p>Given <code>head</code>, the head of a linked list, determine if the linked list has a cycle in it.</p>
+<p>There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the <code>next</code> pointer. Internally, <code>pos</code> is used to denote the index of the node that tail&#39;s <code>next</code> pointer is connected to. <strong>Note that <code>pos</code> is not passed as a parameter</strong>.</p>
+<p>Return <code>true</code> <em>if there is a cycle in the linked list</em>. Otherwise, return <code>false</code>.</p>
+</blockquote>
+<p>For example:</p>
+<p><img src="https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist.png" alt="Example image"></p>
+<pre><code>Input: head = [3, 2, 0, -4], pos = 1
+Output: true
+Explanation: There is a cycle in the linked list, where the tail connects to the 1st node (0-indexed).
+</code></pre>
+<hr>
+<p>One easy way to do it is using a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set" target="_blank" rel="noopener noreferrer">set</a>. As we traverse the list, we can look up each node in the set, and if it&#39;s there, we know that there has to be a cycle so we can just return <code>true</code>.</p>
+<p>Here is how it looks like in TypeScript:</p>
+<pre><code class="language-ts">/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+function hasCycle(head: ListNode | null): boolean {
+  let nodes = new Set();
+  let currentNode = head;
+
+  while (currentNode !== null) {
+    if (nodes.has(currentNode)) {
+      return true;
+    }
+    nodes.add(currentNode);
+    currentNode = currentNode.next;
+  }
+
+  return false;
+};
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity of this solution is $O(n)$ as we go through every node in the list once. The space complexity is also $O(n)$ because we&#39;ll store each node in <code>nodes</code>, and its size will grow with the size of the linked list.</p>
+<hr>
+<p>There is another way to solve this problem that is more memory efficient using <a href="https://rivea0.github.io/blog/leetcode-meditations-interlude-fast-and-slow-pointers" target="_blank" rel="noopener noreferrer">fast and slow pointers</a>, where we don&#39;t need to store an additional data structure at all:</p>
+<pre><code class="language-ts">/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+function hasCycle(head: ListNode | null): boolean {
+  let slow = head;
+  let fast = head;
+
+  while (fast !== null &amp;&amp; fast.next !== null) {
+    slow = slow.next;
+    fast = fast.next.next;
+    if (slow === fast) {
+      return true;
+    }
+  }   
+
+  return false;
+};
+</code></pre>
+<p>We initialize both pointers at the head, and while <code>fast</code> (or its <code>next</code> pointer) is not <code>null</code>, we&#39;ll update them. Of course, while <code>slow</code> is moving one step at a time, <code>fast</code> is increasing by two steps. And, we return <code>true</code> if they both point to the same node, at which point we know there has to be a cycle. Otherwise, if <code>fast</code> ever points to <code>null</code>, we know that there is no cycle, so we can return <code>false</code>.</p>
+<p>This technique of detecting a cycle is also called <a href="https://en.wikipedia.org/wiki/Cycle_detection#Floyd's_tortoise_and_hare" target="_blank" rel="noopener noreferrer">Floyd&#39;s tortoise and hare algorithm</a>.</p>
+<p>The important thing is that when <code>slow</code> and <code>fast</code> catch up, they are going to be pointing to the same node.<br>The reason that this works is that while <code>slow</code> increases the distance between it and <code>fast</code> by 1, <code>fast</code> decreases that distance by 2 — eventually making the overall distance between them 0.</p>
+<p>It makes more sense with an example such as the one given in <a href="https://youtu.be/gBTe7lFR3vc?si=GfjvRmI9rEfYMDSe&t=339" target="_blank" rel="noopener noreferrer">NeetCode&#39;s explanation</a>.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(n)$ where $n$ is the length of the cycle (we can imagine a worst case scenario where the last node points to the head). The good thing is that the space complexity is $O(1)$ because we don&#39;t need an additional data structure that will grow with the size of the input.</p>
+<hr>
+<p>The last problem in this chapter will be <a href="https://leetcode.com/problems/merge-k-sorted-lists" target="_blank" rel="noopener noreferrer">Merge K Sorted Lists</a>. Until then, happy coding. </p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-linked-list-cycle</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-linked-list-cycle</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Mon, 08 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Remove Nth Node From the End of List]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-07/28-lm.png" alt="Cover image"></p>
