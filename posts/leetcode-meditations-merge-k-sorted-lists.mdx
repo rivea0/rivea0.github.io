@@ -109,7 +109,7 @@ function merge(list1: ListNode | null, list2: ListNode | null) {
 }
 ```
 
-Since we're given `k` sorted lists, we'll merge pairs of lists, and keep merging until the lists array is of length 1:
+Since we're given `k` sorted lists, we'll merge pairs of lists, and keep merging while the length of `lists` is greater than 1:
 
 ```ts
 function mergeKLists(lists: Array<ListNode | null>): ListNode | null {

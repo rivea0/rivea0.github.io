@@ -4,7 +4,7 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 10 Apr 2024 00:46:38 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 10 Apr 2024 00:54:06 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
         <item>
@@ -97,7 +97,7 @@ function merge(left, right, arr) {
   return result.next;
 }
 </code></pre>
-<p>Since we&#39;re given <code>k</code> sorted lists, we&#39;ll merge pairs of lists, and keep merging until the lists array is of length 1:</p>
+<p>Since we&#39;re given <code>k</code> sorted lists, we&#39;ll merge pairs of lists, and keep merging while the length of <code>lists</code> is greater than 1:</p>
 <pre><code class="language-ts">function mergeKLists(lists: Array&lt;ListNode | null&gt;): ListNode | null {
   if (lists === null || lists.length === 0) {
     return null;
