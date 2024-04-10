@@ -4,9 +4,192 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 08 Apr 2024 13:55:18 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 10 Apr 2024 00:46:38 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Merge K Sorted Lists]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-09/30-lm.png" alt="Cover image"></p>
+<p>The description of <a href="https://leetcode.com/problems/merge-k-sorted-lists/" target="_blank" rel="noopener noreferrer">Merge K Sorted Lists</a> states:</p>
+<blockquote>
+<p>You are given an array of <code>k</code> linked-lists <code>lists</code>, each linked-list is sorted in ascending order.</p>
+<p><em>Merge all the linked-lists into one sorted linked-list and return it.</em></p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: lists = [[1, 4, 5], [1, 3, 4], [2, 6]]
+Output: [1, 1, 2, 3, 4, 4, 5, 6]
+Explanation: The linked-lists are:
+[
+  1-&gt;4-&gt;5,
+  1-&gt;3-&gt;4,
+  2-&gt;6
+]
+merging them into one sorted list:
+1-&gt;1-&gt;2-&gt;3-&gt;4-&gt;4-&gt;5-&gt;6
+</code></pre>
+<hr>
+<p>This problem was a bit confusing to me at first, but the explanation by <a href="https://www.youtube.com/watch?v=q5a5OiGbT6Q" target="_blank" rel="noopener noreferrer">NeetCode</a> made a lot of sense. </p>
+<p>The way to go for a solution is the <a href="https://en.wikipedia.org/wiki/Merge_sort" target="_blank" rel="noopener noreferrer">Merge Sort algorithm</a>, which is one of the most familiar algorithms you might remember from any introductory computer science course.</p>
+<p>Now, in a usual Merge Sort when we&#39;re given an array as the input, we recursively split the array into left and right halves, and keep merging them until the whole array is sorted. Here&#39;s how our familiar friend might look like in JavaScript:</p>
+<pre><code class="language-ts">function mergeSort(arr) {
+  if (arr.length &lt;= 1) {
+    return arr;
+  }
+
+  let left = arr.slice(0, Math.floor(arr.length / 2));
+  let right = arr.slice(Math.floor(arr.length / 2), arr.length);
+
+  mergeSort(left);
+  mergeSort(right);
+
+  merge(left, right, arr);
+
+  return arr;
+}
+
+
+function merge(left, right, arr) {
+  let index = 0;
+
+  while (left.length &amp;&amp; right.length) {
+    if (left[0] &lt; right[0]) {
+      arr[index++] = left.shift();
+    } else {
+      arr[index++] = right.shift();
+    }
+  }
+
+  while (left.length) {
+    arr[index++] = left.shift();
+  }
+
+  while (right.length) {
+    arr[index++] = right.shift();
+  }
+}
+</code></pre>
+<p>However, what we&#39;re going to make use of is the <em>idea</em> of the <code>merge</code> function. </p>
+<p>Since we&#39;re also using linked lists, it will look a bit different. Using TypeScript, it will look like this:</p>
+<pre><code class="language-ts">function merge(list1: ListNode | null, list2: ListNode | null) {
+  let result = new ListNode(0);
+  let currentNode = result;
+    
+  while (list1 !== null &amp;&amp; list2 !== null) {
+    if (list1.val &lt; list2.val) {
+      currentNode.next = list1;
+      list1 = list1.next;
+    } else {
+      currentNode.next = list2;
+      list2 = list2.next;
+    }
+
+    currentNode = currentNode.next;
+  }
+
+  if (list1 !== null) {
+    currentNode.next = list1;
+  }
+
+  if (list2 !== null) {
+    currentNode.next = list2;
+  }
+
+  return result.next;
+}
+</code></pre>
+<p>Since we&#39;re given <code>k</code> sorted lists, we&#39;ll merge pairs of lists, and keep merging until the lists array is of length 1:</p>
+<pre><code class="language-ts">function mergeKLists(lists: Array&lt;ListNode | null&gt;): ListNode | null {
+  if (lists === null || lists.length === 0) {
+    return null;
+  }
+
+  while (lists.length &gt; 1) {
+    let mergedLists = [];
+    for (let i = 0; i &lt; lists.length; i += 2) {
+      let list1 = lists[i];
+      let list2 = i + 1 &lt; lists.length ? lists[i + 1] : null;
+      mergedLists.push(merge(list1, list2));
+    }
+
+    lists = mergedLists;
+  } 
+
+  return lists[0];
+};
+</code></pre>
+<Note>
+If `list2` is `null` (in the case where the length of `lists` is not even), the merging of `list1` and `list2` will be just `list1`.
+</Note>
+
+<p>Overall, the solution looks like this:</p>
+<pre><code class="language-ts">/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *   val: number
+ *   next: ListNode | null
+ *   constructor(val?: number, next?: ListNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.next = (next === undefined ? null : next)
+ *   }
+ * }
+ */
+
+function mergeKLists(lists: Array&lt;ListNode | null&gt;): ListNode | null {
+  if (lists === null || lists.length === 0) {
+    return null;
+  }
+
+  while (lists.length &gt; 1) {
+    let mergedLists = [];
+    for (let i = 0; i &lt; lists.length; i += 2) {
+      let list1 = lists[i];
+      let list2 = i + 1 &lt; lists.length ? lists[i + 1] : null;
+      mergedLists.push(merge(list1, list2));
+    }
+
+    lists = mergedLists;
+  } 
+
+  return lists[0];
+};
+
+function merge(list1: ListNode | null, list2: ListNode | null) {
+  let result = new ListNode(0);
+  let currentNode = result;
+    
+  while (list1 !== null &amp;&amp; list2 !== null) {
+    if (list1.val &lt; list2.val) {
+      currentNode.next = list1;
+      list1 = list1.next;
+    } else {
+      currentNode.next = list2;
+      list2 = list2.next;
+    }
+
+    currentNode = currentNode.next;
+  }
+
+  if (list1 !== null) {
+    currentNode.next = list1;
+  }
+
+  if (list2 !== null) {
+    currentNode.next = list2;
+  }
+
+  return result.next;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(n \ log \ k)$ — also see <a href="https://youtu.be/q5a5OiGbT6Q?si=NlxKdlyZ5P2bsQUX&t=195" target="_blank" rel="noopener noreferrer">NeetCode&#39;s explanation</a> —, if you remember that the time complexity of the Merge Sort function is $O(n \ log \ n)$: We go through each item in the merging operation, but since the input is halved each time, we do it $log \ n$ times. It is similar here, where $n$ refers to the number of nodes, and $k$ is the number of lists.<br>The space complexity is $O(k)$ where $k$ is the number of lists as we keep a temporary <code>mergedLists</code> variable.</p>
+<hr>
+<p>And, this is the last problem of the Linked Lists chapter. Next up, we&#39;ll begin looking at some <a href="https://en.wikipedia.org/wiki/Tree_(data_structure)" target="_blank" rel="noopener noreferrer">trees</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-merge-k-sorted-lists</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-merge-k-sorted-lists</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 09 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Linked List Cycle]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-08/29-lm.png" alt="Cover image"></p>
