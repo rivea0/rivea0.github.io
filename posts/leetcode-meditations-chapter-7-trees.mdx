@@ -3,10 +3,10 @@ title: "LeetCode Meditations — Chapter 7: Trees"
 tags: [Computer Science, JavaScript]
 description: The seventh chapter of LeetCode Meditation series.
 slug: leetcode-meditations-chapter-7-trees
-date: 2024-04-14
+date: 2024-04-15
 ---
 
-![Cover image](/blog/post-images/2024-04-14/31-lm-ch7.png)
+![Cover image](/blog/post-images/2024-04-15/31-lm-ch7.png)
 
 ## Table of contents
 - [Introduction](#intro)
@@ -73,7 +73,7 @@ $\text{left children } \lt \text{ node } \lt \text{ right children}$
 
 Here is an example:
 
-![Binary search tree example](/blog/post-images/2024-04-14/bst.gif)
+![Binary search tree example](/blog/post-images/2024-04-15/bst.gif)
 
 <a name="bst-insert"></a>
 #### Inserting into a binary search tree
@@ -176,7 +176,7 @@ function insertIntoBST(root, val) {
   }
 
   return root;
-};
+}
 ```
 
 Here, we do the same thing — iterating until we find the correct place, but also keeping track of the parent node. Then, we insert the node as either the left or the right child of the parent, depending on its value.
@@ -262,7 +262,7 @@ In this case, we're essentially making the root of the subtree the child of the 
 
 For example, in the image, if the node-to-be-deleted is 10 (it has only right child node with the value 14), we make 14 the right child of 8. It doesn't break our BST, because those that are larger than 8 continue to be in the right subtree of 8.
 
-![Example BST](/blog/post-images/2024-04-14/bst-example1.png)
+![Example BST](/blog/post-images/2024-04-15/bst-example1.png)
 </Note>
 
 Otherwise, if both the left and right children of the node-to-be-deleted exist, we need to do something different. 
@@ -316,7 +316,7 @@ It goes like this: We first visit the node, then go on to its left subtree, then
 
 $$\text{node \ -> \ left subtree \ -> \ right subtree}$$
 
-![Preorder walk example](/blog/post-images/2024-04-14/preorder.gif)
+![Preorder walk example](/blog/post-images/2024-04-15/preorder.gif)
 
 We can do a preorder walk recursively:
 
@@ -338,7 +338,7 @@ It goes like this: we first visit the left subtree, then the node, then the righ
 
 $$\text{left subtree \ -> \ node \ -> \ right subtree}$$
 
-![Inorder walk example](/blog/post-images/2024-04-14/inorder.gif)
+![Inorder walk example](/blog/post-images/2024-04-15/inorder.gif)
 
 <Note>
 The inorder traversal gives us the sorted values.
@@ -365,7 +365,7 @@ It goes like this: we first visit the left subtree, then the right subtree, and 
 
 $$\text{left subtree \ -> \ right subtree \ -> \ node}$$
 
-![Postorder walk example](/blog/post-images/2024-04-14/postorder.gif)
+![Postorder walk example](/blog/post-images/2024-04-15/postorder.gif)
 
 We can do a postorder walk recursively:
 
@@ -396,7 +396,7 @@ A simple BFS operation looks like this (which is repeated until the queue is emp
 
 Note that the breadth-first search is also known as _level-order traversal_.
 
-![Level order walk example](/blog/post-images/2024-04-14/bfs-walk.gif)
+![Level order walk example](/blog/post-images/2024-04-15/bfs-walk.gif)
 
 Let's see a simple example of a level-order traversal in JavaScript:
 

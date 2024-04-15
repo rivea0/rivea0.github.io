@@ -4,12 +4,12 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 15 Apr 2024 10:05:45 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 15 Apr 2024 10:27:50 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 7: Trees]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-14/31-lm-ch7.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-15/31-lm-ch7.png" alt="Cover image"></p>
 <h2>Table of contents</h2>
 <ul>
 <li><a href="#intro" target="_blank" rel="noopener noreferrer">Introduction</a></li>
@@ -69,7 +69,7 @@ The height of the root node is the same as the height of the whole tree.
 <p>A <strong>binary search tree</strong> is a binary tree where the values smaller than the node go to its left and those greater than it go to its right:</p>
 <p>$\text{left children } \lt \text{ node } \lt \text{ right children}$</p>
 <p>Here is an example:</p>
-<p><img src="/blog/post-images/2024-04-14/bst.gif" alt="Binary search tree example"></p>
+<p><img src="/blog/post-images/2024-04-15/bst.gif" alt="Binary search tree example"></p>
 <p><a name="bst-insert"></a></p>
 <h4>Inserting into a binary search tree</h4>
 <p>If we want to insert a new node into a binary search tree, we need to insert it into its proper place to keep the properties of a BST intact.</p>
@@ -158,7 +158,7 @@ function insertIntoBST(root, val) {
   }
 
   return root;
-};
+}
 </code></pre>
 <p>Here, we do the same thing — iterating until we find the correct place, but also keeping track of the parent node. Then, we insert the node as either the left or the right child of the parent, depending on its value.</p>
 <p><a name="bst-insert-iterative-complexity"></a></p>
@@ -231,7 +231,7 @@ function deleteNode(root, key) {
 In this case, we're essentially making the root of the subtree the child of the parent node.
 
 <p>For example, in the image, if the node-to-be-deleted is 10 (it has only right child node with the value 14), we make 14 the right child of 8. It doesn&#39;t break our BST, because those that are larger than 8 continue to be in the right subtree of 8.</p>
-<p><img src="/blog/post-images/2024-04-14/bst-example1.png" alt="Example BST"><br></Note></p>
+<p><img src="/blog/post-images/2024-04-15/bst-example1.png" alt="Example BST"><br></Note></p>
 <p>Otherwise, if both the left and right children of the node-to-be-deleted exist, we need to do something different. </p>
 <p>In this case, we&#39;ll replace the node-to-be-deleted with the largest value in the left subtree. </p>
 <p>However, after replacing, we&#39;ll have two nodes of the same value in both places, so we need to apply <code>deleteNode</code> itself to the subtree that we&#39;ve taken our replacement node from. </p>
@@ -270,7 +270,7 @@ root.right = deleteNode(root.right, root.val);
 <h6>Preorder traversal</h6>
 <p>It goes like this: We first visit the node, then go on to its left subtree, then the right subtree.</p>
 <p>$$\text{node \ -&gt; \ left subtree \ -&gt; \ right subtree}$$</p>
-<p><img src="/blog/post-images/2024-04-14/preorder.gif" alt="Preorder walk example"></p>
+<p><img src="/blog/post-images/2024-04-15/preorder.gif" alt="Preorder walk example"></p>
 <p>We can do a preorder walk recursively:</p>
 <pre><code class="language-js">function preorderWalk(node) {
   if (node === null) {
@@ -286,7 +286,7 @@ root.right = deleteNode(root.right, root.val);
 <h6>Inorder traversal</h6>
 <p>It goes like this: we first visit the left subtree, then the node, then the right subtree.</p>
 <p>$$\text{left subtree \ -&gt; \ node \ -&gt; \ right subtree}$$</p>
-<p><img src="/blog/post-images/2024-04-14/inorder.gif" alt="Inorder walk example"></p>
+<p><img src="/blog/post-images/2024-04-15/inorder.gif" alt="Inorder walk example"></p>
 <Note>
 The inorder traversal gives us the sorted values.
 </Note>
@@ -306,7 +306,7 @@ The inorder traversal gives us the sorted values.
 <h6>Postorder traversal</h6>
 <p>It goes like this: we first visit the left subtree, then the right subtree, and finally the node.</p>
 <p>$$\text{left subtree \ -&gt; \ right subtree \ -&gt; \ node}$$</p>
-<p><img src="/blog/post-images/2024-04-14/postorder.gif" alt="Postorder walk example"></p>
+<p><img src="/blog/post-images/2024-04-15/postorder.gif" alt="Postorder walk example"></p>
 <p>We can do a postorder walk recursively:</p>
 <pre><code class="language-js">function postorderWalk(node) {
   if (node === null) {
@@ -329,7 +329,7 @@ The inorder traversal gives us the sorted values.
 <li>enqueue right child</li>
 </ul>
 <p>Note that the breadth-first search is also known as <em>level-order traversal</em>.</p>
-<p><img src="/blog/post-images/2024-04-14/bfs-walk.gif" alt="Level order walk example"></p>
+<p><img src="/blog/post-images/2024-04-15/bfs-walk.gif" alt="Level order walk example"></p>
 <p>Let&#39;s see a simple example of a level-order traversal in JavaScript:</p>
 <pre><code class="language-js">function levelOrderWalk(root) {
   if (root === null) {
@@ -376,7 +376,7 @@ The inorder traversal gives us the sorted values.
             <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees</link>
             <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees</guid>
             <dc:creator><![CDATA[Eda Eren]]></dc:creator>
-            <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+            <pubDate>Mon, 15 Apr 2024 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Merge K Sorted Lists]]></title>
