@@ -4,9 +4,380 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 10 Apr 2024 00:54:06 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 15 Apr 2024 10:05:45 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations — Chapter 7: Trees]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-14/31-lm-ch7.png" alt="Cover image"></p>
+<h2>Table of contents</h2>
+<ul>
+<li><a href="#intro" target="_blank" rel="noopener noreferrer">Introduction</a></li>
+<li><a href="#bst" target="_blank" rel="noopener noreferrer">Binary trees, binary search trees (BSTs)</a><ul>
+<li><a href="#bst-insert" target="_blank" rel="noopener noreferrer">Inserting into a binary search tree</a><ul>
+<li><a href="#bst-insert-recursive" target="_blank" rel="noopener noreferrer">Recursive solution</a><ul>
+<li><a href="#bst-insert-recursive-complexity" target="_blank" rel="noopener noreferrer">Time and space complexity</a></li>
+</ul>
+</li>
+<li><a href="#bst-insert-iterative" target="_blank" rel="noopener noreferrer">Iterative solution</a><ul>
+<li><a href="#bst-insert-iterative-complexity" target="_blank" rel="noopener noreferrer">Time and space complexity</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#bst-delete" target="_blank" rel="noopener noreferrer">Deleting from a binary search tree</a><ul>
+<li><a href="#bst-delete-complexity" target="_blank" rel="noopener noreferrer">Time and space complexity</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#traversals" target="_blank" rel="noopener noreferrer">Traversals</a><ul>
+<li><a href="#dfs" target="_blank" rel="noopener noreferrer">Depth-First Search (DFS)</a><ul>
+<li><a href="#preorder" target="_blank" rel="noopener noreferrer">Preorder traversal</a></li>
+<li><a href="#inorder" target="_blank" rel="noopener noreferrer">Inorder traversal</a></li>
+<li><a href="#postorder" target="_blank" rel="noopener noreferrer">Postorder traversal</a></li>
+</ul>
+</li>
+<li><a href="#bfs" target="_blank" rel="noopener noreferrer">Breadth-First Search (BFS)</a></li>
+</ul>
+</li>
+<li><a href="#resources" target="_blank" rel="noopener noreferrer">Resources</a></li>
+</ul>
+<hr>
+<p><a name="intro"></a><br>In this new chapter of the series, we&#39;ll take a look at a <strong>non-linear</strong> data structure that is pretty familiar to many developers: trees.</p>
+<p>Whether familiarity breeds contempt or not is arguable, so let&#39;s start with the simplest component of a tree: a node.</p>
+<p>Trees (like <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-6-linked-lists" target="_blank" rel="noopener noreferrer">linked lists</a>) are made up of nodes. The simplest version of a tree is just the <strong>root node</strong> which doesn&#39;t have any edges (links) pointing to it; that is, it has no <strong>parent nodes</strong>. It is the starting point, in a way.</p>
+<p>A tree can only have one root node, and when you think about it, <em>if there are $n$ nodes in a tree, that means there are $n - 1$ edges (links)</em> because there is no edge (link) pointing to the root node.</p>
+<hr>
+<br />
+
+<p>If you&#39;ve looked at a tree long enough, you might&#39;ve had a moment of epiphany—a tree has smaller trees within itself. A branch may as well be a trunk, having other branches for the little tree it constitutes. </p>
+<p>The tree data structure is like this, it is <strong>recursive</strong>: <em>a child node can be the root of a subtree</em>.</p>
+<hr>
+<p>Two terms that are important when it comes to a tree node are <em>depth</em> and <em>height</em>.</p>
+<p>The <strong>depth</strong> of a node is how far away it is from the root node (how many edges (links) does it take to travel from the root node to it), and the <strong>height</strong> of a node is how far away it is from its furthest <strong>leaf node</strong> (which is the node that has no children).</p>
+<Note>
+The height of the root node is the same as the height of the whole tree.
+</Note>
+
+<p>A <strong>balanced tree</strong> is one where <em>the heights of the left and right subtrees of every node differ by at most 1</em>.</p>
+<hr>
+<p><a name="bst"></a></p>
+<h3>Binary trees, binary search trees (BSTs)</h3>
+<p>A <strong>binary tree</strong> is a tree where each node has at most two children. That is, a node can have a left child node and a right child node, and no more.</p>
+<p>The maximum number of nodes in a binary tree is $2^h - 1$ where $h$ is the height of the tree.<br>This is where the <em>binary</em> of the binary tree makes sense: on each level, the number of nodes grows proportionately to the exponents of $2$. For example, the number of nodes on the first level (the 0th level) is $2^0 = 1$, which is just the root node. The second level has at most 2 nodes: $2^1 = 2$ (remember that we&#39;re counting from $0$, so the second level is $1$).</p>
+<p>A <strong>binary search tree</strong> is a binary tree where the values smaller than the node go to its left and those greater than it go to its right:</p>
+<p>$\text{left children } \lt \text{ node } \lt \text{ right children}$</p>
+<p>Here is an example:</p>
+<p><img src="/blog/post-images/2024-04-14/bst.gif" alt="Binary search tree example"></p>
+<p><a name="bst-insert"></a></p>
+<h4>Inserting into a binary search tree</h4>
+<p>If we want to insert a new node into a binary search tree, we need to insert it into its proper place to keep the properties of a BST intact.</p>
+<p>Let&#39;s see it in JavaScript.</p>
+<p><a name="bst-insert-recursive"></a></p>
+<h5>Recursive solution</h5>
+<pre><code class="language-js">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @param {number} val
+ * @return {TreeNode}
+ */
+function insertIntoBST(root, val) {
+  if (root === null) {
+    return new TreeNode(val);
+  }
+
+  if (val &lt; root.val) {
+    root.left = insertIntoBST(root.left, val);
+  } else {
+    root.right = insertIntoBST(root.right, val);
+  }
+
+  return root;
+}
+</code></pre>
+<p>Here, we traverse the tree until we find a space (a <code>null</code> position) for our value that is waiting to be a <code>TreeNode</code>. We start with the root node; if the value of the node-to-be-inserted is less than the value of the root node, we go left (passing <code>root.left</code> as the <code>root</code> argument to the function). Otherwise, we go right (passing <code>root.right</code> as the <code>root</code> argument).</p>
+<p><a name="bst-insert-recursive-complexity"></a></p>
+<h6>Time and space complexity</h6>
+<p>The time complexity is $O(h)$ where $h$ is the height of the tree. On each level in the tree, we either go left or right, so we don&#39;t necessarily visit every single node. The space complexity is also $O(h)$ because we use recursion, creating a new stack frame for each function call.</p>
+<p><em>Note that if the tree is unbalanced, the time and space complexity can be said to be $O(n)$.</em></p>
+<p><a name="bst-insert-iterative"></a></p>
+<h5>Iterative solution</h5>
+<p>We can also do it iteratively, using pointers only:</p>
+<pre><code class="language-js">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @param {number} val
+ * @return {TreeNode}
+ */
+function insertIntoBST(root, val) {
+  if (root === null) {
+    return new TreeNode(val);
+  }
+
+  let prevNode = null;
+  let currentNode = root;
+
+  while (currentNode !== null) {
+    prevNode = currentNode;
+    if (val &lt; currentNode.val) {
+      currentNode = currentNode.left;
+    } else {
+      currentNode = currentNode.right;
+    }
+  }
+
+  if (val &lt; prevNode.val) {
+    prevNode.left = new TreeNode(val);
+  } else {
+    prevNode.right = new TreeNode(val);
+  }
+
+  return root;
+};
+</code></pre>
+<p>Here, we do the same thing — iterating until we find the correct place, but also keeping track of the parent node. Then, we insert the node as either the left or the right child of the parent, depending on its value.</p>
+<p><a name="bst-insert-iterative-complexity"></a></p>
+<h6>Time and space complexity</h6>
+<p>The time complexity is again $O(h)$ (<em>or if the tree is unbalanced, $O(n)$</em>) for the same reason as in the recursive solution. However, the space complexity is constant — $O(1)$ as we only use pointers.</p>
+<p><a name="bst-delete"></a></p>
+<h4>Deleting from a binary search tree</h4>
+<p>The challenging thing when deleting a node from a BST is keeping the BST as a BST. All smaller values should still go to the root node&#39;s left subtree, and all those that are larger should go to the root node&#39;s right subtree.</p>
+<p>Let&#39;s take a look at how we might do it in JavaScript:</p>
+<pre><code class="language-js">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @param {number} key
+ * @return {TreeNode}
+ */
+function deleteNode(root, key) {
+  if (root === null) {
+    return root;
+  }
+
+  if (key &lt; root.val) {
+    root.left = deleteNode(root.left, key);
+  } else if (key &gt; root.val) {
+    root.right = deleteNode(root.right, key);
+  } else {
+    // Node-to-be-deleted has no children
+    if (root.left === null &amp;&amp; root.right === null) {
+      return null;
+    } 
+
+    // If either the left or the right child exists,
+    // return the one that exists as the new child 
+    // of the parent node (of the node-to-be-deleted)
+    if (root.left === null || root.right === null) {
+      return root.left ? root.left : root.right;
+    }
+
+    // If both children exist, traverse the left subtree, get its maximum value...
+    let currentNode = root.left;
+
+    while (currentNode.right !== null) {
+      currentNode = currentNode.right;
+    }
+
+    // ...replace it with the node-to-be-deleted
+    root.val = currentNode.val;
+    // ...then apply the recursion to the left subtree to get rid of the duplicate value
+    root.left = deleteNode(root.left, root.val);
+  }
+
+  return root;
+}
+</code></pre>
+<p>We traverse the tree until we find the node to be deleted. Once we find it, there are several things to do.</p>
+<p>In the case where it doesn&#39;t have any child nodes, we can return <code>null</code> and be done with it.</p>
+<p>If it has one child node, we can return the one that exists using the ternary operation (<code>return root.left ? root.left : root.right</code>). </p>
+<Note>
+In this case, we're essentially making the root of the subtree the child of the parent node.
+
+<p>For example, in the image, if the node-to-be-deleted is 10 (it has only right child node with the value 14), we make 14 the right child of 8. It doesn&#39;t break our BST, because those that are larger than 8 continue to be in the right subtree of 8.</p>
+<p><img src="/blog/post-images/2024-04-14/bst-example1.png" alt="Example BST"><br></Note></p>
+<p>Otherwise, if both the left and right children of the node-to-be-deleted exist, we need to do something different. </p>
+<p>In this case, we&#39;ll replace the node-to-be-deleted with the largest value in the left subtree. </p>
+<p>However, after replacing, we&#39;ll have two nodes of the same value in both places, so we need to apply <code>deleteNode</code> itself to the subtree that we&#39;ve taken our replacement node from. </p>
+<p>This is all done to keep the BST as BST. It might be a bit difficult to wrap one&#39;s head around at first, but <a href="https://www.youtube.com/watch?v=LFzAoJJt92M" target="_blank" rel="noopener noreferrer">NeetCode has a detailed explanation of this problem</a>.</p>
+<Note>
+Note that we can also use the smallest value in the right subtree as well. In that case, our code would look like this:
+
+<pre><code class="language-js">let currentNode = root.right;
+
+while (currentNode.left !== null) {
+  currentNode = currentNode.left;
+}
+
+root.val = currentNode.val;
+root.right = deleteNode(root.right, root.val);
+</code></pre>
+</Note>
+
+<p><a name="bst-delete-complexity"></a></p>
+<h6>Time and space complexity</h6>
+<p>Similar to inserting into a BST, both the time and space complexity of deleting from a BST will be $O(h)$ where $h$ is the height of the tree.</p>
+<hr>
+<p><a name="traversals"></a></p>
+<h4>Traversals</h4>
+<p>We&#39;ll take a brief look at two of the most famous ways to traverse a tree where the order in which we visit the nodes matters: depth-first search and breadth-first search.</p>
+<p><a name="dfs"></a></p>
+<h5>Depth-First Search (DFS)</h5>
+<p>In a depth-first search, we traverse through a branch until we get to a leaf node. Then, we backtrack and do the same thing with another branch.</p>
+<p>There are three common ways to do a depth-first search:</p>
+<ul>
+<li>preorder traversal</li>
+<li>inorder traversal</li>
+<li>postorder traversal</li>
+</ul>
+<p><a name="preorder"></a></p>
+<h6>Preorder traversal</h6>
+<p>It goes like this: We first visit the node, then go on to its left subtree, then the right subtree.</p>
+<p>$$\text{node \ -&gt; \ left subtree \ -&gt; \ right subtree}$$</p>
+<p><img src="/blog/post-images/2024-04-14/preorder.gif" alt="Preorder walk example"></p>
+<p>We can do a preorder walk recursively:</p>
+<pre><code class="language-js">function preorderWalk(node) {
+  if (node === null) {
+    return;
+  }
+
+  console.log(node.val);
+  preorderWalk(node.left);
+  preorderWalk(node.right);
+}
+</code></pre>
+<p><a name="inorder"></a></p>
+<h6>Inorder traversal</h6>
+<p>It goes like this: we first visit the left subtree, then the node, then the right subtree.</p>
+<p>$$\text{left subtree \ -&gt; \ node \ -&gt; \ right subtree}$$</p>
+<p><img src="/blog/post-images/2024-04-14/inorder.gif" alt="Inorder walk example"></p>
+<Note>
+The inorder traversal gives us the sorted values.
+</Note>
+
+<p>We can do an inorder walk recursively as well:</p>
+<pre><code class="language-js">function inorderWalk(node) {
+  if (node === null) {
+    return;
+  }
+
+  inorderWalk(node.left);
+  console.log(node.val);
+  inorderWalk(node.right);
+}
+</code></pre>
+<p><a name="postorder"></a></p>
+<h6>Postorder traversal</h6>
+<p>It goes like this: we first visit the left subtree, then the right subtree, and finally the node.</p>
+<p>$$\text{left subtree \ -&gt; \ right subtree \ -&gt; \ node}$$</p>
+<p><img src="/blog/post-images/2024-04-14/postorder.gif" alt="Postorder walk example"></p>
+<p>We can do a postorder walk recursively:</p>
+<pre><code class="language-js">function postorderWalk(node) {
+  if (node === null) {
+    return;
+  }
+
+  postorderWalk(node.left);
+  postorderWalk(node.right);
+  console.log(node.val);
+}
+</code></pre>
+<p><a name="bfs"></a></p>
+<h5>Breadth-First Search (BFS)</h5>
+<p>In breadth-first search, we visit the nodes level by level, that is, visiting every child of a node first before moving on.</p>
+<p>A queue is used when implementing a BFS. Since we don&#39;t have edges connecting all the children on one level together, it makes sense to keep them in a queue and visit each one when their time comes.<br>When a node is added to the queue and not have been visited yet, it&#39;s called a <strong>discovered node</strong>.</p>
+<p>A simple BFS operation looks like this (which is repeated until the queue is empty):</p>
+<ul>
+<li>visit node</li>
+<li>enqueue left child</li>
+<li>enqueue right child</li>
+</ul>
+<p>Note that the breadth-first search is also known as <em>level-order traversal</em>.</p>
+<p><img src="/blog/post-images/2024-04-14/bfs-walk.gif" alt="Level order walk example"></p>
+<p>Let&#39;s see a simple example of a level-order traversal in JavaScript:</p>
+<pre><code class="language-js">function levelOrderWalk(root) {
+  if (root === null) {
+    return;
+  }
+
+  let queue = [];
+  queue.push(root);
+
+  while (queue.length &gt; 0) {
+    let currentNode = queue[0];
+
+    console.log(currentNode.val);
+
+    if (currentNode.left !== null) {
+      queue.push(currentNode.left);
+    }
+
+    if (currentNode.right !== null) {
+      queue.push(currentNode.right);
+    }
+
+    // Remove the current node
+    queue.shift();
+  }
+}
+</code></pre>
+<p><em>This example is based on Vaidehi Joshi&#39;s <a href="https://gist.github.com/vaidehijoshi/27f9fa6b6b68f70360019805b5ca3692#file-level_order_search-js" target="_blank" rel="noopener noreferrer">GitHub Gist</a>.</em></p>
+<hr>
+<p>This was a fresh (and long) chapter, and the first problem will be the famous (or infamous) <a href="https://leetcode.com/problems/invert-binary-tree" target="_blank" rel="noopener noreferrer">Invert Binary Tree</a>. Until then, happy coding.</p>
+<p><a name="resources"></a></p>
+<h3>Resources</h3>
+<ul>
+<li><a href="https://medium.com/basecs/leaf-it-up-to-binary-trees-11001aaf746d" target="_blank" rel="noopener noreferrer">&quot;Leaf It Up To Binary Trees&quot; - Vaidehi Joshi</a></li>
+<li><a href="https://medium.com/basecs/demystifying-depth-first-search-a7c14cccf056" target="_blank" rel="noopener noreferrer">&quot;Demystifying Depth-First Search&quot; - Vaidehi Joshi</a></li>
+<li><a href="https://medium.com/basecs/breaking-down-breadth-first-search-cebe696709d9" target="_blank" rel="noopener noreferrer">&quot;Breaking Down Breadth-First Search&quot; - Vaidehi Joshi</a></li>
+<li><a href="https://inst.eecs.berkeley.edu/~cs61b/fa21/materials/demos/tree-traversal-demo.html" target="_blank" rel="noopener noreferrer">Tree Traversals - Professor Paul N. Hilfinger</a></li>
+<li><a href="https://brilliant.org/wiki/traversals" target="_blank" rel="noopener noreferrer">Tree Traversals - brilliant.org</a></li>
+<li><a href="https://leetcodethehardway.com/tutorials/graph-theory/binary-search-tree" target="_blank" rel="noopener noreferrer">Binary Search Tree - LeetCode the Hard Way</a></li>
+<li><a href="https://leetcodethehardway.com/tutorials/graph-theory/depth-first-search" target="_blank" rel="noopener noreferrer">Depth-First Search - LeetCode the Hard Way</a></li>
+<li><a href="https://leetcodethehardway.com/tutorials/graph-theory/breadth-first-search" target="_blank" rel="noopener noreferrer">Breadth-First Search - LeetCode the Hard Way</a></li>
+</ul>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Merge K Sorted Lists]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-09/30-lm.png" alt="Cover image"></p>
