@@ -1,0 +1,104 @@
+---
+title: "LeetCode Meditations: Invert Binary Tree"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Invert Binary Tree problem.
+slug: leetcode-meditations-invert-binary-tree
+date: 2024-04-16
+---
+
+![Cover image](/blog/post-images/2024-04-16/32-lm.png)
+
+Let's start with the description for [Invert Binary Tree](https://leetcode.com/problems/invert-binary-tree):
+
+> Given the `root` of a binary tree, invert the tree, and return _its root_.
+
+
+For example:
+
+![Example image](https://assets.leetcode.com/uploads/2021/03/14/invert1-tree.jpg)
+
+---
+
+Although this one has a very simple recursive solution, let's see one approach that I come up with initially:
+
+```ts
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function invertTree(root: TreeNode | null): TreeNode | null {
+  let queue = [];
+  queue.push(root);
+
+  while (queue.length > 0) {
+    let currentNode = queue[0];
+    if (currentNode !== null) {
+      queue.push(currentNode.left);
+      queue.push(currentNode.right);
+      [currentNode.left, currentNode.right] = [currentNode.right, currentNode.left];
+    }
+
+    queue.shift();
+  }
+
+  return root;
+}
+```
+
+This version uses [level-order traversal](https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#bfs); we store the children of each node in a queue as we go through each level in the tree, and swap the node's left and right children.
+
+#### Time and space complexity
+
+Since we visit each node once, the time complexity is $O(n)$.
+The space complexity will be proportionate to the size of the queue we keep, which holds a whole level at a time, which amounts to $O(n)$ overall.
+
+---
+
+Now, let's look at the recursive solution, which is much simpler:
+
+```ts
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function invertTree(root: TreeNode | null): TreeNode | null {
+  if (root === null) {
+    return null;
+  }
+
+  [root.left, root.right] = [root.right, root.left];
+
+  invertTree(root.left);
+  invertTree(root.right);
+
+  return root;
+}
+```
+
+#### Time and space complexity
+
+The time complexity is $O(n)$ as we visit each node to swap its left and right children. The space complexity is also $O(h)$—where $h$ is the height of the tree—because of the recursive calls to the function on each level.
+
+---
+
+Next up is [Maximum Depth of Binary Tree](https://leetcode.com/problems/maximum-depth-of-binary-tree/). Until then, happy coding.

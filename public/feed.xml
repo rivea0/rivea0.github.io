@@ -4,9 +4,94 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 15 Apr 2024 10:27:50 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 16 Apr 2024 17:23:12 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Invert Binary Tree]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-16/32-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/invert-binary-tree" target="_blank" rel="noopener noreferrer">Invert Binary Tree</a>:</p>
+<blockquote>
+<p>Given the <code>root</code> of a binary tree, invert the tree, and return <em>its root</em>.</p>
+</blockquote>
+<p>For example:</p>
+<p><img src="https://assets.leetcode.com/uploads/2021/03/14/invert1-tree.jpg" alt="Example image"></p>
+<hr>
+<p>Although this one has a very simple recursive solution, let&#39;s see one approach that I come up with initially:</p>
+<pre><code class="language-ts">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function invertTree(root: TreeNode | null): TreeNode | null {
+  let queue = [];
+  queue.push(root);
+
+  while (queue.length &gt; 0) {
+    let currentNode = queue[0];
+    if (currentNode !== null) {
+      queue.push(currentNode.left);
+      queue.push(currentNode.right);
+      [currentNode.left, currentNode.right] = [currentNode.right, currentNode.left];
+    }
+
+    queue.shift();
+  }
+
+  return root;
+}
+</code></pre>
+<p>This version uses <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#bfs" target="_blank" rel="noopener noreferrer">level-order traversal</a>; we store the children of each node in a queue as we go through each level in the tree, and swap the node&#39;s left and right children.</p>
+<h4>Time and space complexity</h4>
+<p>Since we visit each node once, the time complexity is $O(n)$.<br>The space complexity will be proportionate to the size of the queue we keep, which holds a whole level at a time, which amounts to $O(n)$ overall.</p>
+<hr>
+<p>Now, let&#39;s look at the recursive solution, which is much simpler:</p>
+<pre><code class="language-ts">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function invertTree(root: TreeNode | null): TreeNode | null {
+  if (root === null) {
+    return null;
+  }
+
+  [root.left, root.right] = [root.right, root.left];
+
+  invertTree(root.left);
+  invertTree(root.right);
+
+  return root;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(n)$ as we visit each node to swap its left and right children. The space complexity is also $O(h)$—where $h$ is the height of the tree—because of the recursive calls to the function on each level.</p>
+<hr>
+<p>Next up is <a href="https://leetcode.com/problems/maximum-depth-of-binary-tree/" target="_blank" rel="noopener noreferrer">Maximum Depth of Binary Tree</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-invert-binary-tree</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-invert-binary-tree</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 16 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 7: Trees]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-15/31-lm-ch7.png" alt="Cover image"></p>
