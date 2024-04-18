@@ -1,0 +1,106 @@
+---
+title: "LeetCode Meditations: Maximum Depth of Binary Tree"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Maximum Depth of Binary Tree problem.
+slug: leetcode-meditations-maximum-depth-of-binary-tree
+date: 2024-04-18
+---
+
+![Cover image](/blog/post-images/2024-04-18/33-lm.png)
+
+The description for [Maximum Depth of Binary Tree](https://leetcode.com/problems/maximum-depth-of-binary-tree) says that:
+
+> Given the `root` of a binary tree, return _its maximum depth_.
+>
+> A binary tree's **maximum depth** is the number of nodes along the longest path from the root node down to the farthest leaf node.
+
+For example:
+
+![Example image](https://assets.leetcode.com/uploads/2020/11/26/tmp-tree.jpg)
+
+```
+Input: root = [3, 9, 20, null, null, 15, 7]
+Output: 3
+```
+
+---
+
+The word _depth_ in the title (kind of) hints at a [depth-first search](https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#dfs) approach. One way to do it is with recursion:
+
+```ts
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function maxDepth(root: TreeNode | null): number {
+  if (root === null) {
+    return 0;
+  }
+
+  return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+}
+```
+
+It looks elegant and simple: what we're doing is calculating the depth of left and right subtrees from the root node's perspective, and returning the larger one of them plus 1 (for the root node).
+
+#### Time and space complexity
+
+The time complexity is $O(n)$ as we visit each node in the tree. The space complexity can be said to be $O(h)$ where $h$ is the height of the tree (because each recursive call creates a new stack frame). However, in the case of an unbalanced tree, it is going to be $O(n)$.
+
+---
+
+Depth-first search doesn't always have to be recursive, so let's look at an iterative version, as shown by [NeetCode](https://youtu.be/hTM3phVI6YQ?si=_Mzn37CRjHFzpO4G&t=643) (but let's write it in TypeScript):
+
+```ts
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function maxDepth(root: TreeNode | null): number {
+  // Keep the current node and current depth in stack
+  let stack: [TreeNode | null, number][] = [[root, 1]];
+  let result = 0;
+
+  while (stack.length > 0) {
+    let [currentNode, depth] = stack.pop();
+    if (currentNode !== null) {
+      result = Math.max(result, depth);
+      stack.push([currentNode.left, depth + 1]);
+      stack.push([currentNode.right, depth + 1]);
+    }
+  }
+
+  return result;
+}
+```
+
+Here, we use a [stack](https://rivea0.github.io/blog/leetcode-meditations-chapter-4-stack) where we keep the current node and current depth — starting with the root node, and depth of 1.
+We pop the last item and continue pushing its left and right children, also incrementing `depth` as we do so. `result` is keeping track of the maximum depth, so at the end when our stack is empty, we just return it. 
+
+#### Time and space complexity
+
+The time and space complexity are both $O(n)$ — we go through each node; and keep a stack whose size will grow as the number of nodes in the tree grows.
+
+---
+
+The next problem is what seems to be an easy one, called [Same Tree](https://leetcode.com/problems/same-tree). Until then, happy coding.
