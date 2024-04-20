@@ -4,9 +4,86 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 18 Apr 2024 21:20:02 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 20 Apr 2024 21:53:09 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Same Tree]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-20/34-lm.png" alt="Cover image"></p>
+<p>Let&#39;s see the description for <a href="https://leetcode.com/problems/same-tree" target="_blank" rel="noopener noreferrer">this problem</a>:</p>
+<blockquote>
+<p>Given the roots of two binary trees <code>p</code> and <code>q</code>, write a function to check if they are the same or not.</p>
+<p>Two binary trees are considered the same if they are structurally identical, and the nodes have the same value.</p>
+</blockquote>
+<p>For example:</p>
+<p><img src="https://assets.leetcode.com/uploads/2020/12/20/ex1.jpg" alt="Example 1"></p>
+<pre><code>Input: p = [1, 2, 3], q = [1, 2, 3]
+Output: true
+</code></pre>
+<p>Or:</p>
+<p><img src="https://assets.leetcode.com/uploads/2020/12/20/ex2.jpg" alt="Example 2"></p>
+<pre><code>Input: p = [1, 2], q = [1, null, 2]
+Output: false
+</code></pre>
+<hr>
+<p>This problem lends itself easily to recursion. After all, two trees are the same if their subtrees are the same.</p>
+<p>My initial solution in TypeScript looked like this:</p>
+<pre><code class="language-ts">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function isSameTree(p: TreeNode | null, q: TreeNode | null): boolean {
+  if (p !== null &amp;&amp; q !== null &amp;&amp; p.val !== q.val) {
+    return false;
+  } 
+
+  if (p === null) {
+    return q === null;
+  }
+
+  if (q === null) {
+    return p === null;
+  }
+
+  return isSameTree(p.left, q.left) &amp;&amp; isSameTree(p.right, q.right);
+}
+</code></pre>
+<p>First, we check if both nodes are not <code>null</code> and their values are not the same; in that case, we can return <code>false</code>.<br>Then, if one of them is <code>null</code>, we can return if the other one is <code>null</code> as well — if it is, the return value will be <code>true</code>, otherwise <code>false</code>. Of course, we apply <code>isSameTree</code> to the left and right children of the node recursively.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity will be proportionate to the total number of nodes in both trees, that is, $O(n)$ where $n$ is the total number of nodes. Because of the recursive calls, the space complexity, in the worst case—<em>I think</em>—can be said to be $O(n)$ where $n$ is the overall total number of nodes.</p>
+<hr>
+<p>Note that we can also write another concise (and <em>better</em>?) solution like this:</p>
+<pre><code class="language-ts">function isSameTree(p: TreeNode | null, q: TreeNode | null): boolean {
+  if (p === null &amp;&amp; q === null) {
+    return true;
+  } 
+
+  if (p !== null &amp;&amp; q !== null &amp;&amp; p.val === q.val) {
+    return isSameTree(p.left, q.left) &amp;&amp; isSameTree(p.right, q.right);
+  } else {
+    return false;
+  }
+}
+</code></pre>
+<p>Since the only way both trees are the same is either when they both are empty or all their nodes are the same. We first check whether both nodes are <code>null</code>, if so, we return <code>true</code>. We continue checking the left and right subtrees recursively only if both nodes are not <code>null</code> and their values are the same. In other cases, the trees can&#39;t be the same, so we return <code>false</code>.</p>
+<hr>
+<p>The next problem is called <a href="https://leetcode.com/problems/subtree-of-another-tree/" target="_blank" rel="noopener noreferrer">Subtree of Another Tree</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-same-tree</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-same-tree</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 20 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Maximum Depth of Binary Tree]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-18/33-lm.png" alt="Cover image"></p>

@@ -1,0 +1,102 @@
+---
+title: "LeetCode Meditations: Same Tree"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Same Tree problem.
+slug: leetcode-meditations-same-tree
+date: 2024-04-20
+---
+
+![Cover image](/blog/post-images/2024-04-20/34-lm.png)
+
+Let's see the description for [this problem](https://leetcode.com/problems/same-tree):
+
+> Given the roots of two binary trees `p` and `q`, write a function to check if they are the same or not.
+>
+> Two binary trees are considered the same if they are structurally identical, and the nodes have the same value.
+
+For example:
+
+![Example 1](https://assets.leetcode.com/uploads/2020/12/20/ex1.jpg)
+
+```
+Input: p = [1, 2, 3], q = [1, 2, 3]
+Output: true
+```
+
+Or:
+
+![Example 2](https://assets.leetcode.com/uploads/2020/12/20/ex2.jpg)
+
+```
+Input: p = [1, 2], q = [1, null, 2]
+Output: false
+```
+
+---
+
+This problem lends itself easily to recursion. After all, two trees are the same if their subtrees are the same.
+
+My initial solution in TypeScript looked like this:
+
+```ts
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function isSameTree(p: TreeNode | null, q: TreeNode | null): boolean {
+  if (p !== null && q !== null && p.val !== q.val) {
+    return false;
+  } 
+
+  if (p === null) {
+    return q === null;
+  }
+
+  if (q === null) {
+    return p === null;
+  }
+
+  return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+}
+```
+
+First, we check if both nodes are not `null` and their values are not the same; in that case, we can return `false`.
+Then, if one of them is `null`, we can return if the other one is `null` as well — if it is, the return value will be `true`, otherwise `false`. Of course, we apply `isSameTree` to the left and right children of the node recursively.
+
+#### Time and space complexity
+
+The time complexity will be proportionate to the total number of nodes in both trees, that is, $O(n)$ where $n$ is the total number of nodes. Because of the recursive calls, the space complexity, in the worst case—_I think_—can be said to be $O(n)$ where $n$ is the overall total number of nodes.
+
+---
+
+Note that we can also write another concise (and _better_?) solution like this:
+
+```ts
+function isSameTree(p: TreeNode | null, q: TreeNode | null): boolean {
+  if (p === null && q === null) {
+    return true;
+  } 
+
+  if (p !== null && q !== null && p.val === q.val) {
+    return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+  } else {
+    return false;
+  }
+}
+```
+
+Since the only way both trees are the same is either when they both are empty or all their nodes are the same. We first check whether both nodes are `null`, if so, we return `true`. We continue checking the left and right subtrees recursively only if both nodes are not `null` and their values are the same. In other cases, the trees can't be the same, so we return `false`.
+
+---
+
+The next problem is called [Subtree of Another Tree](https://leetcode.com/problems/subtree-of-another-tree/). Until then, happy coding.
