@@ -4,9 +4,92 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 20 Apr 2024 21:53:09 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 22 Apr 2024 17:45:04 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Subtree of Another Tree]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-22/35-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/subtree-of-another-tree" target="_blank" rel="noopener noreferrer">this one</a>:</p>
+<blockquote>
+<p>Given the roots of two binary trees <code>root</code> and <code>subRoot</code>, return <code>true</code> if there is a subtree of <code>root</code> with the same structure and node values of <code>subRoot</code> and <code>false</code> otherwise.</p>
+<p>A subtree of a binary tree <code>tree</code> is a tree that consists of a node in <code>tree</code> and all of this node&#39;s descendants. The tree <code>tree</code> could also be considered as a subtree of itself.</p>
+</blockquote>
+<p>For example:</p>
+<p><img src="https://assets.leetcode.com/uploads/2021/04/28/subtree1-tree.jpg" alt="Example image 1"></p>
+<pre><code>Input: root = [3, 4, 5, 1, 2], subRoot = [4, 1, 2]
+Output: true
+</code></pre>
+<p>Or:</p>
+<p><img src="https://assets.leetcode.com/uploads/2021/04/28/subtree2-tree.jpg" alt="Example image 2"></p>
+<pre><code>Input: root = [3, 4, 5, 1, 2, null, null, null, null, 0], subRoot = [4, 1, 2]
+Output: false
+</code></pre>
+<hr>
+<p>When it comes to tree problems (at least the ones we&#39;ve looked at so far), recursion seems to be a natural choice, as <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees" target="_blank" rel="noopener noreferrer">trees themselves are recursive structures</a>. And this problem is no different.</p>
+<p>What we need to do is check whether a subtree of the first tree we&#39;re given <em>is the same as</em> another tree.<br>In the previous problem, we did just that: we&#39;ve checked <a href="https://rivea0.github.io/blog/leetcode-meditations-same-tree" target="_blank" rel="noopener noreferrer">if two trees are the same</a>.</p>
+<p>So, we can use the same function here as well. Here&#39;s a concise <code>isSameTree</code> function:</p>
+<pre><code class="language-ts">function isSameTree(p: TreeNode | null, q: TreeNode | null): boolean {
+  if (p === null &amp;&amp; q === null) {
+    return true;
+  } 
+
+  if (p !== null &amp;&amp; q !== null &amp;&amp; p.val === q.val) {
+    return isSameTree(p.left, q.left) &amp;&amp; isSameTree(p.right, q.right);
+  } else {
+    return false;
+  }
+}
+</code></pre>
+<p>Now for this problem, we need to check if, with the given <code>root</code> and <code>subRoot</code>, the trees are the same. If not, we need to recursively search left and right subtrees for <em>sameness</em>.</p>
+<p>However, coming up with edge cases was harder than I thought. For one thing, we <strong>don&#39;t want to</strong> check the case when both <code>root</code> and <code>subRoot</code> are <code>null</code> — they need to be handled separately. <a href="https://www.youtube.com/watch?v=E36O5SWp-LE" target="_blank" rel="noopener noreferrer">NeetCode&#39;s explanation</a> was very helpful to sort this out in my mind.</p>
+<p>So, we can check the case when the <code>subRoot</code> is <code>null</code>, in that case we can return <code>true</code> because <mark><em>an empty tree is a subtree of every tree</em></mark>.<br>However, when the <code>root</code> is <code>null</code> and the <code>subRoot</code> is not <code>null</code>, we need to return <code>false</code>, because that means the given subtree is not in the tree. </p>
+<p>When the current <code>root</code> and <code>subRoot</code> are holding the same tree, we can return <code>true</code>, but in other cases, we recursively search the left and right subtrees until they result in the same tree or the root ends up being <code>null</code>: </p>
+<pre><code class="language-ts">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function isSubtree(root: TreeNode | null, subRoot: TreeNode | null): boolean {
+  // The order of these two base cases is important!
+  if (subRoot === null) {
+    return true;
+  }
+
+  if (root === null) { // (root === null &amp;&amp; subRoot !== null)
+    return false;
+  }
+    
+  if (isSameTree(root, subRoot)) {
+    return true;
+  } else {
+    return isSubtree(root.left, subRoot) || isSubtree(root.right, subRoot);
+  }
+}
+</code></pre>
+<Note>
+The order of the first two base cases is important. The second one where we check if `root` is `null` implicitly **assumes that `subRoot` is not `null`** as we have checked that condition in the first `if` statement.
+</Note>
+
+<h4>Time and space complexity</h4>
+<p>For each node in the first tree, we use the <code>isSameTree</code> function to check if the tree is the same as the given subtree. Therefore the time complexity is in the worst case $O(n^2)$.<br>Because of the recursive calls, the space complexity is—<em>I think</em>—in the worst case $O(n)$.</p>
+<hr>
+<p>Next up is <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree" target="_blank" rel="noopener noreferrer">Lowest Common Ancestor of a Binary Search Tree</a>. That&#39;s a mouthful, but we&#39;ll manage.<br>Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-subtree-of-another-tree</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-subtree-of-another-tree</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Mon, 22 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Same Tree]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-20/34-lm.png" alt="Cover image"></p>
