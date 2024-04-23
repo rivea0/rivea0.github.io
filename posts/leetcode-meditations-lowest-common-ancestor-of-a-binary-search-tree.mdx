@@ -1,0 +1,158 @@
+---
+title: "LeetCode Meditations: Lowest Common Ancestor of a Binary Search Tree"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Lowest Common Ancestor of a Binary Search Tree problem.
+slug: leetcode-meditations-lowest-common-ancestor-of-a-binary-search-tree
+date: 2024-04-23
+---
+
+![Cover image](/blog/post-images/2024-04-23/36-lm.png)
+
+The description for [this one](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree) states:
+
+> Given a binary search tree (BST), find the lowest common ancestor (LCA) node of two given nodes in the BST.
+>
+> According to the [definition of LCA on Wikipedia](https://en.wikipedia.org/wiki/Lowest_common_ancestor): “The lowest common ancestor is defined between two nodes `p` and `q` as the lowest node in `T` that has both `p` and `q` as descendants (where we allow **a node to be a descendant of itself**).”
+
+For example:
+
+<img src="https://assets.leetcode.com/uploads/2018/12/14/binarysearchtree_improved.png" alt="Example 1 image" />
+
+```
+Input: root = [6, 2, 8, 0, 4, 7, 9, null, null, 3, 5], p = 2, q = 8
+Output: 6
+Explanation: The LCA of nodes 2 and 8 is 6.
+```
+
+Or:
+
+<img src="https://assets.leetcode.com/uploads/2018/12/14/binarysearchtree_improved.png" alt="Example 2 image" />
+
+```
+Input: root = [6, 2, 8, 0, 4, 7, 9, null, null, 3, 5], p = 2, q = 4
+Output: 2
+Explanation: The LCA of nodes 2 and 4 is 2, since a node can be a descendant of itself according to the LCA definition.
+```
+
+---
+
+If this is the first time you're hearing the term _lowest common ancestor_ in the context of trees, it might sound a bit intimidating. But, it's indeed easy to see how it works.
+
+Like many other problems, the solution awaits that we find which cases to look out for. 
+
+One of those cases is when `p` and `q` are in the different subtrees: that is, either `p` is greater than `root` and `q` is less than `root`, or `p` is less than `root` and `q` is greater than `root`. In that case, we know that the `root` will be their lowest common ancestor. 
+
+Since a node can be a descendant of itself, we can also return it when it's the lowest common ancestor to both nodes, as in the second example above.
+
+My initial solution in TypeScript was this:
+
+```ts
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function lowestCommonAncestor(root: TreeNode | null, p: TreeNode | null, q: TreeNode | null): TreeNode | null {
+  if (
+    root.val === p.val ||
+    root.val === q.val ||
+    (p.val < root.val && q.val > root.val) ||
+    (p.val > root.val && q.val < root.val)
+  ) {
+    return root;
+  }
+
+  if (p.val > root.val && q.val > root.val) {
+    return lowestCommonAncestor(root.right, p, q);
+  }
+    
+  if (p.val < root.val && q.val < root.val) {
+    return lowestCommonAncestor(root.left, p, q);
+  }
+}
+```
+
+We're using (yet again) recursion. If the values of `p` and `q` are greater than `root`, we pass `root.right` as `root` to our function, otherwise, we pass `root.left`.
+
+The base cases are the ones mentioned above. It looks a bit confusing, so let's look at it closely.
+
+This one:
+
+```ts
+(p.val < root.val && q.val > root.val)
+```
+
+And this one:
+
+```ts
+(p.val > root.val && q.val < root.val)
+```
+
+check whether `p` and `q` are in different subtrees — that is, when a split happens. In that case, `root` is their lowest common ancestor. If one of them is true, we need to return `root`.
+
+Other conditions are when `root.val === p.val` or `root.val === q.val`. In these cases, either `p` or `q` is the same as the `root`, which means that it is the lowest common ancestor, so we can return `root` as well.
+
+#### Time and space complexity
+
+Both the time and space complexity will be $O(h)$—where $h$ is the height of the tree. We touch one node at each level as we go (hence the time complexity). And, because of the recursion, we create a new stack frame for each function call, so the additional space is proportionate to the height of the tree.
+
+<Note>
+Since this is a [BST](https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#bst), and we're halving the search space as we go, the time complexity can also be said to be $O(log \ n)$. 
+</Note>
+
+---
+
+### Non-recursive approach
+
+We can do better for the space complexity, and not use recursion at all — like this:
+
+```ts
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function lowestCommonAncestor(root: TreeNode | null, p: TreeNode | null, q: TreeNode | null): TreeNode | null {
+  let currentNode = root;
+
+  while (currentNode !== null) {
+    if (p.val > currentNode.val && q.val > currentNode.val) {
+      currentNode = currentNode.right;
+    } else if (p.val < currentNode.val && q.val < currentNode.val) {
+      currentNode = currentNode.left;
+    // One of them is larger and one of them is smaller than 
+    // the currentNode (i.e., a split happened)
+    } else { 
+      return currentNode;
+    }
+  }
+}
+```
+
+This version is perhaps more readable and cleaner than the first one. When both `p` and `q` have greater values than `currentNode` (which is initially `root`), we go to the right subtree, otherwise if their values are less, we go to the left subtree. In all the other cases (the ones we've looked at in the recursive version), we just return `currentNode`.
+
+#### Time and space complexity
+
+The time complexity is again $O(h)$ where $h$ is the height, for the same reason that we touch each node at every level. However, the space complexity is $O(1)$ as we don't need additional space.
+
+---
+
+The next problem is a fun and essential one, [Binary Tree Level Order Traversal](https://leetcode.com/problems/binary-tree-level-order-traversal/). Until then, happy coding.

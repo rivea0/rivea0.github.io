@@ -4,9 +4,130 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 22 Apr 2024 17:45:04 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 23 Apr 2024 15:51:20 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Lowest Common Ancestor of a Binary Search Tree]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-23/36-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree" target="_blank" rel="noopener noreferrer">this one</a> states:</p>
+<blockquote>
+<p>Given a binary search tree (BST), find the lowest common ancestor (LCA) node of two given nodes in the BST.</p>
+<p>According to the <a href="https://en.wikipedia.org/wiki/Lowest_common_ancestor" target="_blank" rel="noopener noreferrer">definition of LCA on Wikipedia</a>: “The lowest common ancestor is defined between two nodes <code>p</code> and <code>q</code> as the lowest node in <code>T</code> that has both <code>p</code> and <code>q</code> as descendants (where we allow <strong>a node to be a descendant of itself</strong>).”</p>
+</blockquote>
+<p>For example:</p>
+<img src="https://assets.leetcode.com/uploads/2018/12/14/binarysearchtree_improved.png" alt="Example 1 image" />
+
+<pre><code>Input: root = [6, 2, 8, 0, 4, 7, 9, null, null, 3, 5], p = 2, q = 8
+Output: 6
+Explanation: The LCA of nodes 2 and 8 is 6.
+</code></pre>
+<p>Or:</p>
+<img src="https://assets.leetcode.com/uploads/2018/12/14/binarysearchtree_improved.png" alt="Example 2 image" />
+
+<pre><code>Input: root = [6, 2, 8, 0, 4, 7, 9, null, null, 3, 5], p = 2, q = 4
+Output: 2
+Explanation: The LCA of nodes 2 and 4 is 2, since a node can be a descendant of itself according to the LCA definition.
+</code></pre>
+<hr>
+<p>If this is the first time you&#39;re hearing the term <em>lowest common ancestor</em> in the context of trees, it might sound a bit intimidating. But, it&#39;s indeed easy to see how it works.</p>
+<p>Like many other problems, the solution awaits that we find which cases to look out for. </p>
+<p>One of those cases is when <code>p</code> and <code>q</code> are in the different subtrees: that is, either <code>p</code> is greater than <code>root</code> and <code>q</code> is less than <code>root</code>, or <code>p</code> is less than <code>root</code> and <code>q</code> is greater than <code>root</code>. In that case, we know that the <code>root</code> will be their lowest common ancestor. </p>
+<p>Since a node can be a descendant of itself, we can also return it when it&#39;s the lowest common ancestor to both nodes, as in the second example above.</p>
+<p>My initial solution in TypeScript was this:</p>
+<pre><code class="language-ts">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function lowestCommonAncestor(root: TreeNode | null, p: TreeNode | null, q: TreeNode | null): TreeNode | null {
+  if (
+    root.val === p.val ||
+    root.val === q.val ||
+    (p.val &lt; root.val &amp;&amp; q.val &gt; root.val) ||
+    (p.val &gt; root.val &amp;&amp; q.val &lt; root.val)
+  ) {
+    return root;
+  }
+
+  if (p.val &gt; root.val &amp;&amp; q.val &gt; root.val) {
+    return lowestCommonAncestor(root.right, p, q);
+  }
+    
+  if (p.val &lt; root.val &amp;&amp; q.val &lt; root.val) {
+    return lowestCommonAncestor(root.left, p, q);
+  }
+}
+</code></pre>
+<p>We&#39;re using (yet again) recursion. If the values of <code>p</code> and <code>q</code> are greater than <code>root</code>, we pass <code>root.right</code> as <code>root</code> to our function, otherwise, we pass <code>root.left</code>.</p>
+<p>The base cases are the ones mentioned above. It looks a bit confusing, so let&#39;s look at it closely.</p>
+<p>This one:</p>
+<pre><code class="language-ts">(p.val &lt; root.val &amp;&amp; q.val &gt; root.val)
+</code></pre>
+<p>And this one:</p>
+<pre><code class="language-ts">(p.val &gt; root.val &amp;&amp; q.val &lt; root.val)
+</code></pre>
+<p>check whether <code>p</code> and <code>q</code> are in different subtrees — that is, when a split happens. In that case, <code>root</code> is their lowest common ancestor. If one of them is true, we need to return <code>root</code>.</p>
+<p>Other conditions are when <code>root.val === p.val</code> or <code>root.val === q.val</code>. In these cases, either <code>p</code> or <code>q</code> is the same as the <code>root</code>, which means that it is the lowest common ancestor, so we can return <code>root</code> as well.</p>
+<h4>Time and space complexity</h4>
+<p>Both the time and space complexity will be $O(h)$—where $h$ is the height of the tree. We touch one node at each level as we go (hence the time complexity). And, because of the recursion, we create a new stack frame for each function call, so the additional space is proportionate to the height of the tree.</p>
+<Note>
+Since this is a [BST](https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#bst), and we're halving the search space as we go, the time complexity can also be said to be $O(log \ n)$. 
+</Note>
+
+<hr>
+<h3>Non-recursive approach</h3>
+<p>We can do better for the space complexity, and not use recursion at all — like this:</p>
+<pre><code class="language-ts">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function lowestCommonAncestor(root: TreeNode | null, p: TreeNode | null, q: TreeNode | null): TreeNode | null {
+  let currentNode = root;
+
+  while (currentNode !== null) {
+    if (p.val &gt; currentNode.val &amp;&amp; q.val &gt; currentNode.val) {
+      currentNode = currentNode.right;
+    } else if (p.val &lt; currentNode.val &amp;&amp; q.val &lt; currentNode.val) {
+      currentNode = currentNode.left;
+    // One of them is larger and one of them is smaller than 
+    // the currentNode (i.e., a split happened)
+    } else { 
+      return currentNode;
+    }
+  }
+}
+</code></pre>
+<p>This version is perhaps more readable and cleaner than the first one. When both <code>p</code> and <code>q</code> have greater values than <code>currentNode</code> (which is initially <code>root</code>), we go to the right subtree, otherwise if their values are less, we go to the left subtree. In all the other cases (the ones we&#39;ve looked at in the recursive version), we just return <code>currentNode</code>.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity is again $O(h)$ where $h$ is the height, for the same reason that we touch each node at every level. However, the space complexity is $O(1)$ as we don&#39;t need additional space.</p>
+<hr>
+<p>The next problem is a fun and essential one, <a href="https://leetcode.com/problems/binary-tree-level-order-traversal/" target="_blank" rel="noopener noreferrer">Binary Tree Level Order Traversal</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-lowest-common-ancestor-of-a-binary-search-tree</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-lowest-common-ancestor-of-a-binary-search-tree</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 23 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Subtree of Another Tree]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-22/35-lm.png" alt="Cover image"></p>
