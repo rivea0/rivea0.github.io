@@ -4,9 +4,150 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 23 Apr 2024 15:51:20 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 24 Apr 2024 14:48:46 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Binary Tree Level Order Traversal]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-24/37-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/binary-tree-level-order-traversal" target="_blank" rel="noopener noreferrer">Binary Tree Level Order Traversal</a>:</p>
+<blockquote>
+<p>Given the <code>root</code> of a binary tree, return <em>the level order traversal of its nodes&#39; values</em>. (i.e., from left to right, level by level).</p>
+</blockquote>
+<p>For example:</p>
+<img src="https://assets.leetcode.com/uploads/2021/02/19/tree1.jpg" alt="Example image" />
+
+<pre><code>Input: root = [3, 9, 20, null, null, 15, 7]
+Output: [[3], [9, 20], [15, 7]]
+</code></pre>
+<hr>
+<p>Level-order traversal is another name for <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#bfs" target="_blank" rel="noopener noreferrer">breadth-first search</a>. In this problem, we only need to get the values of the nodes in each level.</p>
+<p>My initial solution in TypeScript looked like this:</p>
+<pre><code class="language-ts">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function levelOrder(root: TreeNode | null): number[][] {
+  if (root === null) {
+    return [];
+  }
+
+  let result = [];
+  let currentLevel = [root];
+
+  while (currentLevel.length &gt; 0) {
+    let nextLevel = [];
+    for (let node of currentLevel) {
+      if (node !== null &amp;&amp; node.left !== null) {
+        nextLevel.push(node.left);
+      }
+      if (node !== null &amp;&amp; node.right !== null) {
+        nextLevel.push(node.right);
+      }
+    }
+
+    result.push(currentLevel.map(node =&gt; node.val));
+    currentLevel = nextLevel;
+  }
+
+  return result;
+}
+</code></pre>
+<p>What we do is, first, check if <code>root</code> is null — in that case, we immediately return an empty array.</p>
+<p>Then, we initialize a <code>result</code> array and another array to hold the nodes in the current level (which initially only has <code>root</code>).</p>
+<p>As we traverse the tree, we add the nodes in the next level — that is, the left and right children of the nodes in the current level we&#39;re looking at. Once we&#39;re done with the current level, we add the values in it to <code>result</code>, and go to the next level in the tree, doing the same thing until there are no nodes left to look at.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(n)$ as we visit each node once in the tree. Since <a href="https://en.wikipedia.org/wiki/Binary_tree#Properties_of_binary_trees" target="_blank" rel="noopener noreferrer">the largest level in a binary tree can be of length $\frac{n + 1}{2}$</a> where $n$ is the total number of nodes in the tree, the space complexity also ends up being $O(n)$ as we store each level.</p>
+<hr>
+<p>Similar to the version above, another solution might look like this (as in <a href="https://www.youtube.com/watch?v=6ZnyEApgFYg" target="_blank" rel="noopener noreferrer">this example by NeetCode</a>) — let&#39;s see it in Python this time:</p>
+<pre><code class="language-python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+def levelOrder(self, root: Optional[TreeNode]) -&gt; List[List[int]]:
+    result = []
+    queue = collections.deque()
+    queue.append(root)
+
+    while queue:
+        current_level = []
+        current_queue_length = len(queue)
+        for i in range(current_queue_length):
+            node = queue.popleft()
+            if node:
+                current_level.append(node.val)
+                queue.append(node.left)
+                queue.append(node.right)
+        if current_level:
+            result.append(current_level)
+    
+    return result
+</code></pre>
+<p>In this version, we use a <a href="https://docs.python.org/3/library/collections.html#collections.deque" target="_blank" rel="noopener noreferrer"><code>deque</code></a> for our queue. We initially append <code>root</code> to it, and as we traverse the tree, we append the values to <code>current_level</code>. Once we&#39;re done with a level, we append the values to <code>result</code>.</p>
+<p>We can try a similar logic in TypeScript as well:</p>
+<pre><code class="language-ts">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function levelOrder(root: TreeNode | null): number[][] {
+  let result = [];
+  let queue = [root];
+
+  while (queue.length &gt; 0) {
+    let currentLevel = [];
+    let currentQueueLength = queue.length;
+    for (let i = 0; i &lt; currentQueueLength; i++) {
+      let node = queue.shift();
+      if (node !== null) {
+        currentLevel.push(node.val);
+        queue.push(node.left);
+        queue.push(node.right);
+      }
+    }
+    if (currentLevel.length &gt; 0) {
+      result.push(currentLevel);
+    }
+  }
+   
+  return result;
+}
+</code></pre>
+<Note>
+We're keeping the length of `queue` in a separate variable called `currentQueueLength` — it's essentially needed to keep the levels separate. 
+
+<p>(Note that we&#39;re mutating <code>queue</code>&#39;s length inside the <code>for</code> loop with <code>queue.push</code> when we add the left and right children.)<br></Note></p>
+<p>The time and space complexity are the same for this solution as well, that is, both are $O(n)$.</p>
+<hr>
+<p>Next up, we&#39;ll validate a binary search tree in the problem with the appropriate title, <a href="https://leetcode.com/problems/validate-binary-search-tree" target="_blank" rel="noopener noreferrer">Validate Binary Search Tree</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-binary-tree-level-order-traversal</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-binary-tree-level-order-traversal</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Wed, 24 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Lowest Common Ancestor of a Binary Search Tree]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-23/36-lm.png" alt="Cover image"></p>
