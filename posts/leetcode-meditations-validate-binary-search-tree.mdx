@@ -1,0 +1,125 @@
+---
+title: "LeetCode Meditations: Validate Binary Search Tree"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Validate Binary Search Tree problem.
+slug: leetcode-meditations-validate-binary-search-tree
+date: 2024-04-26
+---
+
+![Cover image](/blog/post-images/2024-04-26/38-lm.png)
+
+The description for Validate Binary Search Tree is:
+
+> Given the `root` of a binary tree, _determine if it is a valid binary search tree (BST)_.
+>
+> A **valid BST** is defined as follows:
+>
+> - The left subtree of a node contains only nodes with keys **less than** the node's key.
+> - The right subtree of a node contains only nodes with keys **greater than** the node's key.
+> - Both the left and right subtrees must also be binary search trees.
+
+For example: 
+
+<img src="https://assets.leetcode.com/uploads/2020/12/01/tree1.jpg" alt="Example image 1" />
+
+```
+Input: root = [2, 1, 3]
+Output: true
+```
+
+Or:
+
+<img src="https://assets.leetcode.com/uploads/2020/12/01/tree2.jpg" alt="Example image 1" />
+
+```
+Input: root = [5, 1, 4, null, null, 3, 6]
+Output: false
+Explanation: The root node's value is 5 but its right child's value is 4.
+```
+
+---
+
+Even though this one looks easy to solve recursively, there is a catch. 
+
+Let's say we naively wrote something like this:
+
+```ts
+function isValidBST(root: TreeNode | null): boolean {
+  if (root === null) {
+    return true;
+  }
+    
+  if (
+    (root.left !== null && root.left.val >= root.val) ||
+    (root.right !== null && root.right.val <= root.val)
+  ) {
+    return false;
+  }
+    
+  return isValidBST(root.left) && isValidBST(root.right);
+}
+```
+
+This would return `true` for the second example above, which is **wrong**. In that example, although the right subtree is valid in its own right, the whole tree itself is not a valid binary search tree because 3 should be in the left subtree of the root.
+
+So, let's look at a proper solution in TypeScript, adapted from [NeetCode's explanation](https://www.youtube.com/watch?v=s6ATEkipzow):
+
+```ts
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function isValidBST(root: TreeNode | null): boolean {
+  function valid(node: TreeNode | null, left: number, right: number) {
+    if (node === null) {
+      return true;
+    }
+
+    if (node.val >= right || node.val <= left) {
+      return false;
+    }
+
+    return valid(node.left, left, node.val) && valid(node.right, node.val, right);
+  }
+
+  return valid(root, -Infinity, Infinity);
+}
+```
+
+Here, we give boundaries for the left and right values that we're going to check a node's value against. Here, the value should be greater than `left`, and less than `right`. We start with negative and positive infinity because the root can be any value. 
+
+Inside `valid`, we only update the right boundary for the left child, and we only update the left boundary for the right child. 
+
+<Note>
+Remember that a left child can be as small as it wants to be, as long as it's smaller than the root, so only the right boundary should be updated for it:
+
+```ts
+valid(node.left, left, node.val)
+```
+
+Likewise, a right child can be as large as it can be, as long as it's larger than the root. Therefore, we only update the left boundary for it:
+
+```ts
+valid(node.right, node.val, right)
+```
+</Note>
+
+Of course, we return `false` when BST rules are broken: if the given node's value is greater than or equal to the right boundary, or less than or equal to the left boundary.
+
+#### Time and space complexity
+
+The time complexity is going to be $O(n)$ as we do the comparisons for each node in the tree once. The space complexity will be $O(h)$ where $h$ is the height of the tree because of the recursive function we use, as it'll create a new stack frame with each call.
+
+---
+
+The next problem is called [Kth Smallest Element in a BST](https://leetcode.com/problems/kth-smallest-element-in-a-bst/), which sounds exciting enough. Until then, happy coding.
