@@ -1,0 +1,129 @@
+---
+title: "LeetCode Meditations: Kth Smallest Element in a BST"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Kth Smallest Element in a BST problem.
+slug: leetcode-meditations-kth-smallest-element-in-a-bst
+date: 2024-04-28
+---
+
+![Cover image](/blog/post-images/2024-04-28/39-lm.png)
+
+Let's start with the description for [Kth Smallest Element in a BST](https://leetcode.com/problems/kth-smallest-element-in-a-bst/):
+
+> Given the `root` of a binary search tree, and an integer `k`, return _the_ `kth` _smallest value (**1-indexed**) of all the values of the nodes in the tree_.
+
+For example:
+
+<img src="https://assets.leetcode.com/uploads/2021/01/28/kthtree1.jpg" alt="Example image 1" />
+
+```
+Input: root = [3, 1, 4, null, 2], k = 1
+Output: 1
+```
+
+Or:
+
+<img src="https://assets.leetcode.com/uploads/2021/01/28/kthtree2.jpg" alt="Example image 2" />
+
+```
+Input: root = [5, 3, 6, 2, 4, null, null, 1], k = 3
+Output: 3
+```
+
+---
+
+This problem naturally lends itself to a neat recursive solution using a neat traversal algorithm. 
+
+Remember [inorder traversal](https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#inorder) that gives us the values in a binary search tree _in order_? Exactly.
+
+Here, we can use it to build a stack called `values`, and get the `k`th item (1-indexed of course, as the problem description states):
+
+```ts
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function kthSmallest(root: TreeNode | null, k: number): number {
+  let values = [];
+  function inorderWalk(node: TreeNode | null) {
+    if (node === null || values.length === k) {
+      return;
+    }
+
+    inorderWalk(node.left);
+    values.push(node.val);
+    inorderWalk(node.right);
+  }
+
+  inorderWalk(root);
+
+  return values[k - 1];
+}
+```
+
+#### Time and space complexity
+
+The time complexity is going to be $O(n)$ because we traverse the whole tree and visit each node once. The space complexity is also $O(n)$ as we keep a stack that holds all the nodes.
+
+---
+
+That was a simple and elegant solution, but let's now take a breath and look at another solution that uses an _**iterative**_ version of the inorder traversal:
+
+
+```ts
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function kthSmallest(root: TreeNode | null, k: number): number {
+  let stack = [];
+  let currentNode = root;
+
+  while (k > 0) {
+    while (currentNode !== null) {
+      stack.push(currentNode);
+      currentNode = currentNode.left;
+    }
+
+    currentNode = stack.pop();
+    k--;
+
+    if (k === 0) {
+      return currentNode.val;
+    }
+
+    currentNode = currentNode.right;
+  }
+}
+```
+
+Here, we go as deep as we can in the left subtree, adding the nodes to our `stack` as we go. Once we reach a node that doesn't have a left child, we pop from the stack. Each time we do so, we'll be getting the values in sorted order. 
+Once we pop the `k`th time, we'll return the value of the current node and be done with it. Otherwise, we'll go to the right subtree.
+
+#### Time and space complexity
+
+The time complexity is $O(n)$ because in the worst case where `k` is $n$, we'll end up visiting each node. The space complexity will be $O(h)$—where $h$ is the height of the tree—because in the worst case, we'll store all the nodes from the root to the deepest leaf node.
+
+---
+
+The next problem is called [Construct Binary Tree from Preorder and Inorder Traversal](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal). Yet another mouthful title, but we'll survive. Until then, happy coding.

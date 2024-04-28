@@ -4,9 +4,113 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 26 Apr 2024 21:19:31 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 28 Apr 2024 20:36:08 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Kth Smallest Element in a BST]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-04-28/39-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/kth-smallest-element-in-a-bst/" target="_blank" rel="noopener noreferrer">Kth Smallest Element in a BST</a>:</p>
+<blockquote>
+<p>Given the <code>root</code> of a binary search tree, and an integer <code>k</code>, return <em>the</em> <code>kth</code> <em>smallest value (<strong>1-indexed</strong>) of all the values of the nodes in the tree</em>.</p>
+</blockquote>
+<p>For example:</p>
+<img src="https://assets.leetcode.com/uploads/2021/01/28/kthtree1.jpg" alt="Example image 1" />
+
+<pre><code>Input: root = [3, 1, 4, null, 2], k = 1
+Output: 1
+</code></pre>
+<p>Or:</p>
+<img src="https://assets.leetcode.com/uploads/2021/01/28/kthtree2.jpg" alt="Example image 2" />
+
+<pre><code>Input: root = [5, 3, 6, 2, 4, null, null, 1], k = 3
+Output: 3
+</code></pre>
+<hr>
+<p>This problem naturally lends itself to a neat recursive solution using a neat traversal algorithm. </p>
+<p>Remember <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#inorder" target="_blank" rel="noopener noreferrer">inorder traversal</a> that gives us the values in a binary search tree <em>in order</em>? Exactly.</p>
+<p>Here, we can use it to build a stack called <code>values</code>, and get the <code>k</code>th item (1-indexed of course, as the problem description states):</p>
+<pre><code class="language-ts">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function kthSmallest(root: TreeNode | null, k: number): number {
+  let values = [];
+  function inorderWalk(node: TreeNode | null) {
+    if (node === null || values.length === k) {
+      return;
+    }
+
+    inorderWalk(node.left);
+    values.push(node.val);
+    inorderWalk(node.right);
+  }
+
+  inorderWalk(root);
+
+  return values[k - 1];
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity is going to be $O(n)$ because we traverse the whole tree and visit each node once. The space complexity is also $O(n)$ as we keep a stack that holds all the nodes.</p>
+<hr>
+<p>That was a simple and elegant solution, but let&#39;s now take a breath and look at another solution that uses an <em><strong>iterative</strong></em> version of the inorder traversal:</p>
+<pre><code class="language-ts">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function kthSmallest(root: TreeNode | null, k: number): number {
+  let stack = [];
+  let currentNode = root;
+
+  while (k &gt; 0) {
+    while (currentNode !== null) {
+      stack.push(currentNode);
+      currentNode = currentNode.left;
+    }
+
+    currentNode = stack.pop();
+    k--;
+
+    if (k === 0) {
+      return currentNode.val;
+    }
+
+    currentNode = currentNode.right;
+  }
+}
+</code></pre>
+<p>Here, we go as deep as we can in the left subtree, adding the nodes to our <code>stack</code> as we go. Once we reach a node that doesn&#39;t have a left child, we pop from the stack. Each time we do so, we&#39;ll be getting the values in sorted order.<br>Once we pop the <code>k</code>th time, we&#39;ll return the value of the current node and be done with it. Otherwise, we&#39;ll go to the right subtree.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(n)$ because in the worst case where <code>k</code> is $n$, we&#39;ll end up visiting each node. The space complexity will be $O(h)$—where $h$ is the height of the tree—because in the worst case, we&#39;ll store all the nodes from the root to the deepest leaf node.</p>
+<hr>
+<p>The next problem is called <a href="https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal" target="_blank" rel="noopener noreferrer">Construct Binary Tree from Preorder and Inorder Traversal</a>. Yet another mouthful title, but we&#39;ll survive. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-kth-smallest-element-in-a-bst</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-kth-smallest-element-in-a-bst</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 28 Apr 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Validate Binary Search Tree]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-26/38-lm.png" alt="Cover image"></p>
