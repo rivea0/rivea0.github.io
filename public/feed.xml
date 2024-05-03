@@ -4,9 +4,116 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 30 Apr 2024 19:34:13 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 03 May 2024 12:34:13 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Binary Tree Maximum Path Sum]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-05-03/41-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/binary-tree-maximum-path-sum" target="_blank" rel="noopener noreferrer">Binary Tree Maximum Path Sum</a>:</p>
+<blockquote>
+<p>A <strong>path</strong> in a binary tree is a sequence of nodes where each pair of adjacent nodes in the sequence has an edge connecting them. A node can only appear in the sequence <strong>at most once</strong>. Note that the path does not need to pass through the root.</p>
+<p>The <strong>path sum</strong> of a path is the sum of the node&#39;s values in the path.</p>
+<p>Given the <code>root</code> of a binary tree, return <em>the maximum <strong>path sum</strong> of any <strong>non-empty</strong> path</em>.</p>
+</blockquote>
+<p>For example:</p>
+<img src="https://assets.leetcode.com/uploads/2020/10/13/exx1.jpg" alt="Example image 1" />
+
+<pre><code>Input: root = [1, 2, 3]
+Output: 6
+Explanation: The optimal path is 2 -&gt; 1 -&gt; 3 with a path sum of 2 + 1 + 3 = 6.
+</code></pre>
+<p>Or:</p>
+<img src="https://assets.leetcode.com/uploads/2020/10/13/exx2.jpg" alt="Example image 2" />
+
+<pre><code>Input: root = [-10, 9, 20, null, null, 15, 7]
+Output: 42
+Explanation: The optimal path is 15 -&gt; 20 -&gt; 7 with a path sum of 15 + 20 + 7 = 42.
+</code></pre>
+<hr>
+<p>Although some people have found it <a href="https://leetcode.com/problems/binary-tree-maximum-path-sum/description/comments/1712502" target="_blank" rel="noopener noreferrer">quite simple</a>, this is a challenging problem. So, we&#39;ll take a deep breath, and take a look at a recursive <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#dfs" target="_blank" rel="noopener noreferrer">depth-first search</a> approach as shown by <a href="https://www.youtube.com/watch?v=Hr5cWUld4vU" target="_blank" rel="noopener noreferrer">NeetCode</a>.</p>
+<p>When all we have is a root node and its children, the maximum value we can have is the total values of all three of them. Of course, however, if there is a negative value that&#39;s going to lower the maximum value we can get, we shouldn&#39;t include it.</p>
+<p>From any root node&#39;s perspective, what we should do is get the total maximum value from the left subtree and the total maximum value from the right subtree. However, if we do the same thing for a node in one of the subtrees, we&#39;ll break our path. </p>
+<p>That is, <mark>if we are going to add the values of both of the children of a node, then we can&#39;t do that again for another node, because it will break the path</mark>. Once we have chosen both the left and right children of a node, we cannot have both children of another node again, we can only choose one of them. In other words, <em>we can only split once</em>.</p>
+<p>Let&#39;s imagine that we are the root node. We&#39;ll get the values of both our left and right children. We&#39;ll get the maximum value we can get from our left subtree, but each node in the left subtree can choose only one of their children. The same is true for the right subtree as well:</p>
+<pre><code class="language-ts">/*
+  maxLeft: the maximum value gained from the left subtree 
+  where each node chose only one of their children
+
+  maxRight: the maximum value gained from the right subtree 
+  where each node chose only one of their children
+*/
+let currentMax = root.val + maxLeft + maxRight;
+</code></pre>
+<p>Once again, the reason that the nodes in the subtrees have to choose only one of their children is that the root node have already chosen both of its children. Otherwise, our path will break.</p>
+<p>But, how can we get <code>maxLeft</code> and <code>maxRight</code>?<br>That&#39;s where the <em>depth-first</em> of depth-first search comes in:</p>
+<pre><code class="language-ts">let maxLeft = dfs(root.left);
+let maxRight = dfs(root.right);
+</code></pre>
+<p>We&#39;ll initialize our result value as the minimum possible value of <code>-Infinity</code> (because we want to get the possible maximum):</p>
+<pre><code class="language-ts">let result = -Infinity;
+</code></pre>
+<p>Inside <code>dfs</code>, we need to update this value each time we calculate <code>currentMax</code>:</p>
+<pre><code class="language-ts">result = Math.max(result, currentMax);
+</code></pre>
+<p>Remember that the nodes in the subtrees have to choose only one of their children? That&#39;s what our <code>dfs</code> function will return:</p>
+<pre><code class="language-ts">return Math.max(root.val + maxLeft, root.val + maxRight, 0);
+</code></pre>
+<Note>
+We include `0` as one of the possible maximum values as well, because a potential negative value can lower the maximum value we can have. `0` is better than a negative.
+</Note>
+
+<p>That&#39;s all there is to it. The final solution in TypeScript looks like this:</p>
+<pre><code class="language-ts">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+function maxPathSum(root: TreeNode | null): number {
+  let result = -Infinity;
+
+  function dfs(root: TreeNode | null) {
+    if (root === null) {
+      return 0;
+    }
+
+    let maxLeft = dfs(root.left);
+    let maxRight = dfs(root.right);
+
+    let currentMax = root.val + maxLeft + maxRight;
+    result = Math.max(result, currentMax);
+
+    return Math.max(root.val + maxLeft, root.val + maxRight, 0);    
+  }
+
+  dfs(root);
+    
+  return result;
+}
+</code></pre>
+<Note>
+`dfs` updates `result` as it runs, so in the outer function (`maxPathSum`), all we have to do is return it.
+</Note>
+
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(n)$ as we look at each node in the tree once. The space complexity is $O(h)$—where $h$ is the height of the tree—because of the stack frames created each time with the recursive calls.</p>
+<hr>
+<p>It&#39;s time to take another deep breath, because next up is yet another problem that&#39;s labeled as hard — <a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree" target="_blank" rel="noopener noreferrer">Serialize and Deserialize Binary Tree</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-binary-tree-maximum-path-sum</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-binary-tree-maximum-path-sum</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Fri, 03 May 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Construct Binary Tree from Preorder and Inorder Traversal]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-04-30/40-lm.png" alt="Cover image"></p>
