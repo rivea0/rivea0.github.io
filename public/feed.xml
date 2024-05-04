@@ -4,9 +4,231 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 03 May 2024 12:34:13 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 04 May 2024 22:24:16 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Serialize and Deserialize Binary Tree]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-05-04/42-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree" target="_blank" rel="noopener noreferrer">Serialize and Deserialize Binary Tree</a>:</p>
+<blockquote>
+<p>Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.</p>
+<p>Design an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.</p>
+<p><strong>Clarification:</strong> The input/output format is the same as <a href="https://support.leetcode.com/hc/en-us/articles/360011883654-What-does-1-null-2-3-mean-in-binary-tree-representation-" target="_blank" rel="noopener noreferrer">how LeetCode serializes a binary tree</a>. You do not necessarily need to follow this format, so please be creative and come up with different approaches yourself.</p>
+</blockquote>
+<p>For example:</p>
+<img src="https://assets.leetcode.com/uploads/2020/09/15/serdeser.jpg" alt="Example image" />
+
+<pre><code>Input: root = [1, 2, 3, null, null, 4, 5]
+Output: [1, 2, 3, null, null, 4, 5]
+</code></pre>
+<hr>
+<p>This one sounds easy, at least for the <code>serialize</code> function. We can just get the nodes one by one, and put them into a string. What could go wrong?</p>
+<p>We can indeed get the nodes one by one, and put them into a string for <code>serialize</code>, but we need a proper method so that when it comes time to <code>deserialize</code>, we can reconstruct our binary tree.</p>
+<p>One way to do it is using <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#bfs" target="_blank" rel="noopener noreferrer">breadth-first search</a>, in other words, a <em>level-order traversal</em>.  </p>
+<p>We&#39;ll keep a result array which we&#39;ll transform into a string by joining the elements with the comma character (<code>,</code>). </p>
+<p>We have seen how to do a level-order traversal before, but now when we see a <code>null</code> node, we don&#39;t ignore it, and instead add the string <code>&#39;null&#39;</code> to our <code>result</code>. Otherwise, we&#39;ll add the stringified version of the node&#39;s value using a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals" target="_blank" rel="noopener noreferrer">template literal</a>:</p>
+<pre><code class="language-ts">function serialize(root: TreeNode | null): string {
+  if (root === null) {
+    return &#39;&#39;;
+  }
+  let queue = [root];
+  let result = [];
+  while (queue.length &gt; 0) {
+    let node = queue[0];
+    if (node === null) {
+      result.push(&#39;null&#39;);
+    } else {
+      queue.push(node.left);
+      queue.push(node.right);
+      result.push(`${node.val}`);
+    }
+    queue.shift();
+  }
+
+  return result.join(&#39;,&#39;);
+}
+</code></pre>
+<p><code>result</code> will include all the nodes level by level. For example, if our tree is the one in the example image above, then the <code>serialize</code> function will return this:</p>
+<pre><code class="language-ts">&#39;1,2,3,null,null,4,5,null,null,null,null&#39;
+</code></pre>
+<p>So, <code>&#39;1&#39;</code> is the root node, and the next level is <code>&#39;2,3&#39;</code>. </p>
+<p>The next level after that is <code>&#39;null,null,4,5&#39;</code>. The last four <code>&#39;null&#39;</code>s are for the children of <code>&#39;4&#39;</code> and <code>&#39;5&#39;</code>.</p>
+<p>That&#39;s fine, but how can we use this string to construct a binary tree in <code>deserialize</code>?</p>
+<p>The first thing we can do is check the edge case when the input <code>data</code> is an empty string. In that case, we can return <code>null</code>:</p>
+<pre><code class="language-ts">if (data === &#39;&#39;) {
+  return null;
+}
+</code></pre>
+<p>Otherwise, since the <code>data</code> is a string that&#39;s constructed with commas, we can split it to get the values in an array.</p>
+<pre><code class="language-ts">let vals = data.split(&#39;,&#39;);
+</code></pre>
+<p>We have to start with the root node somehow, and we know that the very first element in <code>vals</code> has the value for the root node. So we can construct it like this:</p>
+<pre><code class="language-ts">let root = new TreeNode(+vals[0]);
+</code></pre>
+<Note>
+We use the [unary plus (`+`) operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Unary_plus) to easily convert the string into a number.
+</Note>
+
+<p>Now, we have to walk the tree, and make the tree.<br>Since we used a level-order traversal in <code>serialize</code>, we can use a queue again, initializing it with the <code>root</code>:</p>
+<pre><code class="language-ts">let queue = [root];
+</code></pre>
+<p>Now, we can start iterating from the second element of the <code>vals</code> array since we already have the root, and add the nodes to our <code>queue</code>. And, to get the correct right and left children, we can simply use a flag value:</p>
+<pre><code class="language-ts">let isRightChild = false;
+
+for (let i = 1; i &lt; vals.length; i++) {
+  let nodeVal = vals[i];
+  let node = null;
+  if (n !== &#39;null&#39;) {
+    node = new TreeNode(+nodeVal);
+    queue.push(node);
+  }
+  if (isRightChild) {
+    queue[0].right = node;
+    queue.shift();
+    isRightChild = false;
+  } else {
+    queue[0].left = node;
+    isRightChild = true;
+  }
+}
+</code></pre>
+<p><em>Since we already initialize <code>node</code> as <code>null</code>, all the <code>null</code> nodes will be &quot;inserted&quot; correctly.</em></p>
+<p>With our <code>data</code> string looking like this:</p>
+<pre><code class="language-ts">&#39;1,2,3,null,null,4,5,null,null,null,null&#39;
+</code></pre>
+<p>In the <code>for</code> loop, we&#39;ll start with <code>&#39;2&#39;</code>, and push it into our <code>queue</code>. Our <code>isRightChild</code> flag is initially <code>false</code>, so we&#39;ll add <code>2</code> as the left child of the first element in the <code>queue</code>, which is the root node. (<em>Remember that we initialized our <code>queue</code> with <code>root</code>.</em>)</p>
+<p>Then, we&#39;ll go to <code>&#39;3&#39;</code>, push it into our <code>queue</code>, and since <code>isRightChild</code> is now <code>true</code>, we&#39;ll add it as the right child of <code>root</code>. </p>
+<p>Now that we&#39;re finished with the <code>root</code>&#39;s children, we can remove it using <code>queue.shift()</code>, and go on to the next value.</p>
+<p>The next value is <code>&#39;null&#39;</code>. In this case, we don&#39;t construct a <code>TreeNode</code>, but just point the left child of the first element in our <code>queue</code> (which is the node with the value <code>2</code>) to it.</p>
+<p>We go on until there aren&#39;t any elements left in <code>vals</code>.</p>
+<Note>
+We're removing an element from the queue (using `queue.shift()`) only after we add its right child. Since this is a binary tree, and we're going level by level, we won't have another child to add for a node after we add its right child.
+</Note>
+
+
+<p>Finally, <code>deserialize</code> looks like this:</p>
+<pre><code class="language-ts">function deserialize(data: string): TreeNode | null {
+  if (data === &#39;&#39;) {
+    return null;
+  }
+
+  let vals = data.split(&#39;,&#39;);
+  let root = new TreeNode(+vals[0]);
+    
+  let queue = [root];
+  let isRightChild = false;
+    
+  for (let i = 1; i &lt; vals.length; i++) {
+    let nodeVal = vals[i];
+    let node = null;
+    if (n !== &#39;null&#39;) {
+      node = new TreeNode(+nodeVal);
+      queue.push(node);
+    }
+    if (isRightChild) {
+      queue[0].right = node;
+      queue.shift();
+      isRightChild = false;
+    } else {
+      queue[0].left = node;
+      isRightChild = true;
+    }
+  }
+    
+  return root;
+}
+</code></pre>
+<p>And, this is the final solution in TypeScript:</p>
+<pre><code class="language-ts">/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *   val: number
+ *   left: TreeNode | null
+ *   right: TreeNode | null
+ *   constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.left = (left === undefined ? null : left)
+ *     this.right = (right === undefined ? null : right)
+ *   }
+ * }
+ */
+
+/*
+ * Encodes a tree to a single string.
+ */
+function serialize(root: TreeNode | null): string {
+  if (root === null) {
+    return &#39;&#39;;
+  }
+  let queue = [root];
+  let result = [];
+  while (queue.length &gt; 0) {
+    let node = queue[0];
+    if (node === null) {
+      result.push(&#39;null&#39;);
+    } else {
+      queue.push(node.left);
+      queue.push(node.right);
+      result.push(`${node.val}`);
+    }
+    queue.shift();
+  }
+
+  return result.join(&#39;,&#39;);
+}
+
+/*
+ * Decodes your encoded data to tree.
+ */
+function deserialize(data: string): TreeNode | null {
+  if (data === &#39;&#39;) {
+    return null;
+  }
+
+  let vals = data.split(&#39;,&#39;);
+  let root = new TreeNode(+vals[0]);
+    
+  let queue = [root];
+  let isRightChild = false;
+    
+  for (let i = 1; i &lt; vals.length; i++) {
+    let n = vals[i];
+    let node = null;
+    if (n !== &#39;null&#39;) {
+      node = new TreeNode(+n);
+      queue.push(node);
+    }
+    if (isRightChild) {
+      queue[0].right = node;
+      queue.shift();
+      isRightChild = false;
+    } else {
+      queue[0].left = node;
+      isRightChild = true;
+    }
+  }
+    
+  return root;
+}
+
+
+/**
+ * Your functions will be called as such:
+ * deserialize(serialize(root));
+ */
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time and space complexity will both be $O(n)$ for both <code>serialize</code> and <code>deserialize</code>: In both functions, we process each node, and use a queue to hold all the nodes.</p>
+<hr>
+<p>We can take a deep breath now, because we have just finished the chapter on <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees" target="_blank" rel="noopener noreferrer">trees</a>! It&#39;s time to take a short hike and appreciate the <em>real</em> trees around us (and maybe plant one or two!).</p>
+<p>Next up, we&#39;ll take a look at <a href="https://leetcodethehardway.com/tutorials/basic-topics/heap" target="_blank" rel="noopener noreferrer">heaps</a> — until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-serialize-and-deserialize-binary-tree</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-serialize-and-deserialize-binary-tree</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 04 May 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Binary Tree Maximum Path Sum]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-05-03/41-lm.png" alt="Cover image"></p>
