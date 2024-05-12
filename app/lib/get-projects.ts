@@ -54,6 +54,14 @@ const projects: ProjectProps[] = [
     more: GlowCloudMore(),
   },
   {
+    title: 'discrete-math-ref',
+    description:
+      'A Vue application to display basic discrete math formulas, and copy their TeX source to clipboard.',
+    codeHref: 'https://github.com/rivea0/discrete-math-ref',
+    language: ['TypeScript'],
+    framework: ['Vue'],
+  },
+  {
     title: 'Obsidian Prime',
     description: PrimeThemeDescription(),
     demoHref: '',
