@@ -1,0 +1,241 @@
+---
+title: "LeetCode Meditations — Chapter 8: Heap/Priority Queue"
+tags: [Computer Science, TypeScript, JavaScript]
+description: The eighth chapter of LeetCode Meditation series.
+slug: leetcode-meditations-chapter-8-heap-and-priority-queue
+date: 2024-05-12
+---
+
+![Cover image](/blog/post-images/2024-05-12/43-lm-ch8.png)
+
+## Table of contents
+- [Introduction](#intro)
+- [Heap properties](#heap-properties)
+- [Heaps with arrays](#heaps-with-arrays)
+- [Inserting/removing elements](#insert-remove)
+- [Heap sort](#heapsort)
+    - [Time and space complexity](#heapsort-complexity)
+- [Resources](#resources)
+
+<a name="intro"></a>
+
+In this new chapter, we're going to take a look at a [_data structure_](https://en.wikipedia.org/wiki/Data_structure) called a [heap](https://en.wikipedia.org/wiki/Heap_(data_structure)), which is a great way to implement an [_abstract data type_](https://en.wikipedia.org/wiki/Abstract_data_type) called a [priority queue](https://en.wikipedia.org/wiki/Priority_queue). They're so interrelated that priority queues are sometimes referred to as heaps — because heaps are a very efficient way to create a priority queue. But, let's not get ahead of ourselves, and take a deep breath first before we start.
+
+---
+
+<a name="heap-properties"></a>
+
+### Heap properties
+
+The kind of heap we're interested in is also called a _binary heap_ because it's just a binary tree that has specific properties. 
+
+One of them is that it must be a _**complete binary tree**_, meaning that all the levels must be filled, and <mark>_all nodes in the last level should be as far left as possible_</mark>.
+
+For example, when it comes to shape, this is a **complete** binary tree:
+
+![The shape of a complete binary tree](/blog/post-images/2024-05-12/complete-binary-tree.gif)
+
+However, <mark>heaps must also be either a **max heap** or a **min heap**</mark> — all the parent nodes must be either greater than or equal to the values of their children (if it's a max heap); or less than or equal to the values of their children (if it's a min heap).
+
+A max heap might look like this:
+
+![An example of a max heap](/blog/post-images/2024-05-12/max-heap.gif)
+
+<Note>
+A left child doesn't have to be less than the right child at all, as in a binary search tree. Also, we can always have duplicate values in a heap.
+</Note>
+
+A min heap, on the other hand, has the values of parent nodes less than those of their children:
+
+![An example of a min heap](/blog/post-images/2024-05-12/min-heap.gif)
+
+<Note>
+When we have a max heap, the root node will have the maximum value. And, if we have a min heap instead, the root node will have the minimum value.
+</Note>
+
+---
+
+<a name="heaps-with-arrays"></a>
+
+### Heaps with arrays
+
+We can create a heap using an array. Since the root node is the most interesting element with either a maximum or minimum value, it'll be the first element in our array, residing at the 0th index.
+
+What's nice about using an array is that, given a parent node's index $i$, its left child will be at the index $2i + 1$, and its right child will be at the index $2i + 2$.
+
+![Heap as an array](/blog/post-images/2024-05-12/heap-array.gif)
+
+Given that, any child node's parent will be at the index $\lfloor{\frac{(n - 1)}{2}}\rfloor$. 
+
+<Note>
+$\lfloor$ and $\rfloor$ indicate the [floor function](https://en.wikipedia.org/wiki/Floor_and_ceiling_functions).
+</Note>
+
+One question we might ask at this moment is that why should we use an array at all? 
+
+The answer lies in the word _queue_ of a **priority queue**. Since a queue is mainly concerned with the first element (following the [FIFO principle](https://en.wikipedia.org/wiki/FIFO_(computing_and_electronics))), an array can be an ideal choice.
+In a priority queue, each element has a priority, and the value with the highest priority is dequeued first. 
+
+---
+
+<a name="insert-remove"></a>
+
+### Inserting/removing elements
+
+Let's take a look at how we can add an element to a heap.
+
+We know that we have to add the new element to the bottom leftmost place, but once we do that, it might violate the max heap or the min heap property.
+
+And how can we avoid violating the _heap-order property_? 
+
+We'll _**heapify**_, of course!
+
+Let's say that we want to add a node with the value `20`:
+
+![Heapifying for insertion](/blog/post-images/2024-05-12/heapify-for-insert.gif)
+
+So, the <mark>_heapify_ is the swapping of nodes until we know that the heap-order property is maintained</mark>.
+
+A similar thing happens when we need to remove an element. But since we're mainly concerned with the maximum or the minimum element, we just need to remove the root node. So, how are we going to do that?
+
+We start off by swapping the last element (the bottom leftmost one) with the root. Now we can easily remove the "root," which resides as a leaf node. However, we still need to maintain the heap-order property, so we need to _**heapify**_ again.
+
+![Heapifying for removing](/blog/post-images/2024-05-12/heapify-for-remove.gif)
+
+---
+
+<a name="heapsort"></a>
+
+### Heapsort
+
+Even better thing is that if we have a heap, and continually heapify it, we can sort an array!
+
+Let's build a max heap first:
+
+```ts
+function buildMaxHeap(arr: number[]) {
+  /*
+  Index of the last internal node 
+  (i.e., the parent of the last leaf node, 
+   or, the last non-leaf node).
+  The last leaf node will reside at index arr.length - 1,
+  so, we're getting its parent using the formula mentioned above.
+  */
+  let i = Math.floor((arr.length - 1) / 2);
+    
+  while (i >= 0) {
+    heapify(arr, i, arr.length);
+    i--;
+  }
+    
+  return arr;
+}
+```
+
+Then, the `heapify` function:
+
+```ts
+function heapify(arr: number[], i: number, maxLength: number) {
+  while (i < maxLength) {
+    let index = i;
+    let leftChildIdx = 2 * i + 1;
+    let rightChildIdx = leftChildIdx + 1;
+
+    if (leftChildIdx < maxLength && arr[leftChildIdx] > arr[index]) {
+      index = leftChildIdx;
+    }
+
+    if (rightChildIdx < maxLength && arr[rightChildIdx] > arr[index]) {
+      index = rightChildIdx;
+    }
+        
+    if (index === i) { return; }
+        
+    // Swap
+    [arr[i], arr[index]] = [arr[index], arr[i]];
+
+    i = index;
+  }
+}
+```
+
+With a given index `i`, we get its left and right children indexes, and if the indexes are within bounds, we check if they are out of order. In that case, we make the `index` the index of the child, and swap the two nodes. Then, we continue with that new index, assigning it to `i`.
+
+Now, `heapify` is nice and all, but how can we actually use it for sorting?
+
+```ts
+function heapSort(arr: number[]) {
+  buildMaxHeap(arr);
+
+  let lastElementIdx = arr.length - 1;
+
+  while (lastElementIdx > 0) {
+    [arr[0], arr[lastElementIdx]] = [arr[lastElementIdx], arr[0]];
+
+    heapify(arr, 0, lastElementIdx);
+    lastElementIdx--;
+  }
+
+  return arr;
+}
+```
+
+<Note>
+Our max heap:
+
+```js
+[42, 19, 36, 17, 3, 25, 1, 2]
+```
+
+won't change when used in the `buildMaxHeap` function, as it's already a max heap!
+
+However, if it were to have `17` as the right child of `42`, then `17` would have `25` as a child, which breaks the heap-order property. So, using `buildMaxHeap` with this broken version will correctly swap the `17` and `25`, making it a max heap:
+
+```ts
+buildMaxHeap([42, 36, 17, 19, 3, 25, 1, 2]);
+
+// -> [42, 36, 25, 19, 3, 17, 1, 2]
+```
+</Note>
+
+In `heapSort`, with our newly built max heap, we'll start with swapping the first and last nodes. Then, we'll keep heapifying until we get all the elements in their place.
+If we use it with our very own max heap, we can see that it returns the sorted array:
+
+```ts
+heapSort([42, 19, 36, 17, 3, 25, 1, 2]);
+// -> [1, 2, 3, 17, 19, 25, 36, 42]
+```
+
+_The examples are adapted from [Vaidehi Joshi's article](https://medium.com/basecs/heapify-all-the-things-with-heap-sort-55ee1c93af82)._
+
+<a name="heapsort-complexity"></a>
+
+#### Time and space complexity
+
+Heap sort, as a nice sorting algorithm it is, runs in $O(n \ log \ n)$ time.
+
+<Note>
+In this example, building the max heap starts from the last non-leaf node and goes up to the root node, each time calling `heapify`. The `heapify` function has a time complexity of $O(log \ n)$ as we're working with a binary tree, and in the worst case, we get to do it for all the levels. Since we do it $n / 2$ times, overall, `buildMaxHeap` has $O(n \ log \ n)$ time complexity.
+
+We're swapping the first and last elements, and heapifying as we go through each element, so this is also overall an $O(n \ log \ n)$ operation — which makes the time complexity of `heapSort` $O(n \ log \ n)$.
+</Note>
+
+<br />
+
+<Note>
+Building the max heap [can be improved to have $O(n)$ runtime](https://stackoverflow.com/questions/9755721/how-can-building-a-heap-be-on-time-complexity).
+</Note>
+
+Since there is no use of auxiliary space, the space complexity is constant, $O(1)$.
+
+---
+
+Now, we can take a deep breath. The one and only problem that we're going to look at in this chapter is called [Find Median from Data Stream](https://leetcode.com/problems/find-median-from-data-stream). Until then, happy coding.
+
+<a name="resources"></a>
+##### Resources
+- ["Learning to Love Heaps" - Vaidehi Joshi](https://medium.com/basecs/learning-to-love-heaps-cef2b273a238)
+- ["Heapify All The Things With Heap Sort" - Vaidehi Joshi](https://medium.com/basecs/heapify-all-the-things-with-heap-sort-55ee1c93af82)
+- [Binary Heap - brilliant.org](https://brilliant.org/wiki/binary-heap/)
+- [Heap & HeapSort - Noriko Tomuro](https://condor.depaul.edu/ntomuro/courses/402/notes/heap.html)
+- [Heaps - Professor Reva Freedman](https://faculty.cs.niu.edu/~freedman/340/340notes/340heap.htm)
