@@ -4,9 +4,245 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 12 May 2024 17:14:31 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 14 May 2024 11:58:46 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Find Median from Data Stream]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-05-14/44-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/find-median-from-data-stream/" target="_blank" rel="noopener noreferrer">this one</a>:</p>
+<blockquote>
+<p>The <strong>median</strong> is the middle value in an ordered integer list. If the size of the list is even, there is no middle value, and the median is the mean of the two middle values.</p>
+<ul>
+<li>For example, for <code>arr = [2, 3, 4]</code>, the median is <code>3</code>.</li>
+<li>For example, for <code>arr = [2, 3]</code>, the median is <code>(2 + 3) / 2 = 2.5</code>.</li>
+</ul>
+<p>Implement the MedianFinder class:</p>
+<ul>
+<li><code>MedianFinder()</code> initializes the <code>MedianFinder</code> object.</li>
+<li><code>void addNum(int num)</code> adds the integer <code>num</code> from the data stream to the data structure.</li>
+<li><code>double findMedian()</code> returns the median of all elements so far. Answers within <code>10^-5</code> of the actual answer will be accepted.</li>
+</ul>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input:
+[&quot;MedianFinder&quot;, &quot;addNum&quot;, &quot;addNum&quot;, &quot;findMedian&quot;, &quot;addNum&quot;, &quot;findMedian&quot;]
+[[], [1], [2], [], [3], []]
+
+Output:
+[null, null, null, 1.5, null, 2.0]
+
+Explanation:
+MedianFinder medianFinder = new MedianFinder();
+medianFinder.addNum(1);    // arr = [1]
+medianFinder.addNum(2);    // arr = [1, 2]
+medianFinder.findMedian(); // return 1.5 (i.e., (1 + 2) / 2)
+medianFinder.addNum(3);    // arr[1, 2, 3]
+medianFinder.findMedian(); // return 2.0
+</code></pre>
+<hr>
+<p>This question is labeled as a hard one; however, <em>finding the median</em> itself is not hard. </p>
+<p>The first idea that comes to mind is that we can continually add the numbers to an array, keep sorting it each time we do so, and return the median accordingly.</p>
+<p>In fact, let&#39;s try it in TypeScript:</p>
+<pre><code class="language-ts">class MedianFinder {
+  public nums: number[];
+
+  constructor() {
+    this.nums = [];
+  }
+
+  addNum(num: number): void {
+    this.nums.push(num);
+    this.nums.sort((a, b) =&gt; a - b);
+  }
+
+  findMedian(): number {
+    let mid = Math.floor(this.nums.length / 2);
+
+    if (this.nums.length % 2 === 0) {
+      let mid1 = Math.floor(this.nums.length / 2) - 1;
+      return (this.nums[mid] + this.nums[mid1]) / 2;
+    } 
+
+    return this.nums[mid];
+  }
+}
+
+/**
+ * Your MedianFinder object will be instantiated and called as such:
+ * var obj = new MedianFinder()
+ * obj.addNum(num)
+ * var param_2 = obj.findMedian()
+ */
+</code></pre>
+<Note>
+If the length of `nums` is even, we're returning the average of two middle values.
+</Note>
+
+<p>Even though it passes <em>some</em> of the tests, it will end up with a <strong>Time Limit Exceeded</strong> error at one point, so we have to do better.</p>
+<p>Indeed, let&#39;s take a deep breath, because we&#39;ll make use of <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-8-heap-and-priority-queue" target="_blank" rel="noopener noreferrer">heaps</a> for an elegant solution.</p>
+<hr>
+<p>When we think about it, <mark>if we have an even number of sorted numbers, the median will be the average of <strong>the maximum of the smaller half</strong> and <strong>the minimum of the larger half</strong></mark>.</p>
+<p>For example, if our numbers are these:</p>
+<pre><code class="language-ts">[3, 4, 7, 9]
+</code></pre>
+<p>the median is the average of <code>4</code> and <code>7</code> (which is <code>5.5</code>). </p>
+<p><em>The smaller half</em> is <code>[3, 4]</code>, while the larger half is <code>[7, 9]</code>. Indeed, <code>4</code> is the maximum in the smaller half and <code>7</code> is the minimum in the larger half.</p>
+<p>However, <mark>if we have an odd length of numbers, we can just get either the maximum value from the smaller half, or the minimum value from the larger half</mark>.</p>
+<p>Say, our numbers are these:</p>
+<pre><code class="language-ts">[3, 4, 7]
+</code></pre>
+<p>In this case, the smaller half can be <code>[3, 4]</code>, and the larger half can be <code>[7]</code>, so we can get the maximum value from the smaller half, which is <code>4</code>, and be done with it.</p>
+<p>Or, if the smaller half is just <code>[3]</code>, and the larger half is <code>[4, 7]</code>, we&#39;ll get the minimum value from the larger half, which is still <code>4</code>.</p>
+<Note>
+We refer to these parts as _halves_, but they don't have to be exactly the same size. However, <mark>the sizes can only differ by at most 1 because they still have to be _roughly_ the same size, halving the numbers.</mark>
+</Note>
+
+<p>You might already have an inkling that what we&#39;re talking about as <em>the smaller half</em> is a perfect candidate for a <strong>max heap</strong> because we&#39;re only concerned with the maximum value. Similarly, <em>the larger half</em> begs to be implemented as a <strong>min heap</strong> as we only deal with the minimum value in it. Of course, the elegance lies in the fact that we can get these values in constant time.</p>
+<p>We are going to use TypeScript for the solution, and LeetCode&#39;s TypeScript environment (well, in fact, JavaScript environment) <a href="https://support.leetcode.com/hc/en-us/articles/360011833974-What-are-the-environments-for-the-programming-languages" target="_blank" rel="noopener noreferrer">includes</a> a handy package for using heaps (or, priority queues): Enter <a href="https://www.npmjs.com/package/@datastructures-js/priority-queue" target="_blank" rel="noopener noreferrer">@datastructures-js/priority-queue</a>!</p>
+<p>We can use this package to create our max and min heaps, and make use of the functionality it gives such as enqueueing/dequeueing data. </p>
+<p>So, inside the constructor of our <code>MedianFinder</code> class, we can initialize our min and max heaps:</p>
+<pre><code class="language-ts">class MedianFinder {
+  public minHeap;
+  public maxHeap;
+  
+  constructor() {
+    this.minHeap = new MinPriorityQueue();
+    this.maxHeap = new MaxPriorityQueue();
+  }
+
+  ...
+}
+</code></pre>
+<p>Now, when it comes to adding a number, we need to choose a heap to add it into. We can choose either of them when we&#39;re starting off with empty heaps; however, let&#39;s use the max heap for adding a number first. That means, when we&#39;re going to add a number, we&#39;ll first try to put it in the max heap. But, we can only do it when the number we&#39;re going to add is less than the maximum value in the heap, or when the heap is empty. Otherwise, we can add it to the min heap.</p>
+<p>So, we can have a handy <code>getHeap</code> function inside our class for choosing the heap to add the number into:</p>
+<pre><code class="language-ts">getHeap(n: number) {
+  if (this.maxHeap.isEmpty() || n &lt;= this.maxHeap.front().element) {
+    return this.maxHeap;
+  }
+
+  return this.minHeap;
+}
+</code></pre>
+<Note>
+We can have duplicates in a heap, so we're checking if the number is less than or _equal to_ `maxHeap.front().element` instead of only using the "less than" operator.
+</Note>
+
+<p>However, once we add the number, we need to make sure that the sizes of the heaps don&#39;t differ by more than 1. In that case, we&#39;ll dequeue the maximum value from the max heap, and enqueue it to the min heap:</p>
+<pre><code class="language-ts">if ((this.maxHeap.size() - this.minHeap.size()) &gt; 1) {
+  let num = this.maxHeap.dequeue().element;
+  this.minHeap.enqueue(num);
+}
+</code></pre>
+<p>If, however, the size of the min heap becomes larger than the size of the max heap, we need to rearrange things, and this time <em>dequeue</em> from the min heap to <em>enqueue</em> the value to the max heap:</p>
+<pre><code class="language-ts">if (this.maxHeap.size() &lt; this.minHeap.size()) {
+  let num = this.minHeap.dequeue().element;
+  this.maxHeap.enqueue(num);
+}
+</code></pre>
+<p>We can add these conditions to a separate <code>rebalanceHeaps</code> function for modularity&#39;s sake:</p>
+<pre><code class="language-ts">rebalanceHeaps(): void {
+  if ((this.maxHeap.size() - this.minHeap.size()) &gt; 1) {
+    let num = this.maxHeap.dequeue().element;
+    this.minHeap.enqueue(num);
+  }
+
+  if (this.maxHeap.size() &lt; this.minHeap.size()) {
+    let num = this.minHeap.dequeue().element;
+    this.maxHeap.enqueue(num);
+  }
+}
+</code></pre>
+<p>And now, we&#39;re done with <code>addNum</code> itself. We only <em>enqueued</em> the new number to the proper heap, and rebalanced the heaps:</p>
+<pre><code class="language-ts">addNum(num: number): void {
+  this.getHeap(num).enqueue(num);
+  this.rebalanceHeaps();
+}
+</code></pre>
+<p>Now, finding the median is a piece of cake. And, it&#39;s delicious because we&#39;ll get it in constant time:</p>
+<pre><code class="language-ts">findMedian(): number {
+  let maxOfSmallerHalf = this.maxHeap.front().element;
+
+  if (this.maxHeap.size() === this.minHeap.size()) {
+    let minOfLargerHalf = this.minHeap.front().element;
+
+    return (maxOfSmallerHalf + minOfLargerHalf) / 2;
+  }
+
+  return maxOfSmallerHalf;
+}
+</code></pre>
+<Note>
+If the sizes of the heaps are equal (`this.maxHeap.size() === this.minHeap.size()`), we have an even length of numbers.
+</Note>
+
+<p>And finally, here is the whole solution:</p>
+<pre><code class="language-ts">class MedianFinder {
+  public minHeap;
+  public maxHeap;
+
+  constructor() {
+    this.minHeap = new MinPriorityQueue();
+    this.maxHeap = new MaxPriorityQueue();
+  }
+
+  addNum(num: number): void {
+    this.getHeap(num).enqueue(num);
+    this.rebalanceHeaps();
+  }
+
+  findMedian(): number {
+    let maxOfSmallerHalf = this.maxHeap.front().element;
+
+    if (this.maxHeap.size() === this.minHeap.size()) {
+      let minOfLargerHalf = this.minHeap.front().element;
+
+      return (maxOfSmallerHalf + minOfLargerHalf) / 2;
+    }
+
+    return maxOfSmallerHalf;
+  }
+
+  getHeap(n: number) {
+    if (this.maxHeap.isEmpty() || n &lt;= this.maxHeap.front().element) {
+      return this.maxHeap;
+    }
+
+    return this.minHeap;
+  }
+
+  rebalanceHeaps(): void {
+    if ((this.maxHeap.size() - this.minHeap.size()) &gt; 1) {
+      let num = this.maxHeap.dequeue().element;
+      this.minHeap.enqueue(num);
+    }
+
+    if (this.maxHeap.size() &lt; this.minHeap.size()) {
+      let num = this.minHeap.dequeue().element;
+      this.maxHeap.enqueue(num);
+    }
+  }
+}
+
+/**
+ * Your MedianFinder object will be instantiated and called as such:
+ * var obj = new MedianFinder()
+ * obj.addNum(num)
+ * var param_2 = obj.findMedian()
+ */
+</code></pre>
+<p><em>This version is adapted from <a href="https://github.com/neetcode-gh/leetcode/blob/main/typescript/0295-find-median-from-data-stream.ts" target="_blank" rel="noopener noreferrer">@kx0101&#39;s solution</a></em>.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity is going to be $O(log \ n)$ because of the <code>enqueue</code> and <code>dequeue</code> operations on the heaps. However, getting the max value (or, the min value) is always $O(1)$.</p>
+<p>The space complexity is $O(n)$ as we need to create heaps to hold the numbers we have, and their sizes will grow as the length of the numbers increases.</p>
+<hr>
+<p>And, this is the end of the chapter on heaps! Next up, we&#39;ll take a look at the technique of backtracking.<br>Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-find-median-from-data-stream</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-find-median-from-data-stream</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 14 May 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 8: Heap/Priority Queue]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-05-12/43-lm-ch8.png" alt="Cover image"></p>

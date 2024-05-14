@@ -1,0 +1,294 @@
+---
+title: "LeetCode Meditations: Find Median from Data Stream"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Find Median from Data Stream problem.
+slug: leetcode-meditations-find-median-from-data-stream
+date: 2024-05-14
+---
+
+![Cover image](/blog/post-images/2024-05-14/44-lm.png)
+
+Let's start with the description for [this one](https://leetcode.com/problems/find-median-from-data-stream/):
+
+> The **median** is the middle value in an ordered integer list. If the size of the list is even, there is no middle value, and the median is the mean of the two middle values.
+>
+> - For example, for `arr = [2, 3, 4]`, the median is `3`.
+> - For example, for `arr = [2, 3]`, the median is `(2 + 3) / 2 = 2.5`.
+>
+> Implement the MedianFinder class:
+>
+> - `MedianFinder()` initializes the `MedianFinder` object.
+> - `void addNum(int num)` adds the integer `num` from the data stream to the data structure.
+> - `double findMedian()` returns the median of all elements so far. Answers within `10^-5` of the actual answer will be accepted.
+
+For example:
+
+```
+Input:
+["MedianFinder", "addNum", "addNum", "findMedian", "addNum", "findMedian"]
+[[], [1], [2], [], [3], []]
+
+Output:
+[null, null, null, 1.5, null, 2.0]
+
+Explanation:
+MedianFinder medianFinder = new MedianFinder();
+medianFinder.addNum(1);    // arr = [1]
+medianFinder.addNum(2);    // arr = [1, 2]
+medianFinder.findMedian(); // return 1.5 (i.e., (1 + 2) / 2)
+medianFinder.addNum(3);    // arr[1, 2, 3]
+medianFinder.findMedian(); // return 2.0
+```
+
+---
+
+This question is labeled as a hard one; however, _finding the median_ itself is not hard. 
+
+The first idea that comes to mind is that we can continually add the numbers to an array, keep sorting it each time we do so, and return the median accordingly.
+
+In fact, let's try it in TypeScript:
+
+```ts
+class MedianFinder {
+  public nums: number[];
+
+  constructor() {
+    this.nums = [];
+  }
+
+  addNum(num: number): void {
+    this.nums.push(num);
+    this.nums.sort((a, b) => a - b);
+  }
+
+  findMedian(): number {
+    let mid = Math.floor(this.nums.length / 2);
+
+    if (this.nums.length % 2 === 0) {
+      let mid1 = Math.floor(this.nums.length / 2) - 1;
+      return (this.nums[mid] + this.nums[mid1]) / 2;
+    } 
+
+    return this.nums[mid];
+  }
+}
+
+/**
+ * Your MedianFinder object will be instantiated and called as such:
+ * var obj = new MedianFinder()
+ * obj.addNum(num)
+ * var param_2 = obj.findMedian()
+ */
+```
+
+<Note>
+If the length of `nums` is even, we're returning the average of two middle values.
+</Note>
+
+Even though it passes _some_ of the tests, it will end up with a **Time Limit Exceeded** error at one point, so we have to do better.
+
+Indeed, let's take a deep breath, because we'll make use of [heaps](https://rivea0.github.io/blog/leetcode-meditations-chapter-8-heap-and-priority-queue) for an elegant solution.
+
+---
+
+When we think about it, <mark>if we have an even number of sorted numbers, the median will be the average of **the maximum of the smaller half** and **the minimum of the larger half**</mark>.
+
+For example, if our numbers are these:
+
+```ts
+[3, 4, 7, 9]
+```
+
+the median is the average of `4` and `7` (which is `5.5`). 
+
+_The smaller half_ is `[3, 4]`, while the larger half is `[7, 9]`. Indeed, `4` is the maximum in the smaller half and `7` is the minimum in the larger half.
+
+However, <mark>if we have an odd length of numbers, we can just get either the maximum value from the smaller half, or the minimum value from the larger half</mark>.
+
+Say, our numbers are these:
+
+```ts
+[3, 4, 7]
+```
+
+In this case, the smaller half can be `[3, 4]`, and the larger half can be `[7]`, so we can get the maximum value from the smaller half, which is `4`, and be done with it.
+
+Or, if the smaller half is just `[3]`, and the larger half is `[4, 7]`, we'll get the minimum value from the larger half, which is still `4`.
+
+<Note>
+We refer to these parts as _halves_, but they don't have to be exactly the same size. However, <mark>the sizes can only differ by at most 1 because they still have to be _roughly_ the same size, halving the numbers.</mark>
+</Note>
+
+You might already have an inkling that what we're talking about as _the smaller half_ is a perfect candidate for a **max heap** because we're only concerned with the maximum value. Similarly, _the larger half_ begs to be implemented as a **min heap** as we only deal with the minimum value in it. Of course, the elegance lies in the fact that we can get these values in constant time.
+
+We are going to use TypeScript for the solution, and LeetCode's TypeScript environment (well, in fact, JavaScript environment) [includes](https://support.leetcode.com/hc/en-us/articles/360011833974-What-are-the-environments-for-the-programming-languages) a handy package for using heaps (or, priority queues): Enter [@datastructures-js/priority-queue](https://www.npmjs.com/package/@datastructures-js/priority-queue)!
+
+We can use this package to create our max and min heaps, and make use of the functionality it gives such as enqueueing/dequeueing data. 
+
+So, inside the constructor of our `MedianFinder` class, we can initialize our min and max heaps:
+
+```ts
+class MedianFinder {
+  public minHeap;
+  public maxHeap;
+  
+  constructor() {
+    this.minHeap = new MinPriorityQueue();
+    this.maxHeap = new MaxPriorityQueue();
+  }
+
+  ...
+}
+```
+
+Now, when it comes to adding a number, we need to choose a heap to add it into. We can choose either of them when we're starting off with empty heaps; however, let's use the max heap for adding a number first. That means, when we're going to add a number, we'll first try to put it in the max heap. But, we can only do it when the number we're going to add is less than the maximum value in the heap, or when the heap is empty. Otherwise, we can add it to the min heap.
+
+So, we can have a handy `getHeap` function inside our class for choosing the heap to add the number into:
+
+```ts
+getHeap(n: number) {
+  if (this.maxHeap.isEmpty() || n <= this.maxHeap.front().element) {
+    return this.maxHeap;
+  }
+
+  return this.minHeap;
+}
+```
+
+<Note>
+We can have duplicates in a heap, so we're checking if the number is less than or _equal to_ `maxHeap.front().element` instead of only using the "less than" operator.
+</Note>
+
+However, once we add the number, we need to make sure that the sizes of the heaps don't differ by more than 1. In that case, we'll dequeue the maximum value from the max heap, and enqueue it to the min heap:
+
+```ts
+if ((this.maxHeap.size() - this.minHeap.size()) > 1) {
+  let num = this.maxHeap.dequeue().element;
+  this.minHeap.enqueue(num);
+}
+```
+
+If, however, the size of the min heap becomes larger than the size of the max heap, we need to rearrange things, and this time _dequeue_ from the min heap to _enqueue_ the value to the max heap:
+
+```ts
+if (this.maxHeap.size() < this.minHeap.size()) {
+  let num = this.minHeap.dequeue().element;
+  this.maxHeap.enqueue(num);
+}
+```
+
+We can add these conditions to a separate `rebalanceHeaps` function for modularity's sake:
+
+```ts
+rebalanceHeaps(): void {
+  if ((this.maxHeap.size() - this.minHeap.size()) > 1) {
+    let num = this.maxHeap.dequeue().element;
+    this.minHeap.enqueue(num);
+  }
+
+  if (this.maxHeap.size() < this.minHeap.size()) {
+    let num = this.minHeap.dequeue().element;
+    this.maxHeap.enqueue(num);
+  }
+}
+```
+
+And now, we're done with `addNum` itself. We only _enqueued_ the new number to the proper heap, and rebalanced the heaps:
+
+```ts
+addNum(num: number): void {
+  this.getHeap(num).enqueue(num);
+  this.rebalanceHeaps();
+}
+```
+
+Now, finding the median is a piece of cake. And, it's delicious because we'll get it in constant time:
+
+```ts
+findMedian(): number {
+  let maxOfSmallerHalf = this.maxHeap.front().element;
+
+  if (this.maxHeap.size() === this.minHeap.size()) {
+    let minOfLargerHalf = this.minHeap.front().element;
+
+    return (maxOfSmallerHalf + minOfLargerHalf) / 2;
+  }
+
+  return maxOfSmallerHalf;
+}
+```
+
+<Note>
+If the sizes of the heaps are equal (`this.maxHeap.size() === this.minHeap.size()`), we have an even length of numbers.
+</Note>
+
+And finally, here is the whole solution:
+
+```ts
+class MedianFinder {
+  public minHeap;
+  public maxHeap;
+
+  constructor() {
+    this.minHeap = new MinPriorityQueue();
+    this.maxHeap = new MaxPriorityQueue();
+  }
+
+  addNum(num: number): void {
+    this.getHeap(num).enqueue(num);
+    this.rebalanceHeaps();
+  }
+
+  findMedian(): number {
+    let maxOfSmallerHalf = this.maxHeap.front().element;
+
+    if (this.maxHeap.size() === this.minHeap.size()) {
+      let minOfLargerHalf = this.minHeap.front().element;
+
+      return (maxOfSmallerHalf + minOfLargerHalf) / 2;
+    }
+
+    return maxOfSmallerHalf;
+  }
+
+  getHeap(n: number) {
+    if (this.maxHeap.isEmpty() || n <= this.maxHeap.front().element) {
+      return this.maxHeap;
+    }
+
+    return this.minHeap;
+  }
+
+  rebalanceHeaps(): void {
+    if ((this.maxHeap.size() - this.minHeap.size()) > 1) {
+      let num = this.maxHeap.dequeue().element;
+      this.minHeap.enqueue(num);
+    }
+
+    if (this.maxHeap.size() < this.minHeap.size()) {
+      let num = this.minHeap.dequeue().element;
+      this.maxHeap.enqueue(num);
+    }
+  }
+}
+
+/**
+ * Your MedianFinder object will be instantiated and called as such:
+ * var obj = new MedianFinder()
+ * obj.addNum(num)
+ * var param_2 = obj.findMedian()
+ */
+```
+
+_This version is adapted from [@kx0101's solution](https://github.com/neetcode-gh/leetcode/blob/main/typescript/0295-find-median-from-data-stream.ts)_.
+
+#### Time and space complexity
+
+The time complexity is going to be $O(log \ n)$ because of the `enqueue` and `dequeue` operations on the heaps. However, getting the max value (or, the min value) is always $O(1)$.
+
+The space complexity is $O(n)$ as we need to create heaps to hold the numbers we have, and their sizes will grow as the length of the numbers increases.
+
+---
+
+And, this is the end of the chapter on heaps! Next up, we'll take a look at the technique of backtracking. 
+Until then, happy coding.
