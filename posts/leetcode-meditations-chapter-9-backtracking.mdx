@@ -1,0 +1,216 @@
+---
+title: "LeetCode Meditations — Chapter 9: Backtracking"
+tags: [Computer Science, TypeScript, JavaScript]
+description: The ninth chapter of LeetCode Meditation series.
+slug: leetcode-meditations-chapter-9-backtracking
+date: 2024-05-17
+---
+
+![Cover image](/blog/post-images/2024-05-17/45-lm-ch9.png)
+
+Let's start with admitting this one fact: backtracking is hard. Or rather, _understanding it the first time_ is hard.
+Or, it's one of those concepts that you think you grasped it, only to realize later that you actually didn't.
+
+We'll focus on one problem of finding the subsets of an array, but before that, let's imagine that we're walking along a path. 
+
+Then, we reach a fork. We pick one of the paths, and walk. 
+
+Then, we reach another fork in the path. We pick one of the paths again, and go on walking, <mark>then we reach a dead end. So, we _backtrack_</mark> to the last point we had a fork, then go through the other path that we didn't choose the first time.
+
+Then we reach another dead end. So, we _backtrack_ once more and realize that there are no other paths we can go from there. So we _backtrack_ again, and explore the other path we didn't choose the first time we came to this point. 
+
+We reach yet another dead end, so we _backtrack_. We see that there are no more paths to explore, so we _backtrack_ once more. 
+
+Now, we're at our starting point. There are no more paths left to explore, so we can stop walking.
+
+It was a nice but tiring walk, and it went like this:
+
+![Backtracking](/blog/post-images/2024-05-17/backtracking.gif)
+
+Now, let's take a look at an actual LeetCode problem.
+
+#### Subsets
+
+The description for [Subsets](https://leetcode.com/problems/subsets) says:
+
+> Given an integer array `nums` of **unique** elements, return _all possible subsets (the power set)_.
+>
+> The solution set **must not** contain duplicate subsets. Return the solution in **any order**.
+
+For example:
+
+```
+Input: nums = [1, 2, 3]
+Output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]
+```
+
+Or:
+
+```
+Input: nums = [0]
+Output: [[], [0]]
+```
+
+Before diving into the solution code, let's take a look at how backtracking will work in this case. Let's call the `nums` array `items` instead:
+
+![Backtracking decision tree 1](/blog/post-images/2024-05-17/backtracking-subsets-nums.gif)
+
+For each item in `items`, we have initially two choices: to include the item, or not to include it.
+
+For each level $n$ in this _decision tree_, we have the option to include the next item in `items`. We have $2^n$ possible subsets in total.
+
+Let's simplify the example a bit, and say that `items` is now `['a', 'b']` (**We'll ignore the problem specifics for now**).
+
+![Backtracking decision tree 2](/blog/post-images/2024-05-17/backtracking-subsets-2.gif)
+
+In this case, we can use backtracking like this:
+
+```ts
+function subsets(items: string[]) {
+  let result: string[][] = [];
+  let currentSubset: string[] = [];
+
+  function backtrack(idx: number) {
+    if (idx >= items.length) {
+      result.push([...currentSubset]);
+      return;
+    }
+
+    currentSubset.push(items[idx]);
+    backtrack(idx + 1);
+
+    currentSubset.pop();
+    backtrack(idx + 1);
+  }
+
+  backtrack(0);
+
+  return result;
+}
+
+console.log(subsets(['a', 'b']));
+// -> [['a', 'b'], ['a'], ['b'], []]
+```
+
+Well, it looks simple at first glance, but what's going on?
+
+One thing to notice is that we `pop` from the `currentSubset`, then call `backtrack`. In our example of walking, that's the part we go back to our previous point, and continue our walk.
+
+In the first animation, we indicated a dead end with a cross mark, and in this case, a dead end is the _base case_ we reach.
+
+It might still be tough to understand, so let's add some helpful `console.log`s, and see the output:
+
+```ts
+function subsets(items: string[]) {
+  let result: string[][] = [];
+  let currentSubset: string[] = [];
+
+  function backtrack(idx: number) {
+    console.log(`======= this is backtrack(${arguments[0]}) =======`)
+    if (idx >= items.length) {
+      console.log(`idx is ${idx}, currentSubset is [${currentSubset}], adding it to result...`);
+      result.push([...currentSubset]);
+      console.log(`backtrack(${arguments[0]}) is returning...\n`)
+      return;
+    }
+
+    currentSubset.push(items[idx]);
+    console.log(`added ${items[idx]} to currentSubset, inside backtrack(${arguments[0]})`);
+    console.log(`calling backtrack(${idx + 1})...`)
+    backtrack(idx + 1);
+
+    let item = currentSubset.pop();
+    console.log(`popped ${item} from currentSubset, inside backtrack(${arguments[0]})`);
+    console.log(`calling backtrack(${idx + 1})...`)
+    backtrack(idx + 1);
+
+    console.log(`******* done with backtrack(${arguments[0]}) *******\n`);
+  }
+
+  backtrack(0);
+
+  return result;
+}
+
+console.log(subsets(['a', 'b']));
+```
+
+The output looks like this:
+
+```
+======= this is backtrack(0) =======
+added a to currentSubset, inside backtrack(0)
+calling backtrack(1)...
+======= this is backtrack(1) =======
+added b to currentSubset, inside backtrack(1)
+calling backtrack(2)...
+======= this is backtrack(2) =======
+idx is 2, currentSubset is [a,b], adding it to result...
+backtrack(2) is returning...
+
+popped b from currentSubset, inside backtrack(1)
+calling backtrack(2)...
+======= this is backtrack(2) =======
+idx is 2, currentSubset is [a], adding it to result...
+backtrack(2) is returning...
+
+******* done with backtrack(1) *******
+
+popped a from currentSubset, inside backtrack(0)
+calling backtrack(1)...
+======= this is backtrack(1) =======
+added b to currentSubset, inside backtrack(1)
+calling backtrack(2)...
+======= this is backtrack(2) =======
+idx is 2, currentSubset is [b], adding it to result...
+backtrack(2) is returning...
+
+popped b from currentSubset, inside backtrack(1)
+calling backtrack(2)...
+======= this is backtrack(2) =======
+idx is 2, currentSubset is [], adding it to result...
+backtrack(2) is returning...
+
+******* done with backtrack(1) *******
+
+******* done with backtrack(0) *******
+
+[ [ 'a', 'b' ], [ 'a' ], [ 'b' ], [] ]
+```
+
+If you noticed, _Add `'a'`?_ and _Go ahead?_ arrows on the first level are calls to `backtrack(0)`. 
+
+_Add `'b'`?_ and _Go ahead?_ arrows on the second level are calls to `backtrack(1)`.
+
+`backtrack(2)` calls are when we reach the "dead ends," in those cases, we add `currentSubset` to the `result`.
+We always reach the base case in a `backtrack(2)` call, obviously because it's only when the `idx` equals `items.length`.
+
+![Backtracking function](/blog/post-images/2024-05-17/backtracking-subsets-func.gif)
+
+<Note>
+We modified the function in the above examples to work with strings, but in the actual solution we'll only deal with numbers, so in TypeScript, `result` and `currentSubset` will look like this:
+
+```ts
+let result: number[][] = [];
+let currentSubset: number[] = [];
+```
+
+Also, the function parameter and return types are different:
+
+```ts
+function subsets(nums: number[]): number[][] { ... }
+```
+
+Otherwise, everything stays the same.
+</Note>
+
+#### Time and space complexity
+
+A subset is, in the worst case, length $n$ which is the length of our input. We'll have $2^n$ subsets and since we also use a [spread operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) to copy `currentSubset`, the time complexity will be $O(n \cdot 2^n)$. The space complexity is—_I think_— $O(n \cdot 2^n)$ as well because of the recursive call stack (which is of depth `n`), and the space needed for `result` (which is in the worst case $2^n$).
+
+---
+
+Now it's time to take a deep breath, and maybe go on an actual walk. This has been a challenging concept to grasp, and perhaps the only thing that can make it click is a real walk in nature, with some backtracking along the way.
+
+The first problem in this chapter is [Combination Sum](https://leetcode.com/problems/combination-sum/), until then, happy coding.
+

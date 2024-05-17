@@ -4,9 +4,170 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 14 May 2024 11:58:46 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 17 May 2024 21:13:08 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations — Chapter 9: Backtracking]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-05-17/45-lm-ch9.png" alt="Cover image"></p>
+<p>Let&#39;s start with admitting this one fact: backtracking is hard. Or rather, <em>understanding it the first time</em> is hard.<br>Or, it&#39;s one of those concepts that you think you grasped it, only to realize later that you actually didn&#39;t.</p>
+<p>We&#39;ll focus on one problem of finding the subsets of an array, but before that, let&#39;s imagine that we&#39;re walking along a path. </p>
+<p>Then, we reach a fork. We pick one of the paths, and walk. </p>
+<p>Then, we reach another fork in the path. We pick one of the paths again, and go on walking, <mark>then we reach a dead end. So, we <em>backtrack</em></mark> to the last point we had a fork, then go through the other path that we didn&#39;t choose the first time.</p>
+<p>Then we reach another dead end. So, we <em>backtrack</em> once more and realize that there are no other paths we can go from there. So we <em>backtrack</em> again, and explore the other path we didn&#39;t choose the first time we came to this point. </p>
+<p>We reach yet another dead end, so we <em>backtrack</em>. We see that there are no more paths to explore, so we <em>backtrack</em> once more. </p>
+<p>Now, we&#39;re at our starting point. There are no more paths left to explore, so we can stop walking.</p>
+<p>It was a nice but tiring walk, and it went like this:</p>
+<p><img src="/blog/post-images/2024-05-17/backtracking.gif" alt="Backtracking"></p>
+<p>Now, let&#39;s take a look at an actual LeetCode problem.</p>
+<h4>Subsets</h4>
+<p>The description for <a href="https://leetcode.com/problems/subsets" target="_blank" rel="noopener noreferrer">Subsets</a> says:</p>
+<blockquote>
+<p>Given an integer array <code>nums</code> of <strong>unique</strong> elements, return <em>all possible subsets (the power set)</em>.</p>
+<p>The solution set <strong>must not</strong> contain duplicate subsets. Return the solution in <strong>any order</strong>.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: nums = [1, 2, 3]
+Output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: nums = [0]
+Output: [[], [0]]
+</code></pre>
+<p>Before diving into the solution code, let&#39;s take a look at how backtracking will work in this case. Let&#39;s call the <code>nums</code> array <code>items</code> instead:</p>
+<p><img src="/blog/post-images/2024-05-17/backtracking-subsets-nums.gif" alt="Backtracking decision tree 1"></p>
+<p>For each item in <code>items</code>, we have initially two choices: to include the item, or not to include it.</p>
+<p>For each level $n$ in this <em>decision tree</em>, we have the option to include the next item in <code>items</code>. We have $2^n$ possible subsets in total.</p>
+<p>Let&#39;s simplify the example a bit, and say that <code>items</code> is now <code>[&#39;a&#39;, &#39;b&#39;]</code> (<strong>We&#39;ll ignore the problem specifics for now</strong>).</p>
+<p><img src="/blog/post-images/2024-05-17/backtracking-subsets-2.gif" alt="Backtracking decision tree 2"></p>
+<p>In this case, we can use backtracking like this:</p>
+<pre><code class="language-ts">function subsets(items: string[]) {
+  let result: string[][] = [];
+  let currentSubset: string[] = [];
+
+  function backtrack(idx: number) {
+    if (idx &gt;= items.length) {
+      result.push([...currentSubset]);
+      return;
+    }
+
+    currentSubset.push(items[idx]);
+    backtrack(idx + 1);
+
+    currentSubset.pop();
+    backtrack(idx + 1);
+  }
+
+  backtrack(0);
+
+  return result;
+}
+
+console.log(subsets([&#39;a&#39;, &#39;b&#39;]));
+// -&gt; [[&#39;a&#39;, &#39;b&#39;], [&#39;a&#39;], [&#39;b&#39;], []]
+</code></pre>
+<p>Well, it looks simple at first glance, but what&#39;s going on?</p>
+<p>One thing to notice is that we <code>pop</code> from the <code>currentSubset</code>, then call <code>backtrack</code>. In our example of walking, that&#39;s the part we go back to our previous point, and continue our walk.</p>
+<p>In the first animation, we indicated a dead end with a cross mark, and in this case, a dead end is the <em>base case</em> we reach.</p>
+<p>It might still be tough to understand, so let&#39;s add some helpful <code>console.log</code>s, and see the output:</p>
+<pre><code class="language-ts">function subsets(items: string[]) {
+  let result: string[][] = [];
+  let currentSubset: string[] = [];
+
+  function backtrack(idx: number) {
+    console.log(`======= this is backtrack(${arguments[0]}) =======`)
+    if (idx &gt;= items.length) {
+      console.log(`idx is ${idx}, currentSubset is [${currentSubset}], adding it to result...`);
+      result.push([...currentSubset]);
+      console.log(`backtrack(${arguments[0]}) is returning...\n`)
+      return;
+    }
+
+    currentSubset.push(items[idx]);
+    console.log(`added ${items[idx]} to currentSubset, inside backtrack(${arguments[0]})`);
+    console.log(`calling backtrack(${idx + 1})...`)
+    backtrack(idx + 1);
+
+    let item = currentSubset.pop();
+    console.log(`popped ${item} from currentSubset, inside backtrack(${arguments[0]})`);
+    console.log(`calling backtrack(${idx + 1})...`)
+    backtrack(idx + 1);
+
+    console.log(`******* done with backtrack(${arguments[0]}) *******\n`);
+  }
+
+  backtrack(0);
+
+  return result;
+}
+
+console.log(subsets([&#39;a&#39;, &#39;b&#39;]));
+</code></pre>
+<p>The output looks like this:</p>
+<pre><code>======= this is backtrack(0) =======
+added a to currentSubset, inside backtrack(0)
+calling backtrack(1)...
+======= this is backtrack(1) =======
+added b to currentSubset, inside backtrack(1)
+calling backtrack(2)...
+======= this is backtrack(2) =======
+idx is 2, currentSubset is [a,b], adding it to result...
+backtrack(2) is returning...
+
+popped b from currentSubset, inside backtrack(1)
+calling backtrack(2)...
+======= this is backtrack(2) =======
+idx is 2, currentSubset is [a], adding it to result...
+backtrack(2) is returning...
+
+******* done with backtrack(1) *******
+
+popped a from currentSubset, inside backtrack(0)
+calling backtrack(1)...
+======= this is backtrack(1) =======
+added b to currentSubset, inside backtrack(1)
+calling backtrack(2)...
+======= this is backtrack(2) =======
+idx is 2, currentSubset is [b], adding it to result...
+backtrack(2) is returning...
+
+popped b from currentSubset, inside backtrack(1)
+calling backtrack(2)...
+======= this is backtrack(2) =======
+idx is 2, currentSubset is [], adding it to result...
+backtrack(2) is returning...
+
+******* done with backtrack(1) *******
+
+******* done with backtrack(0) *******
+
+[ [ &#39;a&#39;, &#39;b&#39; ], [ &#39;a&#39; ], [ &#39;b&#39; ], [] ]
+</code></pre>
+<p>If you noticed, <em>Add <code>&#39;a&#39;</code>?</em> and <em>Go ahead?</em> arrows on the first level are calls to <code>backtrack(0)</code>. </p>
+<p><em>Add <code>&#39;b&#39;</code>?</em> and <em>Go ahead?</em> arrows on the second level are calls to <code>backtrack(1)</code>.</p>
+<p><code>backtrack(2)</code> calls are when we reach the &quot;dead ends,&quot; in those cases, we add <code>currentSubset</code> to the <code>result</code>.<br>We always reach the base case in a <code>backtrack(2)</code> call, obviously because it&#39;s only when the <code>idx</code> equals <code>items.length</code>.</p>
+<p><img src="/blog/post-images/2024-05-17/backtracking-subsets-func.gif" alt="Backtracking function"></p>
+<Note>
+We modified the function in the above examples to work with strings, but in the actual solution we'll only deal with numbers, so in TypeScript, `result` and `currentSubset` will look like this:
+
+<pre><code class="language-ts">let result: number[][] = [];
+let currentSubset: number[] = [];
+</code></pre>
+<p>Also, the function parameter and return types are different:</p>
+<pre><code class="language-ts">function subsets(nums: number[]): number[][] { ... }
+</code></pre>
+<p>Otherwise, everything stays the same.<br></Note></p>
+<h4>Time and space complexity</h4>
+<p>A subset is, in the worst case, length $n$ which is the length of our input. We&#39;ll have $2^n$ subsets and since we also use a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax" target="_blank" rel="noopener noreferrer">spread operator</a> to copy <code>currentSubset</code>, the time complexity will be $O(n \cdot 2^n)$. The space complexity is—<em>I think</em>— $O(n \cdot 2^n)$ as well because of the recursive call stack (which is of depth <code>n</code>), and the space needed for <code>result</code> (which is in the worst case $2^n$).</p>
+<hr>
+<p>Now it&#39;s time to take a deep breath, and maybe go on an actual walk. This has been a challenging concept to grasp, and perhaps the only thing that can make it click is a real walk in nature, with some backtracking along the way.</p>
+<p>The first problem in this chapter is <a href="https://leetcode.com/problems/combination-sum/" target="_blank" rel="noopener noreferrer">Combination Sum</a>, until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-9-backtracking</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-9-backtracking</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Fri, 17 May 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Find Median from Data Stream]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-05-14/44-lm.png" alt="Cover image"></p>
