@@ -4,9 +4,126 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 17 May 2024 21:13:08 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 19 May 2024 22:02:55 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Combination Sum]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-05-19/46-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/combination-sum" target="_blank" rel="noopener noreferrer">Combination Sum</a>:</p>
+<blockquote>
+<p>Given an array of <strong>distinct</strong> integers <code>candidates</code> and a target integer <code>target</code>, return <em>a list of all <strong>unique combinations</strong> of</em> <code>candidates</code> <em>where the chosen numbers sum to</em> <code>target</code><em>.</em> You may return the combinations in <strong>any order</strong>.</p>
+<p>The <strong>same</strong> number may be chosen from <code>candidates</code> an <strong>unlimited number of times</strong>. Two combinations are unique if the frequency of at least one of the chosen numbers is different.</p>
+<p>The test cases are generated such that the number of unique combinations that sum up to <code>target</code> is less than <code>150</code> combinations for the given input.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: candidates = [2, 3, 6, 7], target = 7
+
+Output: [[2, 2, 3], [7]]
+
+Explanation:
+2 and 3 are candidates, and 2 + 2 + 3 = 7. Note that 2 can be used multiple times.
+7 is a candidate, and 7 = 7.
+These are the only two combinations.
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: candidates = [2, 3, 5], target = 8
+
+Output: [[2, 2, 2, 2], [2, 3, 3], [3, 5]]
+</code></pre>
+<hr>
+<p>One thing to notice here is that we can have duplicate values — for instance, in the second example, <code>[2, 2, 2, 2]</code> is a possible option for a given target of <code>8</code>.</p>
+<p><mark>We can try adding the same item to the <em>current total</em>, until it&#39;s equal to the target or is more than the target.</mark> If the current total ends up being equal to the target, we&#39;ll add the numbers we&#39;ve gathered so far to our result. Otherwise, we&#39;ll backtrack, and try the next item in <code>candidates</code>.</p>
+<p>We&#39;ll have two important variables to help us here: <code>currentNums</code> which has the current numbers we&#39;re looking at, and <code>currentTotal</code> which is the sum of <code>currentNums</code>.</p>
+<p>For the first base case where we can add the <code>currentNums</code> to the result, we&#39;ll check if the <code>currentTotal</code> equals <code>target</code>:</p>
+<pre><code class="language-ts">if (currentTotal === target) {
+  result.push([...currentNums]);
+  return;
+}
+</code></pre>
+<p>Another case where we need to return is when we&#39;ve looked at all the items in <code>candidates</code> or when <code>currentTotal</code> has surpassed <code>target</code>:</p>
+<pre><code class="language-ts">if (idx &gt;= candidates.length || currentTotal &gt; target) {
+  return;
+}
+</code></pre>
+<Note>
+`idx` will be the index of the item in `candidates` that we're adding to `currentNums`.
+</Note>
+
+<p>The process mentioned above goes like this:</p>
+<pre><code class="language-ts">currentNums.push(candidates[idx]);
+backtrack(idx, currentNums, currentTotal + candidates[idx]);
+currentNums.pop();
+backtrack(idx + 1, currentNums, currentTotal);
+</code></pre>
+<p>And, that&#39;s all there is to the <code>backtrack</code> function:</p>
+<pre><code class="language-ts">function backtrack(idx: number, currentNums: number[], currentTotal: number) {
+  if (currentTotal === target) {
+    result.push([...currentNums]);
+    return;
+  }
+
+  if (idx &gt;= candidates.length || currentTotal &gt; target) {
+    return;
+  }
+
+  currentNums.push(candidates[idx]);
+  backtrack(idx, currentNums, currentTotal + candidates[idx]);
+  currentNums.pop();
+  backtrack(idx + 1, currentNums, currentTotal);
+}
+</code></pre>
+<p>For example, let&#39;s say that the <code>candidates</code> array is <code>[2, 3, 5]</code> and the target is <code>5</code>. </p>
+<p>The first item is <code>2</code>, so we&#39;ll add it to itself until it reaches <code>6</code> (<code>2 + 2 + 2</code>), the point where the current total is more than the target. </p>
+<Note>
+Remember that we're keeping track of the numbers we gather, at this point the `currentNums` are `[2, 2, 2]`.
+</Note>
+
+<p>Now that we&#39;re over the target, we&#39;ll pop the last <code>2</code> from <code>currentNums</code>, and add the next item in <code>candidates</code>, which is <code>3</code>. Now, our current total is <code>2 + 2 + 3</code>, which is again more than the target, so we&#39;ll pop <code>3</code>. We&#39;ll go on to <code>5</code>, and our current total will be <code>2 + 2 + 5</code>, which is of course more than the target, so we&#39;ll pop <code>5</code> as well.</p>
+<p>At this point, we&#39;re left with <code>2 + 2</code>, but we tried all the items in <code>candidates</code>, so we&#39;ll pop the last <code>2</code> from <code>currentNums</code> again. </p>
+<p>Now, our current total is just <code>2</code>. So, we go on, and add the next item in <code>candidates</code>, and now, our current total is <code>2 + 3</code> which equals our target. We&#39;ll add it to our result and return. </p>
+<p>We&#39;ll try the next item, our current total is now <code>2 + 5</code>. It is more than the target, so we&#39;ll pop the last item, and once again we&#39;re only left with <code>2</code> as our current total. But, we tried all the items again, so we&#39;ll pop this <code>2</code> as well.</p>
+<p>We tried every possible combination for <code>2</code>, so now it&#39;s time to look at <code>3</code>.</p>
+<p>We&#39;ll add <code>3</code> to itself until it&#39;s more than or equal to the target. Our current total will reach <code>3 + 3</code>, which is more than the target, so we&#39;ll pop the last <code>3</code> from <code>currentNums</code>. Now, we&#39;ll go on to the next item, our current total will be <code>3 + 5</code>, which exceeds the target again, so we&#39;ll pop <code>5</code>.<br>At this point we&#39;ve tried all the items for <code>3</code>, so it&#39;s now time to pop <code>3</code> as well.</p>
+<p>We go on to <code>5</code>, and as our current total is just <code>5</code> which is equal to the target, we&#39;ll add it to our result. There is no next item we can try with <code>5</code>, so we&#39;ll pop it off. </p>
+<p>We don&#39;t have any items left to look at, so we&#39;re done.<br>Our result is <code>[[2, 3], [5]]</code>.</p>
+<p>The final solution in TypeScript looks like this:</p>
+<pre><code class="language-ts">function combinationSum(candidates: number[], target: number): number[][] {
+  let result: number[][] = [];
+  let nums = [];
+
+  function backtrack(idx: number, currentNums: number[], currentTotal: number) {
+    if (currentTotal === target) {
+      result.push([...currentNums]);
+      return;
+    }
+
+    if (idx &gt;= candidates.length || currentTotal &gt; target) {
+      return;
+    }
+
+    currentNums.push(candidates[idx]);
+    backtrack(idx, currentNums, currentTotal + candidates[idx]);
+    currentNums.pop();
+    backtrack(idx + 1, currentNums, currentTotal);
+  }
+
+  backtrack(0, nums, 0);
+
+  return result;
+}
+</code></pre>
+<p><em>For a more detailed explanation of this solution, see <a href="https://www.youtube.com/watch?v=GBKI9VSKdGg" target="_blank" rel="noopener noreferrer">NeetCode&#39;s video</a> on this problem.</em></p>
+<h4>Time and space complexity</h4>
+<p>There are different opinions on the time complexity of this solution. The most likely one is—I think—$2^t$ where $t$ is the target number. The reason is related to the height of the <em>decision tree</em>. For example, if the first item in <code>candidates</code> is <code>1</code>, the number of calls to <code>backtrack</code> will be, in the worst case, equal to the target.<br>The space complexity can be $O(t)$ where $t$ is the target, because the recursive call stack can reach a depth of $t$ in the worst case.</p>
+<hr>
+<p>This is, in my opinion, a very challenging problem, so it&#39;s now time to take a breath. Next, we&#39;ll look at <a href="https://leetcode.com/problems/word-search" target="_blank" rel="noopener noreferrer">Word Search</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-combination-sum</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-combination-sum</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 19 May 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 9: Backtracking]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-05-17/45-lm-ch9.png" alt="Cover image"></p>

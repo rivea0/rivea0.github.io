@@ -1,0 +1,163 @@
+---
+title: "LeetCode Meditations: Combination Sum"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Combination Sum problem.
+slug: leetcode-meditations-combination-sum
+date: 2024-05-19
+---
+
+![Cover image](/blog/post-images/2024-05-19/46-lm.png)
+
+Let's start with the description for [Combination Sum](https://leetcode.com/problems/combination-sum):
+
+> Given an array of **distinct** integers `candidates` and a target integer `target`, return _a list of all **unique combinations** of_ `candidates` _where the chosen numbers sum to_ `target`_._ You may return the combinations in **any order**.
+>
+> The **same** number may be chosen from `candidates` an **unlimited number of times**. Two combinations are unique if the frequency of at least one of the chosen numbers is different.
+>
+> The test cases are generated such that the number of unique combinations that sum up to `target` is less than `150` combinations for the given input.
+
+For example:
+
+```
+Input: candidates = [2, 3, 6, 7], target = 7
+
+Output: [[2, 2, 3], [7]]
+
+Explanation:
+2 and 3 are candidates, and 2 + 2 + 3 = 7. Note that 2 can be used multiple times.
+7 is a candidate, and 7 = 7.
+These are the only two combinations.
+```
+
+Or:
+
+```
+Input: candidates = [2, 3, 5], target = 8
+
+Output: [[2, 2, 2, 2], [2, 3, 3], [3, 5]]
+```
+
+---
+
+One thing to notice here is that we can have duplicate values — for instance, in the second example, `[2, 2, 2, 2]` is a possible option for a given target of `8`.
+
+<mark>We can try adding the same item to the _current total_, until it's equal to the target or is more than the target.</mark> If the current total ends up being equal to the target, we'll add the numbers we've gathered so far to our result. Otherwise, we'll backtrack, and try the next item in `candidates`.
+
+We'll have two important variables to help us here: `currentNums` which has the current numbers we're looking at, and `currentTotal` which is the sum of `currentNums`.
+
+For the first base case where we can add the `currentNums` to the result, we'll check if the `currentTotal` equals `target`:
+
+```ts
+if (currentTotal === target) {
+  result.push([...currentNums]);
+  return;
+}
+```
+
+Another case where we need to return is when we've looked at all the items in `candidates` or when `currentTotal` has surpassed `target`:
+
+```ts
+if (idx >= candidates.length || currentTotal > target) {
+  return;
+}
+```
+
+<Note>
+`idx` will be the index of the item in `candidates` that we're adding to `currentNums`.
+</Note>
+
+The process mentioned above goes like this:
+
+```ts
+currentNums.push(candidates[idx]);
+backtrack(idx, currentNums, currentTotal + candidates[idx]);
+currentNums.pop();
+backtrack(idx + 1, currentNums, currentTotal);
+```
+
+And, that's all there is to the `backtrack` function:
+
+```ts
+function backtrack(idx: number, currentNums: number[], currentTotal: number) {
+  if (currentTotal === target) {
+    result.push([...currentNums]);
+    return;
+  }
+
+  if (idx >= candidates.length || currentTotal > target) {
+    return;
+  }
+
+  currentNums.push(candidates[idx]);
+  backtrack(idx, currentNums, currentTotal + candidates[idx]);
+  currentNums.pop();
+  backtrack(idx + 1, currentNums, currentTotal);
+}
+```
+
+
+For example, let's say that the `candidates` array is `[2, 3, 5]` and the target is `5`. 
+
+The first item is `2`, so we'll add it to itself until it reaches `6` (`2 + 2 + 2`), the point where the current total is more than the target. 
+
+<Note>
+Remember that we're keeping track of the numbers we gather, at this point the `currentNums` are `[2, 2, 2]`.
+</Note>
+
+Now that we're over the target, we'll pop the last `2` from `currentNums`, and add the next item in `candidates`, which is `3`. Now, our current total is `2 + 2 + 3`, which is again more than the target, so we'll pop `3`. We'll go on to `5`, and our current total will be `2 + 2 + 5`, which is of course more than the target, so we'll pop `5` as well.
+
+At this point, we're left with `2 + 2`, but we tried all the items in `candidates`, so we'll pop the last `2` from `currentNums` again. 
+
+Now, our current total is just `2`. So, we go on, and add the next item in `candidates`, and now, our current total is `2 + 3` which equals our target. We'll add it to our result and return. 
+
+We'll try the next item, our current total is now `2 + 5`. It is more than the target, so we'll pop the last item, and once again we're only left with `2` as our current total. But, we tried all the items again, so we'll pop this `2` as well.
+
+We tried every possible combination for `2`, so now it's time to look at `3`.
+
+We'll add `3` to itself until it's more than or equal to the target. Our current total will reach `3 + 3`, which is more than the target, so we'll pop the last `3` from `currentNums`. Now, we'll go on to the next item, our current total will be `3 + 5`, which exceeds the target again, so we'll pop `5`. 
+At this point we've tried all the items for `3`, so it's now time to pop `3` as well.
+
+We go on to `5`, and as our current total is just `5` which is equal to the target, we'll add it to our result. There is no next item we can try with `5`, so we'll pop it off. 
+
+We don't have any items left to look at, so we're done.
+Our result is `[[2, 3], [5]]`.
+
+The final solution in TypeScript looks like this:
+
+```ts
+function combinationSum(candidates: number[], target: number): number[][] {
+  let result: number[][] = [];
+  let nums = [];
+
+  function backtrack(idx: number, currentNums: number[], currentTotal: number) {
+    if (currentTotal === target) {
+      result.push([...currentNums]);
+      return;
+    }
+
+    if (idx >= candidates.length || currentTotal > target) {
+      return;
+    }
+
+    currentNums.push(candidates[idx]);
+    backtrack(idx, currentNums, currentTotal + candidates[idx]);
+    currentNums.pop();
+    backtrack(idx + 1, currentNums, currentTotal);
+  }
+
+  backtrack(0, nums, 0);
+
+  return result;
+}
+```
+
+_For a more detailed explanation of this solution, see [NeetCode's video](https://www.youtube.com/watch?v=GBKI9VSKdGg) on this problem._
+
+#### Time and space complexity
+
+There are different opinions on the time complexity of this solution. The most likely one is—I think—$2^t$ where $t$ is the target number. The reason is related to the height of the _decision tree_. For example, if the first item in `candidates` is `1`, the number of calls to `backtrack` will be, in the worst case, equal to the target.
+The space complexity can be $O(t)$ where $t$ is the target, because the recursive call stack can reach a depth of $t$ in the worst case.
+
+---
+
+This is, in my opinion, a very challenging problem, so it's now time to take a breath. Next, we'll look at [Word Search](https://leetcode.com/problems/word-search). Until then, happy coding.
