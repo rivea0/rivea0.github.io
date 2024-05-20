@@ -4,9 +4,350 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 19 May 2024 22:02:55 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 20 May 2024 22:33:50 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Word Search]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-05-20/47-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/word-search" target="_blank" rel="noopener noreferrer">Word Search</a> is:</p>
+<blockquote>
+<p>Given an <code>m x n</code> grid of characters <code>board</code> and a string <code>word</code>, return <code>true</code> <em>if</em> <code>word</code> <em>exists in the grid</em>.</p>
+<p>The word can be constructed from letters of sequentially adjacent cells, where adjacent cells are horizontally or vertically neighboring. The same letter cell may not be used more than once.</p>
+</blockquote>
+<p>For example: </p>
+<img src="https://assets.leetcode.com/uploads/2020/11/04/word2.jpg" alt="Example 1" />
+
+<pre><code>Input: board = [[&#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;E&#39;], [&#39;S&#39;, &#39;F&#39;, &#39;C&#39;, &#39;S&#39;], [&#39;A&#39;, &#39;D&#39;, &#39;E&#39;, &#39;E&#39;]], word = &#39;ABCCED&#39;
+
+Output: true
+</code></pre>
+<hr>
+<p>We somehow have to look at each cell, and explore our options to see if we can find the word. This <em>exploration</em> lends itself perfectly to a <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#dfs" target="_blank" rel="noopener noreferrer">depth-first search</a>.  </p>
+<p>But, we can&#39;t explore other cells if <mark>the current row and column we&#39;re looking at are out of bounds</mark>, and <mark>the current character is not the character we want</mark>.</p>
+<p>In these cases, we have to return <code>false</code>:</p>
+<pre><code class="language-ts">if (outOfBounds(row, col) || word[idx] !== board[row][col]) {
+  return false;
+}
+</code></pre>
+<Note>
+`idx` is the index of the current character in `word` that we're looking for.
+</Note>
+
+<p>This is one base case. Another base case is when we actually find the word.</p>
+<p>Since we&#39;ll be keeping track of the index of the word for the current character we&#39;re exploring, once it reaches the word&#39;s length, we know that we have found the word:</p>
+<pre><code class="language-ts">if (idx === word.length) {
+  return true;
+}
+</code></pre>
+<p>Now that the base cases are out of the way, the first thing we can do for the cell we&#39;re looking at is to mark it as visited. We can use the <code>*</code> character to indicate that:</p>
+<pre><code class="language-ts">let currentCell = board[row][col];
+board[row][col] = &#39;*&#39;; 
+</code></pre>
+<p>Now, we can do the exploring for the cell we&#39;re looking at:</p>
+<pre><code class="language-ts">dfs(row + 1, col, idx + 1) || // down
+dfs(row - 1, col, idx + 1) || // up
+dfs(row, col + 1, idx + 1) || // right
+dfs(row, col - 1, idx + 1);   // left
+</code></pre>
+<Note>
+We'll pass idx + 1 as our new index, because we'll be looking for the next character in `word`.
+</Note>
+
+<p>All these explorations are not for nothing of course, so we have to keep the result we have:</p>
+<pre><code class="language-ts">let result = dfs(row + 1, col, idx + 1) || // down
+             dfs(row - 1, col, idx + 1) || // up
+             dfs(row, col + 1, idx + 1) || // right
+             dfs(row, col - 1, idx + 1);   // left
+</code></pre>
+<p>Before returning this result, we need to reset the marked cell to its original value, otherwise, in our other explorations, we would have it wrongly marked:</p>
+<pre><code class="language-ts">board[row][col] = currentCell;
+</code></pre>
+<p>This is all for our depth-first search function:</p>
+<pre><code class="language-ts">function dfs(row: number, col: number, idx: number): boolean {
+  if (idx === word.length) {
+    return true;
+  }
+  if (outOfBounds(row, col) || word[idx] !== board[row][col]) {
+    return false;
+  }
+
+  // Mark the current cell as visited
+  let currentCell = board[row][col];
+  board[row][col] = &#39;*&#39;; 
+
+  // Pass idx + 1 because we&#39;re looking for 
+  // the next character in the word now
+  let result = dfs(row + 1, col, idx + 1) || // down
+               dfs(row - 1, col, idx + 1) || // up
+               dfs(row, col + 1, idx + 1) || // right
+               dfs(row, col - 1, idx + 1);   // left
+
+  // Reset the current cell to its original value 
+  // because we&#39;re done visiting it
+  board[row][col] = currentCell;
+
+  return result;
+}
+</code></pre>
+<p>We&#39;ll apply depth-first search for each cell on the board:</p>
+<pre><code class="language-ts">for (let i = 0; i &lt; rowsLength; i++) {
+  for (let j = 0; j &lt; colsLength; j++) {
+    if (dfs(i, j, 0)) {
+      return true;
+    }
+  }
+}
+</code></pre>
+<p>If <code>dfs</code> returns true for that cell, we can return <code>true</code> immediately. Otherwise, we&#39;ll return <code>false</code> at the end. </p>
+<p>The final solution looks like this in TypeScript:</p>
+<pre><code class="language-ts">function exist(board: string[][], word: string): boolean {
+  const rowsLength = board.length;
+  const colsLength = board[0].length;
+
+  function outOfBounds(r: number, c: number) {
+    return r &lt; 0 || c &lt; 0 || r &gt;= rowsLength || c &gt;= colsLength;
+  }
+
+  // idx: the index of the current character in the word we&#39;re looking for
+  function dfs(row: number, col: number, idx: number): boolean {
+    if (idx === word.length) {
+      return true;
+    }
+    if (outOfBounds(row, col) || word[idx] !== board[row][col]) {
+      return false;
+    }
+
+    // Mark the current cell as visited
+    let currentCell = board[row][col];
+    board[row][col] = &#39;*&#39;; 
+
+    // Pass idx + 1 because we&#39;re looking for 
+    // the next character in the word now
+    let result = dfs(row + 1, col, idx + 1) || // down
+                 dfs(row - 1, col, idx + 1) || // up
+                 dfs(row, col + 1, idx + 1) || // right
+                 dfs(row, col - 1, idx + 1);   // left
+
+    // Reset the current cell to its original value 
+    // because we&#39;re done visiting it
+    board[row][col] = currentCell;
+
+    return result;
+  }
+
+  // For each cell, do a depth-first search
+  for (let i = 0; i &lt; rowsLength; i++) {
+    for (let j = 0; j &lt; colsLength; j++) {
+      if (dfs(i, j, 0)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+</code></pre>
+<p><em>This version is adapted from <a href="https://www.youtube.com/watch?v=pfiQ_PS1g8E" target="_blank" rel="noopener noreferrer">NeetCode&#39;s solution</a></em>.</p>
+<hr>
+<p>Now, let&#39;s look at a very simple example.</p>
+<p>Our board looks like this, and the word we&#39;re looking for is <code>PIE</code>:</p>
+<p><img src="/blog/post-images/2024-05-20/word-search-pie.png" alt="Word search board highlighted for the word PIE"></p>
+<pre><code class="language-ts">board = [[&#39;A&#39;, &#39;P&#39;], [&#39;E&#39;, &#39;I&#39;]]
+
+word = &#39;PIE&#39;
+</code></pre>
+<p>Let&#39;s modify the code a little bit, and use some helpful <code>console.log</code>s:</p>
+<pre><code class="language-ts">function exist(board: string[][], word: string): boolean {
+  const rowsLength = board.length;
+  const colsLength = board[0].length;
+
+  function outOfBounds(r: number, c: number) {
+    return r &lt; 0 || c &lt; 0 || r &gt;= rowsLength || c &gt;= colsLength;
+  }
+
+  // idx: the index of the current character in the word we&#39;re looking for
+  function dfs(row: number, col: number, idx: number): boolean {
+    console.log(`\n===== row: ${row}, col: ${col} =====`);
+    if (idx === word.length) {
+      console.log(`🎉 this is dfs(${row}, ${col}, ${idx}), FINISHED ALREADY, &#39;${word}&#39; HAS BEEN FOUND`);
+      return true;
+    }
+    if (outOfBounds(row, col)) {
+      console.log(`\n======= OUT OF BOUNDS =======\n`);
+      return false;
+    }
+    if (word[idx] !== board[row][col]) {
+      console.log(`looking for &#39;${word[idx]}&#39;, this is ${board[row][col]}`);
+      return false;
+    }
+
+    // Mark the current cell as visited
+    let currentCell = board[row][col];
+    console.log(`found ${currentCell}, currentCell is ${currentCell}, idx is ${idx}`);
+    board[row][col] = &#39;*&#39;; 
+
+    // Pass idx + 1 because we&#39;re looking for 
+    // the next character in the word now
+    console.log(`this is dfs(${row}, ${col}, ${idx}), going down, searching for &#39;${word[idx + 1]}&#39;`); 
+    let downResult = dfs(row + 1, col, idx + 1); 
+    console.log(`🟣 dfs(${row + 1}, ${col}, ${idx + 1}) returned, row is ${row}, col is ${col}\n`);
+
+    console.log(`this is dfs(${row}, ${col}, ${idx}), going up, searching for &#39;${word[idx + 1]}&#39;`);
+    let upResult = dfs(row - 1, col, idx + 1);
+    console.log(`🟣 dfs(${row - 1}, ${col}, ${idx + 1}) returned, row is ${row}, col is ${col}\n`);
+
+    console.log(`this is dfs(${row}, ${col}, ${idx}), going right, searching for &#39;${word[idx + 1]}&#39;`);
+    let rightResult = dfs(row, col + 1, idx + 1);
+    console.log(`🟣 dfs(${row}, ${col + 1}, ${idx + 1}) returned, row is ${row}, col is ${col}\n`);
+
+    console.log(`this is dfs(${row}, ${col}, ${idx}), going left, searching for &#39;${word[idx + 1]}&#39;`);
+    let leftResult = dfs(row, col - 1, idx + 1);
+    console.log(`🟣 dfs(${row}, ${col - 1}, ${idx + 1}) returned, row is ${row}, col is ${col}\n`);
+
+    // Reset the current cell to its original value 
+    // because we&#39;re done visiting it
+    board[row][col] = currentCell;
+
+    return downResult || upResult || rightResult || leftResult;
+  }
+
+  // For each cell, do a depth-first search
+  for (let i = 0; i &lt; rowsLength; i++) {
+    for (let j = 0; j &lt; colsLength; j++) {
+      if (dfs(i, j, 0)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+console.log(exist([[&#39;A&#39;, &#39;P&#39;],[&#39;E&#39;, &#39;I&#39;]], &#39;PIE&#39;));
+</code></pre>
+<p>It looks overwhelming and cluttered, but looking at the output, it almost reads like a story:</p>
+<pre><code>
+===== row: 0, col: 0 =====
+looking for &#39;P&#39;, this is A
+
+===== row: 0, col: 1 =====
+found P, currentCell is P, idx is 0
+this is dfs(0, 1, 0), going down, searching for &#39;I&#39;
+
+===== row: 1, col: 1 =====
+found I, currentCell is I, idx is 1
+this is dfs(1, 1, 1), going down, searching for &#39;E&#39;
+
+===== row: 2, col: 1 =====
+
+======= OUT OF BOUNDS =======
+
+🟣 dfs(2, 1, 2) returned, row is 1, col is 1
+
+this is dfs(1, 1, 1), going up, searching for &#39;E&#39;
+
+===== row: 0, col: 1 =====
+looking for &#39;E&#39;, this is *
+🟣 dfs(0, 1, 2) returned, row is 1, col is 1
+
+this is dfs(1, 1, 1), going right, searching for &#39;E&#39;
+
+===== row: 1, col: 2 =====
+
+======= OUT OF BOUNDS =======
+
+🟣 dfs(1, 2, 2) returned, row is 1, col is 1
+
+this is dfs(1, 1, 1), going left, searching for &#39;E&#39;
+
+===== row: 1, col: 0 =====
+found E, currentCell is E, idx is 2
+this is dfs(1, 0, 2), going down, searching for &#39;undefined&#39;
+
+===== row: 2, col: 0 =====
+🎉 this is dfs(2, 0, 3), FINISHED ALREADY, &#39;PIE&#39; HAS BEEN FOUND
+🟣 dfs(2, 0, 3) returned, row is 1, col is 0
+
+this is dfs(1, 0, 2), going up, searching for &#39;undefined&#39;
+
+===== row: 0, col: 0 =====
+🎉 this is dfs(0, 0, 3), FINISHED ALREADY, &#39;PIE&#39; HAS BEEN FOUND
+🟣 dfs(0, 0, 3) returned, row is 1, col is 0
+
+this is dfs(1, 0, 2), going right, searching for &#39;undefined&#39;
+
+===== row: 1, col: 1 =====
+🎉 this is dfs(1, 1, 3), FINISHED ALREADY, &#39;PIE&#39; HAS BEEN FOUND
+🟣 dfs(1, 1, 3) returned, row is 1, col is 0
+
+this is dfs(1, 0, 2), going left, searching for &#39;undefined&#39;
+
+===== row: 1, col: -1 =====
+🎉 this is dfs(1, -1, 3), FINISHED ALREADY, &#39;PIE&#39; HAS BEEN FOUND
+🟣 dfs(1, -1, 3) returned, row is 1, col is 0
+
+🟣 dfs(1, 0, 2) returned, row is 1, col is 1
+
+🟣 dfs(1, 1, 1) returned, row is 0, col is 1
+
+this is dfs(0, 1, 0), going up, searching for &#39;I&#39;
+
+===== row: -1, col: 1 =====
+
+======= OUT OF BOUNDS =======
+
+🟣 dfs(-1, 1, 1) returned, row is 0, col is 1
+
+this is dfs(0, 1, 0), going right, searching for &#39;I&#39;
+
+===== row: 0, col: 2 =====
+
+======= OUT OF BOUNDS =======
+
+🟣 dfs(0, 2, 1) returned, row is 0, col is 1
+
+this is dfs(0, 1, 0), going left, searching for &#39;I&#39;
+
+===== row: 0, col: 0 =====
+looking for &#39;I&#39;, this is A
+🟣 dfs(0, 0, 1) returned, row is 0, col is 1
+
+true
+</code></pre>
+<p>There are several insights here — for example, note that this line:</p>
+<pre><code>this is dfs(1, 0, 2), going down, searching for &#39;undefined&#39;
+</code></pre>
+<p>indicates that we still go looking for <code>word[idx + 1]</code> even though the current index is the index of the last character in <code>word</code>.</p>
+<p>It, of course, continues exploring every direction left from there on:</p>
+<pre><code>this is dfs(1, 0, 2), going up, searching for &#39;undefined&#39;
+</code></pre>
+<pre><code>this is dfs(1, 0, 2), going right, searching for &#39;undefined&#39;
+</code></pre>
+<pre><code>this is dfs(1, 0, 2), going left, searching for &#39;undefined&#39;
+</code></pre>
+<p>Again, also these lines:</p>
+<pre><code>this is dfs(0, 1, 0), going up, searching for &#39;I&#39;
+</code></pre>
+<pre><code>this is dfs(0, 1, 0), going right, searching for &#39;I&#39;
+</code></pre>
+<pre><code>this is dfs(0, 1, 0), going left, searching for &#39;I&#39;
+</code></pre>
+<p>indicate that once the control returns to the function that has found <code>&#39;P&#39;</code>, it&#39;ll still continue exploring all the directions left from there. We&#39;ve already found <code>&#39;PIE&#39;</code> by going down, but the other directions are still being explored.</p>
+<h4>Time and space complexity</h4>
+<p>The time complexity will be</p>
+<p>$$O(\text{ length of rows } * \text{ length of columns } * 4^{\text{ length of the word }})$$</p>
+<p>We can denote it succinctly as $O(n * m * 4^l)$ where $n$ is the length of rows, $m$ is the length of columns, and $l$ is the length of the word. The reason is that we call <code>dfs</code> for each cell on the board ($n * m$), and there can be $4^l$ recursive calls to <code>dfs</code>.</p>
+<p>The space complexity is going to be $O(l)$ where $l$ is the length of the word, as the stack depth can reach <code>l</code> in the worst case.</p>
+<hr>
+<p>Backtracking might not be very efficient or elegant, and it&#39;s definitely a brute force solution for a given problem. Now that we&#39;re done with this chapter, we can take a deep breath.</p>
+<p>Next up, we&#39;ll take a look at the <a href="https://en.wikipedia.org/wiki/Trie" target="_blank" rel="noopener noreferrer">trie data structure</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-word-search</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-word-search</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Mon, 20 May 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Combination Sum]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-05-19/46-lm.png" alt="Cover image"></p>
