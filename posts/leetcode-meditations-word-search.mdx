@@ -69,7 +69,7 @@ dfs(row, col - 1, idx + 1);   // left
 ```
 
 <Note>
-We'll pass idx + 1 as our new index, because we'll be looking for the next character in `word`.
+We'll pass `idx + 1` as our new index, because we'll be looking for the next character in `word`.
 </Note>
 
 All these explorations are not for nothing of course, so we have to keep the result we have:
@@ -409,7 +409,7 @@ $$O(\text{ length of rows } * \text{ length of columns } * 4^{\text{ length of t
 
 We can denote it succinctly as $O(n * m * 4^l)$ where $n$ is the length of rows, $m$ is the length of columns, and $l$ is the length of the word. The reason is that we call `dfs` for each cell on the board ($n * m$), and there can be $4^l$ recursive calls to `dfs`.
 
-The space complexity is going to be $O(l)$ where $l$ is the length of the word, as the stack depth can reach `l` in the worst case.
+The space complexity is going to be $O(l)$ where $l$ is the length of the word, as the stack depth can reach $l$ in the worst case.
 
 ---
 
