@@ -15,7 +15,7 @@ export const metadata = {
 export default function Page() {
   return (
     <Suspense fallback={<LoaderIcon />}>
-      <ul>
+      <ul className={styles.projects}>
         {getProjects().map(project => {
           return (
             <li key={project.title}>
@@ -28,16 +28,18 @@ export default function Page() {
               language={project.language}
               framework={project.framework}
               more={project.more}
+              imageSrc={project.imageSrc}
             />
             </li>
           )
         })}
       </ul>
       <h2 className={styles.heading}>Writing</h2>
+      <ul className={styles.projects}>
       <Project
         title={<><em>Bite-Sized Mathematics for Computer Science</em></>}
         description={<>A collection of my <i>very</i> short notes on <Link href="https://openlearninglibrary.mit.edu/courses/course-v1:OCW+6.042J+2T2019/about">MIT's 6.042 Mathematics for Computer Science</Link>. Half learn-in-public experiment, half short online book.
-        Website written in Eleventy.</>}
+        Website written in <Link href="https://www.11ty.dev/">Eleventy</Link>.</>}
         demoHref="https://rivea0.github.io/bite-sized-math-for-cs"
         codeHref="https://github.com/rivea0/bite-sized-math-for-cs"
         isWriting={true}
@@ -51,6 +53,7 @@ export default function Page() {
         isThirdParty={true}
         thirdPartyName='dev.to'
       />
+      </ul>
     </Suspense>
   )
 }

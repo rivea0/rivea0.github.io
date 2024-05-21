@@ -1,10 +1,16 @@
 .project {
   background-color: var(--project-bg);
   padding: 4px 12px;
-  margin-bottom: 1rem;
+  display: grid;
+  grid-template-rows: 95px 168px 100px 1fr 1fr;
+  border-radius: 8px;
 }
 
-.projectLinks {
+.writingProject {
+  grid-template-rows: 150px 1fr;
+}
+
+.projectLinks, .projectLanguages {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -13,12 +19,21 @@
   padding-bottom: 8px;
 }
 
+.projectLinks a:first-of-type {
+  padding-left: 2px;
+}
+
 .link {
   display: flex;
   gap: 8px;
   align-items: baseline;
   color: var(--link);
   text-decoration: none;
+}
+
+.languageList {
+  display: flex;
+  gap: 12px;
 }
 
 .language, .framework {
@@ -34,12 +49,12 @@
   opacity: 0.7;
 }
 
-.languageList {
-  display: flex;
-  gap: 12px;
-}
-
 .more {
   flex-basis: 100%;
-  font-weight: lighter;
+}
+
+@media screen and (max-width: 768px) {
+  .writingProject {
+    grid-template-rows: .5fr 1fr;
+  }
 }

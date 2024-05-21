@@ -2,3 +2,20 @@
   margin-top: 2rem;
   text-decoration: underline;
 }
+
+.projects {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 45px;
+}
+
+.projects > li > div {
+  min-height: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  .projects {
+    grid-template-columns: 1fr;
+  }
+}

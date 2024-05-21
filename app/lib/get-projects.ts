@@ -16,6 +16,7 @@ type ProjectProps = {
   thirdPartyName?: string;
   language?: string[];
   framework?: string[];
+  imageSrc?: string;
 };
 
 const projects: ProjectProps[] = [
@@ -26,22 +27,15 @@ const projects: ProjectProps[] = [
     codeHref: 'https://github.com/rivea0/lemon',
     language: ['TypeScript'],
     framework: ['Next.js'],
+    imageSrc: './projects/lemon.jpg'
   },
   {
-    title: 'Vocab-Build',
-    description: 'A Python CLI tool to study English vocabulary.',
+    title: 'Obsidian Prime',
+    description: PrimeThemeDescription(),
     demoHref: '',
-    codeHref: 'https://github.com/rivea0/vocab-build',
-    language: ['Python'],
-  },
-  {
-    title: 'WikiAnagrams',
-    description:
-      'A simple website to search for anagrams of a word, taken from its Wiktionary page.',
-    demoHref: 'https://wikianagrams.vercel.app/',
-    codeHref: 'https://github.com/rivea0/wikianagrams',
-    language: ['TypeScript'],
-    framework: ['Next.js'],
+    codeHref: 'https://github.com/rivea0/obsidian-prime',
+    language: ['CSS'],
+    imageSrc: 'https://raw.githubusercontent.com/rivea0/obsidian-prime/main/screenshot.png'
   },
   {
     title: 'Glow Cloud: The Weather',
@@ -52,6 +46,25 @@ const projects: ProjectProps[] = [
     language: ['TypeScript'],
     framework: ['Next.js'],
     more: GlowCloudMore(),
+    imageSrc: './projects/glow-cloud.gif'
+  },
+  {
+    title: 'Vocab-Build',
+    description: 'A Python CLI tool to study English vocabulary.',
+    demoHref: '',
+    codeHref: 'https://github.com/rivea0/vocab-build',
+    language: ['Python'],
+    imageSrc: 'https://raw.githubusercontent.com/rivea0/vocab-build/main/readme-images/opening-screen.png'
+  },
+  {
+    title: 'WikiAnagrams',
+    description:
+      'A simple website to search for anagrams of a word, taken from its Wiktionary page.',
+    demoHref: 'https://wikianagrams.vercel.app/',
+    codeHref: 'https://github.com/rivea0/wikianagrams',
+    language: ['TypeScript'],
+    framework: ['Next.js'],
+    imageSrc: './projects/wikianagrams.gif'
   },
   {
     title: 'discrete-math-ref',
@@ -60,13 +73,7 @@ const projects: ProjectProps[] = [
     codeHref: 'https://github.com/rivea0/discrete-math-ref',
     language: ['TypeScript'],
     framework: ['Vue'],
-  },
-  {
-    title: 'Obsidian Prime',
-    description: PrimeThemeDescription(),
-    demoHref: '',
-    codeHref: 'https://github.com/rivea0/obsidian-prime',
-    language: ['CSS'],
+    imageSrc: './projects/discrete-math-ref.gif'
   },
   {
     title: 'Terra Incognita',
@@ -76,6 +83,7 @@ const projects: ProjectProps[] = [
     codeHref: 'https://github.com/rivea0/terra-incognita',
     language: ['TypeScript'],
     framework: ['Next.js'],
+    imageSrc: './projects/terra-incognita.png'
   },
   {
     title: 'Casual Math',
@@ -85,13 +93,7 @@ const projects: ProjectProps[] = [
     codeHref: 'https://github.com/rivea0/casual-math',
     language: ['JavaScript'],
     framework: ['React'],
-  },
-  {
-    title: 'Simple Caesar Cipher',
-    description: 'A simple tool for encrypting/decrypting a Caesar cipher.',
-    demoHref: 'https://rivea0.github.io/simple-caesar-cipher',
-    codeHref: 'https://github.com/rivea0/simple-caesar-cipher',
-    language: ['JavaScript'],
+    imageSrc: './projects/casual-math.png'
   },
   {
     title: 'Heap for Reading Lists',
@@ -101,6 +103,15 @@ const projects: ProjectProps[] = [
     codeHref: 'https://github.com/rivea0/heap-for-reading-lists',
     language: ['Python'],
     framework: ['Flask'],
+    imageSrc: 'https://raw.githubusercontent.com/rivea0/heap-for-reading-lists/main/static/images_for_readme/index.png'
+  },
+  {
+    title: 'Simple Caesar Cipher',
+    description: 'A simple tool for encrypting/decrypting a Caesar cipher.',
+    demoHref: 'https://rivea0.github.io/simple-caesar-cipher',
+    codeHref: 'https://github.com/rivea0/simple-caesar-cipher',
+    language: ['JavaScript'],
+    imageSrc: './projects/simple-caesar-cipher.gif'
   },
 ];
 
