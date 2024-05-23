@@ -4,9 +4,211 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 20 May 2024 23:15:49 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 23 May 2024 20:50:40 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations — Chapter 10: Tries]]></title>
+            <description><![CDATA[<p><img src="/blog/post-images/2024-05-23/48-lm-ch10.png" alt="Cover image"></p>
+<p>The trie data structure <a href="https://en.wikipedia.org/wiki/Trie#History,_etymology,_and_pronunciation" target="_blank" rel="noopener noreferrer">gets its name from the word <em>re<strong>trie</strong>val</em></a> — and it&#39;s usually pronounced as &quot;try,&quot; so that we don&#39;t get confused with another familiar and friendly data structure, &quot;tree.&quot;</p>
+<p>However, a trie is still a tree (or tree-like) data structure whose nodes usually store individual letters. So, by traversing the nodes in a trie, we can retrieve strings.</p>
+<p>Tries are useful for applications such as autocompletion and spellchecking — and the larger our trie is, the less work we have to do for inserting a new value. </p>
+<hr>
+<p><strong>An important note before we start: using arrays is not very memory-efficient, and we&#39;ll see another way of creating tries in the next article for <a href="https://leetcode.com/problems/implement-trie-prefix-tree" target="_blank" rel="noopener noreferrer">Implement Trie (Prefix Tree)</a>. For now, we&#39;ll stick to the array implementation.</strong></p>
+<p>First, let&#39;s see what a trie looks like:</p>
+<p><img src="/blog/post-images/2024-05-23/tries.gif" alt="Example of a trie"></p>
+<p><em>In this trie, we can retrieve the strings &quot;sea&quot; and &quot;see&quot; — but not &quot;sew&quot; for example.</em></p>
+<p>There is a lot going on, but we can try to understand it piece by piece.</p>
+<p>Let&#39;s look at a trie node.</p>
+<p>We&#39;ll create a <code>TrieNode</code> class that has <code>children</code>, which is an array of length 26 (so that each index corresponds to a letter in the English alphabet), and a flag variable <code>isEndOfWord</code> to indicate whether that node represents the last character of a word:</p>
+<pre><code class="language-js">class TrieNode {
+  constructor() {
+    this.children = Array.from({ length: 26 }, () =&gt; null);
+    this.isEndOfWord = false;
+  }
+}
+</code></pre>
+<p>We&#39;re initializing <code>children</code> with <code>null</code> values. As we add a character to our trie, the index that corresponds to that character will be filled.</p>
+<Note>
+We're not storing the actual character itself in this implementation, it's implicit in the usage of indices.
+</Note>
+
+<p>In a trie, we start with an empty root node.</p>
+<pre><code class="language-js">class Trie {
+  constructor() {
+    this.root = new TrieNode();
+  }
+  ...
+}
+</code></pre>
+<p>To insert a word, we&#39;re going to loop through each character, and initialize a new <code>TrieNode</code> to the corresponding index.</p>
+<pre><code class="language-js">insert(word) {
+  let currentNode = this.root;
+  for (const char of word) {
+    let idx = char.charCodeAt(0) - &#39;a&#39;.charCodeAt(0);
+    if (currentNode.children[idx] === null) {
+      currentNode.children[idx] = new TrieNode();
+    }
+    currentNode = currentNode.children[idx];
+  }
+
+  currentNode.isEndOfWord = true;
+}
+</code></pre>
+<p>Once we reach the node that indicates the last character of the word we inserted, we also mark the <code>isEndOfWord</code> variable as <code>true</code>.</p>
+<Note>
+`word` is going to be lowercase in these examples, otherwise, we have to convert it, such as:
+
+<pre><code class="language-js">word = word.toLowerCase();
+</code></pre>
+</Note>
+
+<p>For searching a word&#39;s existence in the trie, we&#39;ll do a similar thing. We&#39;ll look at the nodes for each character, and if we reach the last one that has <code>isEndOfWord</code> marked as <code>true</code>, that means we&#39;ve found the word:</p>
+<pre><code class="language-js">search(word) {
+  let currentNode = this.root;
+  for (const char of word) {
+    let idx = char.charCodeAt(0) - &#39;a&#39;.charCodeAt(0);
+    if (currentNode.children[idx] === null) {
+      return false;
+    }      
+    currentNode = currentNode.children[idx];
+  }
+
+  return currentNode.isEndOfWord;
+}
+</code></pre>
+<Note>
+If we find the word we're looking for, then it's called a **search hit**; otherwise, we have a **search miss** and the word doesn't exist in our trie.
+</Note>
+
+<p>Removing a word is a bit more challenging. Let&#39;s say that we want to remove the word &quot;see.&quot; But, there is also another word &quot;sea,&quot; with the same prefix (&#39;s&#39; and &#39;e&#39;). So, we should remove only the nodes that we&#39;re allowed to.</p>
+<p>For this reason, we&#39;ll define a recursive function.<br>Once we reach the last character of the word we want to remove, we&#39;ll back up and remove the characters we can remove:</p>
+<pre><code class="language-js">const removeRecursively = (node, word, depth) =&gt; {
+  if (node === null) {
+    return null;
+  }
+
+  if (depth === word.length) {
+    if (node.isEndOfWord) {
+      node.isEndOfWord = false;
+    }
+    if (node.children.every(child =&gt; child === null)) {
+      node = null;
+    }
+
+    return node;
+  }
+
+  let idx = word[depth].charCodeAt(0) - &#39;a&#39;.charCodeAt(0);
+  node.children[idx] = removeRecursively(node.children[idx], word, depth + 1);
+
+  if (node.children.every(child =&gt; child === null) &amp;&amp; !node.isEndOfWord) {
+    node = null;
+  }
+
+  return node;
+}
+</code></pre>
+<p><code>depth</code> indicates the index of the word, or <em>the depth of the trie we reach</em>.</p>
+<p>Once <code>depth</code> is equal to the word&#39;s length (one past the last character), we check if it&#39;s the end of the word, if that&#39;s the case, we&#39;ll mark it as <code>false</code> now, because that word won&#39;t exist from here on. Then, we can only mark the node as <code>null</code> if it doesn&#39;t have any children (in other words, if all of them are <code>null</code>). We&#39;ll apply this logic to each child node recursively until the word is removed as far as it can be removed.</p>
+<p>Here is the final example implementation of a trie:</p>
+<pre><code class="language-js">class TrieNode {
+  constructor() {
+    this.children = Array.from({ length: 26 }, () =&gt; null);
+    this.isEndOfWord = false;
+  }
+}
+
+class Trie {
+  constructor() {
+    this.root = new TrieNode();
+  }
+
+  insert(word) {
+    let currentNode = this.root;
+    for (const char of word) {
+      let idx = char.charCodeAt(0) - &#39;a&#39;.charCodeAt(0);
+      if (currentNode.children[idx] === null) {
+        currentNode.children[idx] = new TrieNode();
+      }
+      currentNode = currentNode.children[idx];
+    }
+
+    currentNode.isEndOfWord = true;
+  }
+
+  search(word) {
+    let currentNode = this.root;
+    for (const char of word) {
+      let idx = char.charCodeAt(0) - &#39;a&#39;.charCodeAt(0);
+      if (currentNode.children[idx] === null) {
+        return false;
+      }      
+      currentNode = currentNode.children[idx];
+    }
+
+    return currentNode.isEndOfWord;
+  }
+    
+  remove(word) {
+    const removeRecursively = (node, word, depth) =&gt; {
+      if (node === null) {
+        return null;
+      }
+
+      if (depth === word.length) {
+        if (node.isEndOfWord) {
+          node.isEndOfWord = false;
+        }
+        if (node.children.every(child =&gt; child === null)) {
+          node = null;
+        }
+
+        return node;
+      }
+
+      let idx = word[depth].charCodeAt(0) - &#39;a&#39;.charCodeAt(0);
+      node.children[idx] = removeRecursively(node.children[idx], word, depth + 1);
+
+      if (node.children.every(child =&gt; child === null) &amp;&amp; !node.isEndOfWord) {
+        node = null;
+      }
+
+      return node;
+    }
+
+    removeRecursively(this.root, word, 0);
+  }
+}
+
+let t = new Trie();
+
+t.insert(&#39;sea&#39;);
+t.insert(&#39;see&#39;);
+
+console.log(t.search(&#39;sea&#39;)); // true
+console.log(t.search(&#39;see&#39;)); // true
+
+console.log(t.search(&#39;hey&#39;)); // false
+console.log(t.search(&#39;sew&#39;)); // false
+
+t.remove(&#39;see&#39;);
+
+console.log(t.search(&#39;see&#39;)); // false 
+console.log(t.search(&#39;sea&#39;)); // true
+</code></pre>
+<hr>
+<h4>Time and space complexity</h4>
+<p>The time complexity of creating a trie is going to be $O(m * n)$ where $m$ is the longest word and $n$ is the total number of words.<br>Inserting, searching, and deleting a word is $O(a * n)$ where $a$ is the length of the word and $n$ is the total number of words.</p>
+<p>When it comes to space complexity, in the worst case, each node can have children for all the characters in the alphabet we&#39;re representing. But, the size of the alphabet is constant, so the growth of storage needs will be proportionate to the number of nodes we have, which is $O(n)$ where $n$ is the number of nodes.</p>
+<hr>
+<p>We have already done most of the work for <a href="https://leetcode.com/problems/implement-trie-prefix-tree" target="_blank" rel="noopener noreferrer">the next problem</a>, but next time we&#39;ll be slightly more efficient. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-10-tries</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-10-tries</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Thu, 23 May 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Word Search]]></title>
             <description><![CDATA[<p><img src="/blog/post-images/2024-05-20/47-lm.png" alt="Cover image"></p>
