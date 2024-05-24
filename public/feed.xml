@@ -4,19 +4,202 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 23 May 2024 20:50:40 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 24 May 2024 19:46:28 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
         <item>
+            <title><![CDATA[LeetCode Meditations: Implement Trie (Prefix Tree)]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-24/49-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/implement-trie-prefix-tree" target="_blank" rel="noopener noreferrer">this problem</a> is:</p>
+<blockquote>
+<p>A <a href="https://en.wikipedia.org/wiki/Trie" target="_blank" rel="noopener noreferrer"><strong>trie</strong></a> (pronounced as &quot;try&quot;) or <strong>prefix tree</strong> is a tree data structure used to efficiently store and retrieve keys in a dataset of strings. There are various applications of this data structure, such as autocomplete and spellchecker.</p>
+<p>Implement the Trie class:</p>
+<ul>
+<li><code>Trie()</code> Initializes the trie object.</li>
+<li><code>void insert(String word)</code> Inserts the string <code>word</code> into the trie.</li>
+<li><code>boolean search(String word)</code> Returns <code>true</code> if the string <code>word</code> is in the trie (i.e., was inserted before), and <code>false</code> otherwise.</li>
+<li><code>boolean startsWith(String prefix)</code> Returns <code>true</code> if there is a previously inserted string <code>word</code> that has the prefix <code>prefix</code>, and <code>false</code> otherwise.</li>
+</ul>
+</blockquote>
+<p>For example: </p>
+<pre><code>Input
+[&#39;Trie&#39;, &#39;insert&#39;, &#39;search&#39;, &#39;search&#39;, &#39;startsWith&#39;, &#39;insert&#39;, &#39;search&#39;]
+[[], [&#39;apple&#39;], [&#39;apple&#39;], [&#39;app&#39;], [&#39;app&#39;], [&#39;app&#39;], [&#39;app&#39;]]
+
+Output
+[null, null, true, false, true, null, true]
+
+Explanation
+Trie trie = new Trie();
+trie.insert(&#39;apple&#39;);
+trie.search(&#39;apple&#39;);   // return True
+trie.search(&#39;app&#39;);     // return False
+trie.startsWith(&#39;app&#39;); // return True
+trie.insert(&#39;app&#39;);
+trie.search(&#39;app&#39;);     // return True
+</code></pre>
+<hr>
+<p>We have seen in <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-10-tries" target="_blank" rel="noopener noreferrer">the previous article</a> how to create a trie, insert a word, and search for a word, as well as deleting a word.</p>
+<p>This problem requires only the first three of them, and additionally a <code>startsWith</code> method to search for a prefix.</p>
+<p>In the previous version, we&#39;ve created our trie using an array, but let&#39;s use another approach here. We&#39;ll make use of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map#instance_methods" target="_blank" rel="noopener noreferrer">the <code>Map</code> object</a>, which is slightly more readable and efficient.</p>
+<p><em>We used JavaScript in the previous article, but for this solution we&#39;ll continue using TypeScript.</em></p>
+<hr>
+<p>Let&#39;s start with a trie node.</p>
+<p>We&#39;ll create a <code>TrieNode</code> class that has <code>children</code> which is initiated as a <code>Map</code> whose keys are <code>string</code>s and the values are <code>TrieNode</code>s. </p>
+<p>Our node will also have an <code>isEndOfWord</code> flag to indicate whether it represents the end character of a word:</p>
+<pre><code class="language-ts">class TrieNode {
+  public children: Map&lt;string, TrieNode&gt;;
+  public isEndOfWord: boolean;
+
+  constructor() {
+    this.children = new Map();
+    this.isEndOfWord = false;    
+  }
+}
+</code></pre>
+<p>Now, on to the <code>Trie</code> itself.</p>
+<p>We&#39;ll start with creating an empty root note in our <code>constructor</code>:</p>
+<pre><code class="language-ts">class Trie {
+  public root: TrieNode;
+
+  constructor() {
+    this.root = new TrieNode();
+  }
+  ...
+}
+</code></pre>
+<p>To insert a word, we&#39;ll traverse each character, and starting with our root node, insert them one by one. </p>
+<p>First, we&#39;ll initialize a <code>currentNode</code> variable which points to our root node, and we&#39;ll update it each time we add a character. Once we add all the characters, we&#39;ll mark that node&#39;s <code>isEndOfWord</code> as <code>true</code>:</p>
+<pre><code class="language-ts">insert(word: string): void {
+  let currentNode = this.root;
+  for (const char of word) {
+    if (!currentNode.children.has(char)) {
+      currentNode.children.set(char, new TrieNode());
+    }
+    currentNode = currentNode.children.get(char) as TrieNode;
+  }
+
+  currentNode.isEndOfWord = true;
+}
+</code></pre>
+<Note>
+We'll be casting `currentNode.children.get(char)` as a `TrieNode`, because TypeScript thinks that it might be `undefined`. This is one of those times that we know more than the TS compiler, so we're using a [type assertion](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions).
+
+<p>Alternatively, we could&#39;ve also used a <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#non-null-assertion-operator-postfix" target="_blank" rel="noopener noreferrer">non-null assertion operator</a> that asserts values as non <code>null</code> or <code>undefined</code>, like this:</p>
+<pre><code class="language-ts">currentNode = currentNode.children.get(char)!;
+</code></pre>
+</Note>
+
+<p>To search a word, we&#39;ll do a similar thing. We&#39;ll iterate through each character, and check if it&#39;s in our trie. If not, we can immediately return <code>false</code>. Otherwise, we&#39;ll return <code>isEndOfWord</code> of the last node we reach. So, if that character is indeed the end of a word, that word is in our trie:</p>
+<pre><code class="language-ts">search(word: string): boolean {
+  let currentNode = this.root;
+  for (const char of word) {
+    if (!currentNode.children.has(char)) {
+      return false;
+    }
+    currentNode = currentNode.children.get(char) as TrieNode;
+  }
+
+  return currentNode.isEndOfWord;
+}
+</code></pre>
+<p>The <code>startsWith</code> method also looks very similar, only that we don&#39;t need to check <code>isEndOfWord</code> of any node. We&#39;re just checking for the existence of the prefix we&#39;re given, so we&#39;ll traverse all the characters in it, and once we reach the end (<em>that all characters are in our trie</em>), we can return <code>true</code>: </p>
+<pre><code class="language-ts">startsWith(prefix: string): boolean {
+  let currentNode = this.root;
+  for (const char of prefix) {
+    if (!currentNode.children.has(char)) {
+      return false;
+    }
+    currentNode = currentNode.children.get(char) as TrieNode;
+  }
+
+  return true;
+}
+</code></pre>
+<p>And, here is the whole solution:</p>
+<pre><code class="language-ts">class TrieNode {
+  public children: Map&lt;string, TrieNode&gt;;
+  public isEndOfWord: boolean;
+
+  constructor() {
+    this.children = new Map();
+    this.isEndOfWord = false;    
+  }
+}
+
+class Trie {
+  public root: TrieNode;
+
+  constructor() {
+    this.root = new TrieNode();
+  }
+
+  insert(word: string): void {
+    let currentNode = this.root;
+    for (const char of word) {
+      if (!currentNode.children.has(char)) {
+        currentNode.children.set(char, new TrieNode());
+      }
+      currentNode = currentNode.children.get(char) as TrieNode;
+    }
+
+    currentNode.isEndOfWord = true;
+  }
+
+  search(word: string): boolean {
+    let currentNode = this.root;
+    for (const char of word) {
+      if (!currentNode.children.has(char)) {
+        return false;
+      }
+      currentNode = currentNode.children.get(char) as TrieNode;
+    }
+
+    return currentNode.isEndOfWord;
+  }
+
+  startsWith(prefix: string): boolean {
+    let currentNode = this.root;
+    for (const char of prefix) {
+      if (!currentNode.children.has(char)) {
+        return false;
+      }
+      currentNode = currentNode.children.get(char) as TrieNode;
+    }
+
+    return true;
+  }
+}
+
+/**
+ * Your Trie object will be instantiated and called as such:
+ * var obj = new Trie()
+ * obj.insert(word)
+ * var param_2 = obj.search(word)
+ * var param_3 = obj.startsWith(prefix)
+ */
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>Both the time and space complexity of inserting a word are $O(n)$ where $n$ is the number of characters — we traverse through each of them once, and the space requirements will grow as the number of characters of the word grows.</p>
+<p><code>search</code> and <code>startsWith</code> both have $O(n)$ time complexity, as we&#39;re iterating through each character in a given string input. They also both have $O(1)$ space complexity because we don&#39;t need any additional space.</p>
+<hr>
+<p>Next up is the problem <a href="https://leetcode.com/problems/design-add-and-search-words-data-structure" target="_blank" rel="noopener noreferrer">Design Add and Search Words Data Structure</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-implement-trie-prefix-tree</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-implement-trie-prefix-tree</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Fri, 24 May 2024 00:00:00 GMT</pubDate>
+        </item>
+        <item>
             <title><![CDATA[LeetCode Meditations — Chapter 10: Tries]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-05-23/48-lm-ch10.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-23/48-lm-ch10.png" alt="Cover image"></p>
 <p>The trie data structure <a href="https://en.wikipedia.org/wiki/Trie#History,_etymology,_and_pronunciation" target="_blank" rel="noopener noreferrer">gets its name from the word <em>re<strong>trie</strong>val</em></a> — and it&#39;s usually pronounced as &quot;try,&quot; so that we don&#39;t get confused with another familiar and friendly data structure, &quot;tree.&quot;</p>
 <p>However, a trie is still a tree (or tree-like) data structure whose nodes usually store individual letters. So, by traversing the nodes in a trie, we can retrieve strings.</p>
 <p>Tries are useful for applications such as autocompletion and spellchecking — and the larger our trie is, the less work we have to do for inserting a new value. </p>
 <hr>
 <p><strong>An important note before we start: using arrays is not very memory-efficient, and we&#39;ll see another way of creating tries in the next article for <a href="https://leetcode.com/problems/implement-trie-prefix-tree" target="_blank" rel="noopener noreferrer">Implement Trie (Prefix Tree)</a>. For now, we&#39;ll stick to the array implementation.</strong></p>
 <p>First, let&#39;s see what a trie looks like:</p>
-<p><img src="/blog/post-images/2024-05-23/tries.gif" alt="Example of a trie"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-23/tries.gif" alt="Example of a trie"></p>
 <p><em>In this trie, we can retrieve the strings &quot;sea&quot; and &quot;see&quot; — but not &quot;sew&quot; for example.</em></p>
 <p>There is a lot going on, but we can try to understand it piece by piece.</p>
 <p>Let&#39;s look at a trie node.</p>
@@ -211,7 +394,7 @@ console.log(t.search(&#39;sea&#39;)); // true
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Word Search]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-05-20/47-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-20/47-lm.png" alt="Cover image"></p>
 <p>The description for <a href="https://leetcode.com/problems/word-search" target="_blank" rel="noopener noreferrer">Word Search</a> is:</p>
 <blockquote>
 <p>Given an <code>m x n</code> grid of characters <code>board</code> and a string <code>word</code>, return <code>true</code> <em>if</em> <code>word</code> <em>exists in the grid</em>.</p>
@@ -354,7 +537,7 @@ We'll pass `idx + 1` as our new index, because we'll be looking for the next cha
 <hr>
 <p>Now, let&#39;s look at a very simple example.</p>
 <p>Our board looks like this, and the word we&#39;re looking for is <code>PIE</code>:</p>
-<p><img src="/blog/post-images/2024-05-20/word-search-pie.png" alt="Word search board highlighted for the word PIE"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-20/word-search-pie.png" alt="Word search board highlighted for the word PIE"></p>
 <pre><code class="language-ts">board = [[&#39;A&#39;, &#39;P&#39;], [&#39;E&#39;, &#39;I&#39;]]
 
 word = &#39;PIE&#39;
@@ -552,7 +735,7 @@ true
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Combination Sum]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-05-19/46-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-19/46-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/combination-sum" target="_blank" rel="noopener noreferrer">Combination Sum</a>:</p>
 <blockquote>
 <p>Given an array of <strong>distinct</strong> integers <code>candidates</code> and a target integer <code>target</code>, return <em>a list of all <strong>unique combinations</strong> of</em> <code>candidates</code> <em>where the chosen numbers sum to</em> <code>target</code><em>.</em> You may return the combinations in <strong>any order</strong>.</p>
@@ -669,7 +852,7 @@ Remember that we're keeping track of the numbers we gather, at this point the `c
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 9: Backtracking]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-05-17/45-lm-ch9.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-17/45-lm-ch9.png" alt="Cover image"></p>
 <p>Let&#39;s start with admitting this one fact: backtracking is hard. Or rather, <em>understanding it the first time</em> is hard.<br>Or, it&#39;s one of those concepts that you think you grasped it, only to realize later that you actually didn&#39;t.</p>
 <p>We&#39;ll focus on one problem of finding the subsets of an array, but before that, let&#39;s imagine that we&#39;re walking along a path. </p>
 <p>Then, we reach a fork. We pick one of the paths, and walk. </p>
@@ -678,7 +861,7 @@ Remember that we're keeping track of the numbers we gather, at this point the `c
 <p>We reach yet another dead end, so we <em>backtrack</em>. We see that there are no more paths to explore, so we <em>backtrack</em> once more. </p>
 <p>Now, we&#39;re at our starting point. There are no more paths left to explore, so we can stop walking.</p>
 <p>It was a nice but tiring walk, and it went like this:</p>
-<p><img src="/blog/post-images/2024-05-17/backtracking.gif" alt="Backtracking"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-17/backtracking.gif" alt="Backtracking"></p>
 <p>Now, let&#39;s take a look at an actual LeetCode problem.</p>
 <h4>Subsets</h4>
 <p>The description for <a href="https://leetcode.com/problems/subsets" target="_blank" rel="noopener noreferrer">Subsets</a> says:</p>
@@ -695,11 +878,11 @@ Output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]
 Output: [[], [0]]
 </code></pre>
 <p>Before diving into the solution code, let&#39;s take a look at how backtracking will work in this case. Let&#39;s call the <code>nums</code> array <code>items</code> instead:</p>
-<p><img src="/blog/post-images/2024-05-17/backtracking-subsets-nums.gif" alt="Backtracking decision tree 1"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-17/backtracking-subsets-nums.gif" alt="Backtracking decision tree 1"></p>
 <p>For each item in <code>items</code>, we have initially two choices: to include the item, or not to include it.</p>
 <p>For each level $n$ in this <em>decision tree</em>, we have the option to include the next item in <code>items</code>. We have $2^n$ possible subsets in total.</p>
 <p>Let&#39;s simplify the example a bit, and say that <code>items</code> is now <code>[&#39;a&#39;, &#39;b&#39;]</code> (<strong>We&#39;ll ignore the problem specifics for now</strong>).</p>
-<p><img src="/blog/post-images/2024-05-17/backtracking-subsets-2.gif" alt="Backtracking decision tree 2"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-17/backtracking-subsets-2.gif" alt="Backtracking decision tree 2"></p>
 <p>In this case, we can use backtracking like this:</p>
 <pre><code class="language-ts">function subsets(items: string[]) {
   let result: string[][] = [];
@@ -806,7 +989,7 @@ backtrack(2) is returning...
 <p>If you noticed, <em>Add <code>&#39;a&#39;</code>?</em> and <em>Go ahead?</em> arrows on the first level are calls to <code>backtrack(0)</code>. </p>
 <p><em>Add <code>&#39;b&#39;</code>?</em> and <em>Go ahead?</em> arrows on the second level are calls to <code>backtrack(1)</code>.</p>
 <p><code>backtrack(2)</code> calls are when we reach the &quot;dead ends,&quot; in those cases, we add <code>currentSubset</code> to the <code>result</code>.<br>We always reach the base case in a <code>backtrack(2)</code> call, obviously because it&#39;s only when the <code>idx</code> equals <code>items.length</code>.</p>
-<p><img src="/blog/post-images/2024-05-17/backtracking-subsets-func.gif" alt="Backtracking function"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-17/backtracking-subsets-func.gif" alt="Backtracking function"></p>
 <Note>
 We modified the function in the above examples to work with strings, but in the actual solution we'll only deal with numbers, so in TypeScript, `result` and `currentSubset` will look like this:
 
@@ -830,7 +1013,7 @@ let currentSubset: number[] = [];
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Find Median from Data Stream]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-05-14/44-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-14/44-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/find-median-from-data-stream/" target="_blank" rel="noopener noreferrer">this one</a>:</p>
 <blockquote>
 <p>The <strong>median</strong> is the middle value in an ordered integer list. If the size of the list is even, there is no middle value, and the median is the mean of the two middle values.</p>
@@ -1066,7 +1249,7 @@ If the sizes of the heaps are equal (`this.maxHeap.size() === this.minHeap.size(
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 8: Heap/Priority Queue]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-05-12/43-lm-ch8.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/43-lm-ch8.png" alt="Cover image"></p>
 <h2>Table of contents</h2>
 <ul>
 <li><a href="#intro" target="_blank" rel="noopener noreferrer">Introduction</a></li>
@@ -1087,16 +1270,16 @@ If the sizes of the heaps are equal (`this.maxHeap.size() === this.minHeap.size(
 <p>The kind of heap we&#39;re interested in is also called a <em>binary heap</em> because it&#39;s just a binary tree that has specific properties. </p>
 <p>One of them is that it must be a <em><strong>complete binary tree</strong></em>, meaning that all the levels must be filled, and <mark><em>all nodes in the last level should be as far left as possible</em></mark>.</p>
 <p>For example, when it comes to shape, this is a <strong>complete</strong> binary tree:</p>
-<p><img src="/blog/post-images/2024-05-12/complete-binary-tree.gif" alt="The shape of a complete binary tree"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/complete-binary-tree.gif" alt="The shape of a complete binary tree"></p>
 <p>However, <mark>heaps must also be either a <strong>max heap</strong> or a <strong>min heap</strong></mark> — all the parent nodes must be either greater than or equal to the values of their children (if it&#39;s a max heap); or less than or equal to the values of their children (if it&#39;s a min heap).</p>
 <p>A max heap might look like this:</p>
-<p><img src="/blog/post-images/2024-05-12/max-heap.gif" alt="An example of a max heap"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/max-heap.gif" alt="An example of a max heap"></p>
 <Note>
 A left child doesn't have to be less than the right child at all, as in a binary search tree. Also, we can always have duplicate values in a heap.
 </Note>
 
 <p>A min heap, on the other hand, has the values of parent nodes less than those of their children:</p>
-<p><img src="/blog/post-images/2024-05-12/min-heap.gif" alt="An example of a min heap"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/min-heap.gif" alt="An example of a min heap"></p>
 <Note>
 When we have a max heap, the root node will have the maximum value. And, if we have a min heap instead, the root node will have the minimum value.
 </Note>
@@ -1106,7 +1289,7 @@ When we have a max heap, the root node will have the maximum value. And, if we h
 <h3>Heaps with arrays</h3>
 <p>We can create a heap using an array. Since the root node is the most interesting element with either a maximum or minimum value, it&#39;ll be the first element in our array, residing at the 0th index.</p>
 <p>What&#39;s nice about using an array is that, given a parent node&#39;s index $i$, its left child will be at the index $2i + 1$, and its right child will be at the index $2i + 2$.</p>
-<p><img src="/blog/post-images/2024-05-12/heap-array.gif" alt="Heap as an array"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/heap-array.gif" alt="Heap as an array"></p>
 <p>Given that, any child node&#39;s parent will be at the index $\lfloor{\frac{(n - 1)}{2}}\rfloor$. </p>
 <Note>
 $\lfloor$ and $\rfloor$ indicate the [floor function](https://en.wikipedia.org/wiki/Floor_and_ceiling_functions).
@@ -1122,11 +1305,11 @@ $\lfloor$ and $\rfloor$ indicate the [floor function](https://en.wikipedia.org/w
 <p>And how can we avoid violating the <em>heap-order property</em>? </p>
 <p>We&#39;ll <em><strong>heapify</strong></em>, of course!</p>
 <p>Let&#39;s say that we want to add a node with the value <code>20</code>:</p>
-<p><img src="/blog/post-images/2024-05-12/heapify-for-insert.gif" alt="Heapifying for insertion"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/heapify-for-insert.gif" alt="Heapifying for insertion"></p>
 <p>So, the <mark><em>heapify</em> is the swapping of nodes until we know that the heap-order property is maintained</mark>.</p>
 <p>A similar thing happens when we need to remove an element. But since we&#39;re mainly concerned with the maximum or the minimum element, we just need to remove the root node. So, how are we going to do that?</p>
 <p>We start off by swapping the last element (the bottom leftmost one) with the root. Now we can easily remove the &quot;root,&quot; which resides as a leaf node. However, we still need to maintain the heap-order property, so we need to <em><strong>heapify</strong></em> again.</p>
-<p><img src="/blog/post-images/2024-05-12/heapify-for-remove.gif" alt="Heapifying for removing"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/heapify-for-remove.gif" alt="Heapifying for removing"></p>
 <hr>
 <p><a name="heapsort"></a></p>
 <h3>Heapsort</h3>
@@ -1242,7 +1425,7 @@ Building the max heap [can be improved to have $O(n)$ runtime](https://stackover
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Serialize and Deserialize Binary Tree]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-05-04/42-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-04/42-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree" target="_blank" rel="noopener noreferrer">Serialize and Deserialize Binary Tree</a>:</p>
 <blockquote>
 <p>Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.</p>
@@ -1464,7 +1647,7 @@ function deserialize(data: string): TreeNode | null {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Binary Tree Maximum Path Sum]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-05-03/41-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-03/41-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/binary-tree-maximum-path-sum" target="_blank" rel="noopener noreferrer">Binary Tree Maximum Path Sum</a>:</p>
 <blockquote>
 <p>A <strong>path</strong> in a binary tree is a sequence of nodes where each pair of adjacent nodes in the sequence has an edge connecting them. A node can only appear in the sequence <strong>at most once</strong>. Note that the path does not need to pass through the root.</p>
@@ -1571,7 +1754,7 @@ function maxPathSum(root: TreeNode | null): number {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Construct Binary Tree from Preorder and Inorder Traversal]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-30/40-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-30/40-lm.png" alt="Cover image"></p>
 <p>Let&#39;s look at the description for <a href="https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal" target="_blank" rel="noopener noreferrer">this problem</a>:</p>
 <blockquote>
 <p>Given two integer arrays <code>preorder</code> and <code>inorder</code> where <code>preorder</code> is the preorder traversal of a binary tree and <code>inorder</code> is the inorder traversal of the same tree, construct and return <em>the binary tree</em>.</p>
@@ -1692,7 +1875,7 @@ function buildTree(preorder: number[], inorder: number[]): TreeNode | null {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Kth Smallest Element in a BST]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-28/39-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-28/39-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/kth-smallest-element-in-a-bst/" target="_blank" rel="noopener noreferrer">Kth Smallest Element in a BST</a>:</p>
 <blockquote>
 <p>Given the <code>root</code> of a binary search tree, and an integer <code>k</code>, return <em>the</em> <code>kth</code> <em>smallest value (<strong>1-indexed</strong>) of all the values of the nodes in the tree</em>.</p>
@@ -1796,7 +1979,7 @@ function kthSmallest(root: TreeNode | null, k: number): number {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Validate Binary Search Tree]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-26/38-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-26/38-lm.png" alt="Cover image"></p>
 <p>The description for Validate Binary Search Tree is:</p>
 <blockquote>
 <p>Given the <code>root</code> of a binary tree, <em>determine if it is a valid binary search tree (BST)</em>.</p>
@@ -1895,7 +2078,7 @@ Remember that a left child can be as small as it wants to be, as long as it's sm
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Binary Tree Level Order Traversal]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-24/37-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-24/37-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/binary-tree-level-order-traversal" target="_blank" rel="noopener noreferrer">Binary Tree Level Order Traversal</a>:</p>
 <blockquote>
 <p>Given the <code>root</code> of a binary tree, return <em>the level order traversal of its nodes&#39; values</em>. (i.e., from left to right, level by level).</p>
@@ -2036,7 +2219,7 @@ We're keeping the length of `queue` in a separate variable called `currentQueueL
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Lowest Common Ancestor of a Binary Search Tree]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-23/36-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-23/36-lm.png" alt="Cover image"></p>
 <p>The description for <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree" target="_blank" rel="noopener noreferrer">this one</a> states:</p>
 <blockquote>
 <p>Given a binary search tree (BST), find the lowest common ancestor (LCA) node of two given nodes in the BST.</p>
@@ -2157,7 +2340,7 @@ function lowestCommonAncestor(root: TreeNode | null, p: TreeNode | null, q: Tree
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Subtree of Another Tree]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-22/35-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-22/35-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/subtree-of-another-tree" target="_blank" rel="noopener noreferrer">this one</a>:</p>
 <blockquote>
 <p>Given the roots of two binary trees <code>root</code> and <code>subRoot</code>, return <code>true</code> if there is a subtree of <code>root</code> with the same structure and node values of <code>subRoot</code> and <code>false</code> otherwise.</p>
@@ -2240,7 +2423,7 @@ The order of the first two base cases is important. The second one where we chec
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Same Tree]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-20/34-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-20/34-lm.png" alt="Cover image"></p>
 <p>Let&#39;s see the description for <a href="https://leetcode.com/problems/same-tree" target="_blank" rel="noopener noreferrer">this problem</a>:</p>
 <blockquote>
 <p>Given the roots of two binary trees <code>p</code> and <code>q</code>, write a function to check if they are the same or not.</p>
@@ -2317,7 +2500,7 @@ function isSameTree(p: TreeNode | null, q: TreeNode | null): boolean {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Maximum Depth of Binary Tree]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-18/33-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-18/33-lm.png" alt="Cover image"></p>
 <p>The description for <a href="https://leetcode.com/problems/maximum-depth-of-binary-tree" target="_blank" rel="noopener noreferrer">Maximum Depth of Binary Tree</a> says that:</p>
 <blockquote>
 <p>Given the <code>root</code> of a binary tree, return <em>its maximum depth</em>.</p>
@@ -2401,7 +2584,7 @@ function maxDepth(root: TreeNode | null): number {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Invert Binary Tree]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-16/32-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-16/32-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/invert-binary-tree" target="_blank" rel="noopener noreferrer">Invert Binary Tree</a>:</p>
 <blockquote>
 <p>Given the <code>root</code> of a binary tree, invert the tree, and return <em>its root</em>.</p>
@@ -2486,7 +2669,7 @@ function invertTree(root: TreeNode | null): TreeNode | null {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 7: Trees]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-15/31-lm-ch7.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-15/31-lm-ch7.png" alt="Cover image"></p>
 <h2>Table of contents</h2>
 <ul>
 <li><a href="#intro" target="_blank" rel="noopener noreferrer">Introduction</a></li>
@@ -2546,7 +2729,7 @@ The height of the root node is the same as the height of the whole tree.
 <p>A <strong>binary search tree</strong> is a binary tree where the values smaller than the node go to its left and those greater than it go to its right:</p>
 <p>$\text{left children } \lt \text{ node } \lt \text{ right children}$</p>
 <p>Here is an example:</p>
-<p><img src="/blog/post-images/2024-04-15/bst.gif" alt="Binary search tree example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-15/bst.gif" alt="Binary search tree example"></p>
 <p><a name="bst-insert"></a></p>
 <h4>Inserting into a binary search tree</h4>
 <p>If we want to insert a new node into a binary search tree, we need to insert it into its proper place to keep the properties of a BST intact.</p>
@@ -2708,7 +2891,7 @@ function deleteNode(root, key) {
 In this case, we're essentially making the root of the subtree the child of the parent node.
 
 <p>For example, in the image, if the node-to-be-deleted is 10 (it has only right child node with the value 14), we make 14 the right child of 8. It doesn&#39;t break our BST, because those that are larger than 8 continue to be in the right subtree of 8.</p>
-<p><img src="/blog/post-images/2024-04-15/bst-example1.png" alt="Example BST"><br></Note></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-15/bst-example1.png" alt="Example BST"><br></Note></p>
 <p>Otherwise, if both the left and right children of the node-to-be-deleted exist, we need to do something different. </p>
 <p>In this case, we&#39;ll replace the node-to-be-deleted with the largest value in the left subtree. </p>
 <p>However, after replacing, we&#39;ll have two nodes of the same value in both places, so we need to apply <code>deleteNode</code> itself to the subtree that we&#39;ve taken our replacement node from. </p>
@@ -2747,7 +2930,7 @@ root.right = deleteNode(root.right, root.val);
 <h6>Preorder traversal</h6>
 <p>It goes like this: We first visit the node, then go on to its left subtree, then the right subtree.</p>
 <p>$$\text{node \ -&gt; \ left subtree \ -&gt; \ right subtree}$$</p>
-<p><img src="/blog/post-images/2024-04-15/preorder.gif" alt="Preorder walk example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-15/preorder.gif" alt="Preorder walk example"></p>
 <p>We can do a preorder walk recursively:</p>
 <pre><code class="language-js">function preorderWalk(node) {
   if (node === null) {
@@ -2763,7 +2946,7 @@ root.right = deleteNode(root.right, root.val);
 <h6>Inorder traversal</h6>
 <p>It goes like this: we first visit the left subtree, then the node, then the right subtree.</p>
 <p>$$\text{left subtree \ -&gt; \ node \ -&gt; \ right subtree}$$</p>
-<p><img src="/blog/post-images/2024-04-15/inorder.gif" alt="Inorder walk example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-15/inorder.gif" alt="Inorder walk example"></p>
 <Note>
 The inorder traversal gives us the sorted values.
 </Note>
@@ -2783,7 +2966,7 @@ The inorder traversal gives us the sorted values.
 <h6>Postorder traversal</h6>
 <p>It goes like this: we first visit the left subtree, then the right subtree, and finally the node.</p>
 <p>$$\text{left subtree \ -&gt; \ right subtree \ -&gt; \ node}$$</p>
-<p><img src="/blog/post-images/2024-04-15/postorder.gif" alt="Postorder walk example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-15/postorder.gif" alt="Postorder walk example"></p>
 <p>We can do a postorder walk recursively:</p>
 <pre><code class="language-js">function postorderWalk(node) {
   if (node === null) {
@@ -2806,7 +2989,7 @@ The inorder traversal gives us the sorted values.
 <li>enqueue right child</li>
 </ul>
 <p>Note that the breadth-first search is also known as <em>level-order traversal</em>.</p>
-<p><img src="/blog/post-images/2024-04-15/bfs-walk.gif" alt="Level order walk example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-15/bfs-walk.gif" alt="Level order walk example"></p>
 <p>Let&#39;s see a simple example of a level-order traversal in JavaScript:</p>
 <pre><code class="language-js">function levelOrderWalk(root) {
   if (root === null) {
@@ -2857,7 +3040,7 @@ The inorder traversal gives us the sorted values.
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Merge K Sorted Lists]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-09/30-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-09/30-lm.png" alt="Cover image"></p>
 <p>The description of <a href="https://leetcode.com/problems/merge-k-sorted-lists/" target="_blank" rel="noopener noreferrer">Merge K Sorted Lists</a> states:</p>
 <blockquote>
 <p>You are given an array of <code>k</code> linked-lists <code>lists</code>, each linked-list is sorted in ascending order.</p>
@@ -3040,7 +3223,7 @@ function merge(list1: ListNode | null, list2: ListNode | null) {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Linked List Cycle]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-08/29-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-08/29-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/linked-list-cycle" target="_blank" rel="noopener noreferrer">Linked List Cycle</a>:</p>
 <blockquote>
 <p>Given <code>head</code>, the head of a linked list, determine if the linked list has a cycle in it.</p>
@@ -3130,7 +3313,7 @@ function hasCycle(head: ListNode | null): boolean {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Remove Nth Node From the End of List]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-07/28-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-07/28-lm.png" alt="Cover image"></p>
 <p>The description for this problem says:</p>
 <blockquote>
 <p>Given the <code>head</code> of a linked list, remove the <code>nth</code> node from the end of the list and return its head.</p>
@@ -3262,7 +3445,7 @@ function removeNthFromEnd(head: ListNode | null, n: number): ListNode | null {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Reorder List]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-07/27-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-07/27-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/reorder-list" target="_blank" rel="noopener noreferrer">Reorder List</a>:</p>
 <blockquote>
 <p>You are given the head of a singly linked-list. The list can be represented as:</p>
@@ -3452,7 +3635,7 @@ function reorderList(head: ListNode | null): void {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Interlude: Fast & Slow Pointers]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-06/26-lm-interlude.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-06/26-lm-interlude.png" alt="Cover image"></p>
 <p>Before we start the <a href="https://leetcode.com/problems/reorder-list/" target="_blank" rel="noopener noreferrer">next problem in the series</a>, let&#39;s take a quick look at a technique that comes in handy when it comes to working with linked lists.</p>
 <p>We can keep two pointers while traversing a linked list: fast and slow. While the fast one increases by two steps, the slow pointer will increase by just one step. </p>
 <h4>Finding the middle node of a linked list</h4>
@@ -3471,7 +3654,7 @@ while (fast !== null &amp;&amp; fast.next !== null) {
 <p>Then, we update the slow pointer one step, which will be <code>2</code>. And, <code>fast</code> will be at <code>3</code>.</p>
 <p>When we update <code>slow</code> again, it will be at <code>3</code>.<br>When the fast pointer increases, it will be two steps ahead, and its <code>next</code> pointer will point to the <code>null</code> value, at which point our loop will stop iterating. </p>
 <p><code>slow</code> will end up pointing to the node with the value <code>3</code>, which is the middle node.</p>
-<p><img src="/blog/post-images/2024-04-06/fast-and-slow.gif" alt="An example of fast and slow pointers"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-06/fast-and-slow.gif" alt="An example of fast and slow pointers"></p>
 <p>With an even number of nodes, there are two candidates for the middle node. For example, with a list like <code>[1, 2, 3, 4]</code>, our current implementation will find the middle as <code>3</code>.</p>
 <hr>
 <p>This technique is also useful to detect cycles in a linked list, but we&#39;ll see that in an upcoming problem.<br>For now, knowing that it exists is sufficient and makes our day better. Happy coding.</p>
@@ -3483,7 +3666,7 @@ while (fast !== null &amp;&amp; fast.next !== null) {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Merge Two Sorted Lists]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-05/25-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-05/25-lm.png" alt="Cover image"></p>
 <p>The description for <a href="https://leetcode.com/problems/merge-two-sorted-lists" target="_blank" rel="noopener noreferrer">Merge Two Sorted Lists</a> says:</p>
 <blockquote>
 <p>You are given the heads of two sorted linked lists <code>list1</code> and <code>list2</code>.</p>
@@ -3587,7 +3770,7 @@ function mergeTwoLists(
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Reverse Linked List]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-04-02/24-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-04-02/24-lm.png" alt="Cover image"></p>
 <p>The description for <a href="https://leetcode.com/problems/reverse-linked-list" target="_blank" rel="noopener noreferrer">Reverse Linked List</a> states:</p>
 <blockquote>
 <p>Given the <code>head</code> of a singly linked list, reverse the list, and return <em>the reversed list</em>.</p>
@@ -3723,7 +3906,7 @@ function reverseList(head: ListNode | null): ListNode | null {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 6: Linked Lists]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-31/23-lm-ch6.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-31/23-lm-ch6.png" alt="Cover image"></p>
 <p>A linked list is a linear data structure that you&#39;re likely to be familiar with. It is also a dynamic data structure that can grow and shrink dynamically, so unlike arrays, there&#39;s no need to allocate memory beforehand.</p>
 <p>An important part of a linked list is the <em>head pointer</em> that points to the beginning of the list. There may or may not be a <em>tail pointer</em> that also points to the end of the list. </p>
 <p>The core ingredient of a linked list is a simple node, which consists of two parts: data and the next pointer.<br>So, it is an important idea to remember: <em>a node only knows about its data and its neighbor.</em></p>
@@ -3740,7 +3923,7 @@ function reverseList(head: ListNode | null): ListNode | null {
 }
 </code></pre>
 <p>And here is an example where we have three nodes, holding the values <code>1</code>, <code>2</code>, and <code>3</code> consecutively:</p>
-<p><img src="/blog/post-images/2024-03-31/singly-ll.gif" alt="Singly linked list example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-31/singly-ll.gif" alt="Singly linked list example"></p>
 <p>Here is a simple implementation of a singly linked list in JavaScript:</p>
 <pre><code class="language-js">class SinglyLinkedList {
   constructor() {
@@ -3858,7 +4041,7 @@ We'll keep a tail pointer in all these examples for convenience. It [doesn't hur
 }
 </code></pre>
 <p>Here is the same example as above, but as a doubly linked list:</p>
-<p><img src="/blog/post-images/2024-03-31/doubly-ll.gif" alt="Doubly linked list example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-31/doubly-ll.gif" alt="Doubly linked list example"></p>
 <p>A simple implementation might look like this:</p>
 <pre><code class="language-js">class DoublyLinkedList {
   constructor() {
@@ -3984,7 +4167,7 @@ We'll keep a tail pointer in all these examples for convenience. It [doesn't hur
 }
 </code></pre>
 <p>The same example, in a circular linked list fashion:</p>
-<p><img src="/blog/post-images/2024-03-31/circular-ll.gif" alt="Circular linked list example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-31/circular-ll.gif" alt="Circular linked list example"></p>
 <p>Here is a simple implementation:</p>
 <pre><code class="language-js">class CircularLinkedList {
   constructor() {
@@ -4109,7 +4292,7 @@ We'll keep a tail pointer in all these examples for convenience. It [doesn't hur
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Search in Rotated Sorted Array]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-29/22-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-29/22-lm.png" alt="Cover image"></p>
 <p>The description for this problem states:</p>
 <blockquote>
 <p>There is an integer array <code>nums</code> sorted in ascending order (with <strong>distinct</strong> values).</p>
@@ -4196,7 +4379,7 @@ search([1], 0);
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Find Minimum in Rotated Sorted Array]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-26/21-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-26/21-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/find-minimum-in-rotated-sorted-array" target="_blank" rel="noopener noreferrer">this problem</a>:</p>
 <blockquote>
 <p>Suppose an array of length <code>n</code> sorted in ascending order is <strong>rotated</strong> between <code>1</code> and <code>n</code> times. For example, the array <code>nums = [0,1,2,4,5,6,7]</code> might become:</p>
@@ -4293,12 +4476,12 @@ findMin([11, 13, 15, 17]);
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 5: Binary Search]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-24/20-lm-ch5.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-24/20-lm-ch5.png" alt="Cover image"></p>
 <p>Binary search is one of the most well-known algorithms. It&#39;s also a <a href="https://brilliant.org/wiki/divide-and-conquer/" target="_blank" rel="noopener noreferrer">divide-and-conquer algorithm</a>, where we break the problem into smaller components.</p>
 <p>The crux of binary search is to find a target element in a given sorted array.<br>We have two pointers: <code>high</code> to point to the largest element, and <code>low</code> to point to the smallest element. We first initialize them for the whole array itself, with <code>high</code> being the last index and <code>low</code> being the first index. Then, we calculate the midpoint. If the target is greater than the midpoint, then we adjust our <code>low</code> pointer to point to the <code>mid + 1</code>, otherwise if the target is less than the midpoint, we adjust <code>high</code> to be <code>mid - 1</code>. With each iteration, we eliminate half the array until the midpoint equals target or the <code>low</code> pointer passes <code>high</code>. </p>
 <p>If we find the index of the target, we can return it as soon as we find it; otherwise, we can just return <code>-1</code> to indicate that the target doesn&#39;t exist in the array.</p>
 <p>For example, if we have a <code>nums</code> array <code>[-1, 0, 3, 5, 9, 12]</code> and our <code>target</code> is <code>9</code>, the operation looks like this:</p>
-<p><img src="/blog/post-images/2024-03-24/binary-search.gif" alt="Binary search example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-24/binary-search.gif" alt="Binary search example"></p>
 <p>We can write it in TypeScript like this: </p>
 <pre><code class="language-ts">function search(nums: number[], target: number): number {
   let high = nums.length - 1;
@@ -4331,7 +4514,7 @@ findMin([11, 13, 15, 17]);
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Valid Parentheses]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-19/19-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-19/19-lm.png" alt="Cover image"></p>
 <p>The description for <a href="https://leetcode.com/problems/valid-parentheses" target="_blank" rel="noopener noreferrer">this problem</a> says:</p>
 <blockquote>
 <p>Given a string <code>s</code> containing just the characters <code>&#39;(&#39;</code>, <code>&#39;)&#39;</code>, <code>&#39;{&#39;</code>, <code>&#39;}&#39;</code>, <code>&#39;[&#39;</code> and <code>&#39;]&#39;</code>, determine if the input string is valid.</p>
@@ -4357,7 +4540,7 @@ isValid(&#39;(]&#39;);
 <hr>
 <p>The first idea that comes to mind is, perhaps, adding each parenthesis in the string to a stack, and once we come to one of the closing parentheses, we can check if the previous parenthesis is its opening pair. If so, we can pop them both off the stack. If we are left with an empty stack at the end, that means all the parentheses match, so we can return <code>true</code>; otherwise, we&#39;ll return <code>false</code>.</p>
 <p>For example, if our string is <code>([{}])</code> (which is valid), it will look like this:</p>
-<p><img src="/blog/post-images/2024-03-17/stack.gif" alt="Stack for checking valid parentheses"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-17/stack.gif" alt="Stack for checking valid parentheses"></p>
 <p>My initial solution in TypeScript looked like this:</p>
 <pre><code class="language-ts">function isValid(s: string): boolean {
   let stack = [];
@@ -4425,14 +4608,14 @@ isValid(&#39;(]&#39;);
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 4: Stack]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-17/18-lm-ch4.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-17/18-lm-ch4.png" alt="Cover image"></p>
 <p>A stack data type is perhaps one of the most well-known ones. A stack of books might be a good example to visualize, however, insertion and deletion can only happen from the one end. A stack operates through the last-in first-out (LIFO) principle: the last item to go in is the first to go out.</p>
 <p>Usually we&#39;ll have methods for <em>pushing</em> an element onto the stack, and <em>popping</em> an element from the stack.</p>
 <p>For example, let&#39;s say we&#39;re looking for valid parentheses in a given string (more on <a href="https://leetcode.com/problems/valid-parentheses" target="_blank" rel="noopener noreferrer">that problem</a> in the next post), and the operation we&#39;ll do goes like this:</p>
 <p>As we iterate over the characters in the string, we <em>push</em> the character onto the stack. If we pushed a closing parenthesis (one of <code>)</code>, <code>}</code>, or <code>]</code>), then, if the previous pushed element is its opening pair, we&#39;ll <em>pop</em> that pair from the stack.</p>
 <p>If, at the end, the stack is empty, the string consists of valid parentheses.</p>
 <p>It looks like this:</p>
-<p><img src="/blog/post-images/2024-03-17/stack.gif" alt="Stack for checking valid parentheses"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-17/stack.gif" alt="Stack for checking valid parentheses"></p>
 <hr>
 <p>A stack can be implemented as an array or a linked list; but using linked lists is more common because with arrays, we have a potential <em>stack overflow</em> when we predefine a maximum stack size. On the other hand, linked lists are not static when it comes to memory, so they are a good candidate to implement stacks. </p>
 <p>Linked lists are also efficient because we are using one end of the stack for insertion and deletion, and doing these are constant time operations. </p>
@@ -4527,7 +4710,7 @@ class Stack:
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Minimum Window Substring]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-16/17-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-16/17-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/minimum-window-substring" target="_blank" rel="noopener noreferrer">Minimum Window String</a>:</p>
 <blockquote>
 <p>Given two strings <code>s</code> and <code>t</code> of lengths <code>m</code> and <code>n</code> respectively, return <em>the <strong>minimum window</strong></em> <strong><em>substring</em></strong> <em>of</em> <code>s</code> <em>such that every character in</em> <code>t</code> <em>(<strong>including duplicates</strong>) is included in the window</em>. If there is no such substring, return <em>the empty string</em> <code>&quot;&quot;</code>.</p>
@@ -4656,7 +4839,7 @@ minWindow(&#39;a&#39;, &#39;aa&#39;);
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Longest Repeating Character Replacement]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-15/16-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-15/16-lm.png" alt="Cover image"></p>
 <p>The description for <a href="https://leetcode.com/problems/longest-repeating-character-replacement/description/" target="_blank" rel="noopener noreferrer">this problem</a> says:</p>
 <blockquote>
 <p>You are given a string <code>s</code> and an integer <code>k</code>. You can choose any character of the string and change it to any other uppercase English character. You can perform this operation at most <code>k</code> times.</p>
@@ -4727,7 +4910,7 @@ If `s[right]` is `'B'`, its charCode is `66`, subtracting it from the charCode o
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Longest Substring without Repeating Characters]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-11/15-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-11/15-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/longest-substring-without-repeating-characters" target="_blank" rel="noopener noreferrer">this problem</a>:</p>
 <blockquote>
 <p>Given a string <code>s</code>, find the length of the <strong>longest</strong> <strong>substring</strong> without repeating characters.</p>
@@ -4809,7 +4992,7 @@ lengthOfLongestSubstring(&#39;pwwkew&#39;);
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Best Time to Buy and Sell Stock]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-10/14-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-10/14-lm.png" alt="Cover image"></p>
 <p><em>Make sure to read <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-3-sliding-window" target="_blank" rel="noopener noreferrer">the Sliding Window post</a> first!</em></p>
 <hr>
 <p>The description for <a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock" target="_blank" rel="noopener noreferrer">this problem</a> states:</p>
@@ -4865,12 +5048,12 @@ maxProfit([7, 6, 4, 3, 1]);
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 3: Sliding Window]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-09/13-lm-ch3.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-09/13-lm-ch3.png" alt="Cover image"></p>
 <p>Now that we&#39;re familiar with the <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers" target="_blank" rel="noopener noreferrer">Two Pointers technique</a>, we can add another one to our toolbox: the Sliding Window.<br>It&#39;s usually used for operations done on the subsets of a given data. It also comes in two flavors: <strong>fixed window size</strong> and <strong>dynamic window size</strong>.</p>
 <h4>Fixed window size</h4>
 <p>If we have a size constraint in a given problem, say, we need to check a $k$-sized subarray, sliding window is an appropriate technique to use.</p>
 <p>For example, getting the maximum subarray (of size $k$) sum of a given array can be done like this:</p>
-<p><img src="/blog/post-images/2024-03-09/sliding-window-fixed.gif" alt="Sliding window fixed"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-09/sliding-window-fixed.gif" alt="Sliding window fixed"></p>
 <p>Note that the window size is $k$, and it doesn&#39;t change throughout the operation, hence, <em>fixed size</em>.</p>
 <p>A very cool thing to notice here is that with each <em>slide</em>, what happens to our sum is that we <em>add</em> the right element, and <em>decrease</em> the left element.</p>
 <p>Let&#39;s look at an example for getting the maximum sum of subarray with given size <code>k</code>:</p>
@@ -4917,7 +5100,7 @@ Updating the pointers can be done outside the brackets as well, like this:
 <p>For example, let&#39;s take a brief look at the problem <a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock" target="_blank" rel="noopener noreferrer">Best Time to Buy and Sell Stock</a> that we&#39;ll see in detail later on.<br>We need to choose a day to buy a stock, and sell it in the <em>future</em>. The numbers in the array are prices, and we need to buy the stock at as low a price as we can, and sell it as high as we can.</p>
 <p>We can initialize <code>left</code> and <code>right</code> pointers again, but this time, we&#39;ll update them depending on a condition. When the left item is less than the one on the right, that means it&#39;s good, we can buy and sell at those prices, so we get their difference and update our <code>maxDiff</code> variable that holds the maximum difference between the two.<br>If, however, the left one is greater than the right one, we update our <code>left</code> pointer to be where the <code>right</code> is at.<br>In both cases, we&#39;ll continue updating <code>right</code> until we reach the end of the array.</p>
 <p>With the blue arrow indicating the left pointer, and the red the right one, the process looks like this:</p>
-<p><img src="/blog/post-images/2024-03-09/sliding-window-dynamic.gif" alt="Sliding window dynamic"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-09/sliding-window-dynamic.gif" alt="Sliding window dynamic"></p>
 <p>The solution looks like this:</p>
 <pre><code class="language-ts">function maxProfit(prices: number[]): number {
   let left = 0;
@@ -4954,7 +5137,7 @@ This one is also called **fast/catch-up** version of dynamic sliding window, bec
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Container with Most Water]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-05/12-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-05/12-lm.png" alt="Cover image"></p>
 <p>The description for <a href="https://leetcode.com/problems/container-with-most-water" target="_blank" rel="noopener noreferrer">this problem</a> states:</p>
 <blockquote>
 <p>You are given an integer array <code>height</code> of length <code>n</code>. There are <code>n</code> vertical lines drawn such that the two endpoints of the <code>ith</code> line are <code>(i, 0)</code> and <code>(i, height[i])</code>.</p>
@@ -5033,7 +5216,7 @@ We can use `Math.max()` to calculate `maximumArea` as well.
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: 3Sum]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-04/11-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-04/11-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/3sum" target="_blank" rel="noopener noreferrer">this one</a>:</p>
 <blockquote>
 <p>Given an integer array <code>nums</code>, return all the triplets <code>[nums[i], nums[j], nums[k]]</code> such that <code>i != j</code>, <code>i != k</code>, and <code>j != k</code>, and <code>nums[i] + nums[j] + nums[k] == 0</code>.</p>
@@ -5142,7 +5325,7 @@ console.log(s);
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Valid Palindrome]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-03-02/10-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-02/10-lm.png" alt="Cover image"></p>
 <p>The description for <a href="https://leetcode.com/problems/valid-palindrome" target="_blank" rel="noopener noreferrer">this problem</a> is:</p>
 <blockquote>
 <p>A phrase is a <strong>palindrome</strong> if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.</p>
@@ -5261,9 +5444,9 @@ function isAlphaNum(c: string) {
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 2: Two Pointers]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-02-29/09-lm-ch2.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-29/09-lm-ch2.png" alt="Cover image"></p>
 <p>One of the techniques of iterating through an array is the <em>two pointers technique</em>, and it is as simple as it sounds: we just keep two pointers, one starting from the left, and the other from the right, gradually getting closer to each other.</p>
-<p><img src="/blog/post-images/2024-02-29/two-pointers.gif" alt="Two pointers"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-29/two-pointers.gif" alt="Two pointers"></p>
 <h3>Palindrome example</h3>
 <p>A very basic example can be the one where we check if a string is a palindrome or not. A palindrome is a string that reads the same forwards and backwards.</p>
 <p>In an imaginary world where all the inputs always consist of lowercase English letters, we can do it like this:</p>
@@ -5283,7 +5466,7 @@ function isPalindrome(s: string) {
 </code></pre>
 <p>We initialize two pointers: <code>left</code> and <code>right</code>. <code>left</code> points to the start of the array, while the <code>right</code> points to the last element. As we loop while <code>left</code> is less than <code>right</code>, we check if they are equal. If not, we return <code>false</code> immediately. Otherwise, our <code>left</code> pointer is increased; that is, it&#39;s moved to the <em>right</em> one step, and our <code>right</code> pointer is decreased, meaning that it&#39;s moved to the <em>left</em> one step.<br>When they eventually overlap, the loop terminates, and we return <code>true</code>.</p>
 <p>Let&#39;s say our string is <code>&#39;racecar&#39;</code>, which is a palindrome.<br>It will go like this:</p>
-<p><img src="/blog/post-images/2024-02-29/palindrome.gif" alt="Palindrome example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-29/palindrome.gif" alt="Palindrome example"></p>
 <h3>Squares of a sorted array example</h3>
 <p>Another example where we can use the two pointers technique is the problem <a href="https://leetcode.com/problems/squares-of-a-sorted-array" target="_blank" rel="noopener noreferrer">Squares of a Sorted Array</a>.</p>
 <p>The description says:</p>
@@ -5323,7 +5506,7 @@ The reason we return the reversed result is that the array is initially already 
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Longest Consecutive Sequence]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-02-27/08-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-27/08-lm.png" alt="Cover image"></p>
 <p>The description for <a href="https://leetcode.com/problems/longest-consecutive-sequence/" target="_blank" rel="noopener noreferrer">Longest Consecutive Sequence</a> states:</p>
 <blockquote>
 <p>Given an unsorted array of integers <code>nums</code>, return <em>the length of the longest consecutive elements sequence.</em></p>
@@ -5427,7 +5610,7 @@ longestConsecutive([0, 3, 7, 2, 5, 8, 4, 6, 0, 1]);
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Product of Array Except Self]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-02-25/07-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-25/07-lm.png" alt="Cover image"></p>
 <p>The description of <a href="https://leetcode.com/problems/product-of-array-except-self/" target="_blank" rel="noopener noreferrer">this problem</a> states that:</p>
 <blockquote>
 <p>Given an integer array <code>nums</code>, return <em>an array</em> <code>answer</code> <em>such that</em> <code>answer[i]</code> <em>is equal to the product of all the elements of</em> <code>nums</code> <em>except</em> <code>nums[i]</code>.</p>
@@ -5605,7 +5788,7 @@ The values inside the parentheses are the previous values of `result`.
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Top K Frequent Elements]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-02-23/06-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-23/06-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/top-k-frequent-elements/" target="_blank" rel="noopener noreferrer">Top K Frequent Elements</a>:</p>
 <blockquote>
 <p>Given an integer array <code>nums</code> and an integer <code>k</code>, return <em>the</em> <code>k</code> <em>most frequent elements</em>. You may return the answer in <strong>any order</strong>.</p>
@@ -5726,7 +5909,7 @@ What we do here is a bit similar to `setdefault()` in Python; when `n` does not 
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Group Anagrams]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-02-21/05-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-21/05-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/group-anagrams/description/" target="_blank" rel="noopener noreferrer">Group Anagrams</a>:</p>
 <blockquote>
 <p>Given an array of strings <code>strs</code>, group <strong>the anagrams</strong> together. You can return the answer in <strong>any order</strong>.</p>
@@ -5854,7 +6037,7 @@ While we couldn't use lists as keys in the Python version, we'll just convert th
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Two Sum]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-02-19/04-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-19/04-lm.png" alt="Cover image"></p>
 <p>Let&#39;s see what the description says for <a href="https://leetcode.com/problems/two-sum/" target="_blank" rel="noopener noreferrer">this one</a>:</p>
 <blockquote>
 <p>Given an array of integers <code>nums</code> and an integer <code>target</code>, return <em>indices of the two numbers such that they add up to <code>target</code></em>.</p>
@@ -5944,7 +6127,7 @@ twoSum([3, 3], 6);
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Valid Anagram]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-02-17/03-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-17/03-lm.png" alt="Cover image"></p>
 <p>For <a href="https://leetcode.com/problems/valid-anagram" target="_blank" rel="noopener noreferrer">this one</a>, let&#39;s start with the description:</p>
 <blockquote>
 <p>Given two strings <code>s</code> and <code>t</code>, return <code>true</code> <em>if</em> <code>t</code> <em>is an anagram of</em> <code>s</code><em>, and</em> <code>false</code> <em>otherwise</em>.</p>
@@ -6065,7 +6248,7 @@ This one wouldn't work as intended:
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Contains Duplicate]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-02-15/02-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-15/02-lm.png" alt="Cover image"></p>
 <p>For <a href="https://leetcode.com/problems/contains-duplicate/description/" target="_blank" rel="noopener noreferrer">this problem</a>, let&#39;s start with the description: </p>
 <blockquote>
 <p>Given an integer array <code>nums</code>, return <code>true</code> if any value appears <strong>at least twice</strong> in the array, and return <code>false</code> if every element is distinct.</p>
@@ -6127,7 +6310,7 @@ new Set([1, 1, 1, 3, 3, 4, 3, 2, 4, 2]);
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 1: Arrays & Hashing]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-02-13/01-lm-ch1.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-13/01-lm-ch1.png" alt="Cover image"></p>
 <p>Before starting the <a href="https://neetcode.io/practice" target="_blank" rel="noopener noreferrer">Arrays &amp; Hashing section in the Blind 75 list</a>, let&#39;s <em>very briefly</em> get to know our prerequisite topics for now:</p>
 <ul>
 <li>dynamic arrays</li>
@@ -6152,7 +6335,7 @@ items.append(11)
 items.append(13)
 </code></pre>
 <p>All the while, the length and capacity of <code>items</code> keeps growing dynamically.</p>
-<p><img src="/blog/post-images/2024-02-13/dynamic-arrays.gif" alt="Dynamic arrays example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-13/dynamic-arrays.gif" alt="Dynamic arrays example"></p>
 <h4>Time and space complexity</h4>
 <p>Accessing an element is $O(1)$ as we have <a href="https://en.wikipedia.org/wiki/Random_access" target="_blank" rel="noopener noreferrer">random access</a>.</p>
 <p>Inserting a new element or deleting an element is $O(n)$ (think about having to shift all the elements before inserting or after deleting an item). But, <a href="https://en.wikipedia.org/wiki/Amortized_analysis" target="_blank" rel="noopener noreferrer">in order to not be too pessimistic, we can look at amortized analysis</a>, in that case, inserting/deleting at the end of the array becomes $O(1)$.  </p>
@@ -6184,7 +6367,7 @@ items.append(13)
 <li>a hash function to map the data to a specific index in the array</li>
 </ul>
 <p>Hashes are usually large integers, so to find an index, we can take the result of the hash modulo the array&#39;s length.</p>
-<p><img src="/blog/post-images/2024-02-13/hash-tables.gif" alt="Hash tables example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-13/hash-tables.gif" alt="Hash tables example"></p>
 <Note>
 The **hash function** that's mapping the elements to buckets is <mark>not</mark> the `hash()` used in the visual (it's just a [Python function](https://docs.python.org/3/library/functions.html#hash) to calculate the hash value of an object). The hash function in this case is the modulo ( `%` ) operation.
 </Note>
@@ -6210,7 +6393,7 @@ The **hash function** that's mapping the elements to buckets is <mark>not</mark>
 
     return result
 </code></pre>
-<p><img src="/blog/post-images/2024-02-13/prefix-sums.gif" alt="Prefix sums example"></p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-13/prefix-sums.gif" alt="Prefix sums example"></p>
 <h4>Time and space complexity</h4>
 <p>Time complexity for a prefix sum is $O(n)$ because we&#39;re iterating over each of the elements in the array.<br>The space complexity is also $O(n)$ because the need of space grows as the length of the original array grows.</p>
 <hr>
@@ -6231,7 +6414,7 @@ The **hash function** that's mapping the elements to buckets is <mark>not</mark>
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Introduction]]></title>
-            <description><![CDATA[<p><img src="/blog/post-images/2024-02-13/00-lm-intro.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-13/00-lm-intro.png" alt="Cover image"></p>
 <p>It may seem like an oxymoron when the words &quot;LeetCode&quot; and &quot;meditation&quot; are used together; after all, one thing that almost everyone can agree is that <a href="https://leetcode.com/" target="_blank" rel="noopener noreferrer">LeetCode</a> is challenging. It&#39;s called <em>grinding</em> LeetCode for a reason.</p>
 <p>It doesn&#39;t have anything to do with the platform, of course, but rather what it represents: tackling problems for hours on end, usually to find a solution that is even harder to understand.</p>
 <p>However, what is more challenging is finding a roadmap to solve those problems with very little knowledge of data structures and algorithms. There are prerequisites to solve one type of problem, and there are prerequisites for understanding those prerequisites in the first place.<br>It&#39;s just intimidating when you consider yourself a beginner.</p>
