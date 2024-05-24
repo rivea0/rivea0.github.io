@@ -6,7 +6,7 @@ slug: leetcode-meditations-chapter-8-heap-and-priority-queue
 date: 2024-05-12
 ---
 
-![Cover image](/blog/post-images/2024-05-12/43-lm-ch8.png)
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/43-lm-ch8.png)
 
 ## Table of contents
 - [Introduction](#intro)
@@ -33,13 +33,13 @@ One of them is that it must be a _**complete binary tree**_, meaning that all th
 
 For example, when it comes to shape, this is a **complete** binary tree:
 
-![The shape of a complete binary tree](/blog/post-images/2024-05-12/complete-binary-tree.gif)
+![The shape of a complete binary tree](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/complete-binary-tree.gif)
 
 However, <mark>heaps must also be either a **max heap** or a **min heap**</mark> — all the parent nodes must be either greater than or equal to the values of their children (if it's a max heap); or less than or equal to the values of their children (if it's a min heap).
 
 A max heap might look like this:
 
-![An example of a max heap](/blog/post-images/2024-05-12/max-heap.gif)
+![An example of a max heap](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/max-heap.gif)
 
 <Note>
 A left child doesn't have to be less than the right child at all, as in a binary search tree. Also, we can always have duplicate values in a heap.
@@ -47,7 +47,7 @@ A left child doesn't have to be less than the right child at all, as in a binary
 
 A min heap, on the other hand, has the values of parent nodes less than those of their children:
 
-![An example of a min heap](/blog/post-images/2024-05-12/min-heap.gif)
+![An example of a min heap](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/min-heap.gif)
 
 <Note>
 When we have a max heap, the root node will have the maximum value. And, if we have a min heap instead, the root node will have the minimum value.
@@ -63,7 +63,7 @@ We can create a heap using an array. Since the root node is the most interesting
 
 What's nice about using an array is that, given a parent node's index $i$, its left child will be at the index $2i + 1$, and its right child will be at the index $2i + 2$.
 
-![Heap as an array](/blog/post-images/2024-05-12/heap-array.gif)
+![Heap as an array](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/heap-array.gif)
 
 Given that, any child node's parent will be at the index $\lfloor{\frac{(n - 1)}{2}}\rfloor$. 
 
@@ -92,7 +92,7 @@ We'll _**heapify**_, of course!
 
 Let's say that we want to add a node with the value `20`:
 
-![Heapifying for insertion](/blog/post-images/2024-05-12/heapify-for-insert.gif)
+![Heapifying for insertion](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/heapify-for-insert.gif)
 
 So, the <mark>_heapify_ is the swapping of nodes until we know that the heap-order property is maintained</mark>.
 
@@ -100,7 +100,7 @@ A similar thing happens when we need to remove an element. But since we're mainl
 
 We start off by swapping the last element (the bottom leftmost one) with the root. Now we can easily remove the "root," which resides as a leaf node. However, we still need to maintain the heap-order property, so we need to _**heapify**_ again.
 
-![Heapifying for removing](/blog/post-images/2024-05-12/heapify-for-remove.gif)
+![Heapifying for removing](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-12/heapify-for-remove.gif)
 
 ---
 

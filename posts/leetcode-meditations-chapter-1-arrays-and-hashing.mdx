@@ -6,7 +6,7 @@ slug: leetcode-meditations-chapter-1-arrays-and-hashing
 date: 2024-02-13
 ---
 
-![Cover image](/blog/post-images/2024-02-13/01-lm-ch1.png)
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-13/01-lm-ch1.png)
 
 Before starting the [Arrays & Hashing section in the Blind 75 list](https://neetcode.io/practice), let's _very briefly_ get to know our prerequisite topics for now:
 
@@ -47,7 +47,7 @@ items.append(13)
 
 All the while, the length and capacity of `items` keeps growing dynamically.
 
-![Dynamic arrays example](/blog/post-images/2024-02-13/dynamic-arrays.gif)
+![Dynamic arrays example](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-13/dynamic-arrays.gif)
 
 #### Time and space complexity
 
@@ -92,7 +92,7 @@ There are two important ingredients for a hash table:
 
 Hashes are usually large integers, so to find an index, we can take the result of the hash modulo the array's length.
 
-![Hash tables example](/blog/post-images/2024-02-13/hash-tables.gif)
+![Hash tables example](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-13/hash-tables.gif)
 
 <Note>
 The **hash function** that's mapping the elements to buckets is <mark>not</mark> the `hash()` used in the visual (it's just a [Python function](https://docs.python.org/3/library/functions.html#hash) to calculate the hash value of an object). The hash function in this case is the modulo ( `%` ) operation.
@@ -132,7 +132,7 @@ def runningSum(nums):
     return result
 ```
 
-![Prefix sums example](/blog/post-images/2024-02-13/prefix-sums.gif)
+![Prefix sums example](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-02-13/prefix-sums.gif)
 
 
 #### Time and space complexity

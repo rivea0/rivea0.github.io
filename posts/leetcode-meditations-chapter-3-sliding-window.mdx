@@ -6,7 +6,7 @@ slug: leetcode-meditations-chapter-3-sliding-window
 date: 2024-03-09
 ---
 
-![Cover image](/blog/post-images/2024-03-09/13-lm-ch3.png)
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-09/13-lm-ch3.png)
 
 Now that we're familiar with the [Two Pointers technique](https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers), we can add another one to our toolbox: the Sliding Window.
 It's usually used for operations done on the subsets of a given data. It also comes in two flavors: **fixed window size** and **dynamic window size**.
@@ -17,7 +17,7 @@ If we have a size constraint in a given problem, say, we need to check a $k$-siz
 
 For example, getting the maximum subarray (of size $k$) sum of a given array can be done like this:
 
-![Sliding window fixed](/blog/post-images/2024-03-09/sliding-window-fixed.gif)
+![Sliding window fixed](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-09/sliding-window-fixed.gif)
 
 Note that the window size is $k$, and it doesn't change throughout the operation, hence, _fixed size_.
 
@@ -84,7 +84,7 @@ In both cases, we'll continue updating `right` until we reach the end of the arr
 
 With the blue arrow indicating the left pointer, and the red the right one, the process looks like this:
 
-![Sliding window dynamic](/blog/post-images/2024-03-09/sliding-window-dynamic.gif)
+![Sliding window dynamic](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-03-09/sliding-window-dynamic.gif)
 
 The solution looks like this:
 

@@ -6,7 +6,7 @@ slug: leetcode-meditations-chapter-9-backtracking
 date: 2024-05-17
 ---
 
-![Cover image](/blog/post-images/2024-05-17/45-lm-ch9.png)
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-17/45-lm-ch9.png)
 
 Let's start with admitting this one fact: backtracking is hard. Or rather, _understanding it the first time_ is hard.
 Or, it's one of those concepts that you think you grasped it, only to realize later that you actually didn't.
@@ -25,7 +25,7 @@ Now, we're at our starting point. There are no more paths left to explore, so we
 
 It was a nice but tiring walk, and it went like this:
 
-![Backtracking](/blog/post-images/2024-05-17/backtracking.gif)
+![Backtracking](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-17/backtracking.gif)
 
 Now, let's take a look at an actual LeetCode problem.
 
@@ -53,7 +53,7 @@ Output: [[], [0]]
 
 Before diving into the solution code, let's take a look at how backtracking will work in this case. Let's call the `nums` array `items` instead:
 
-![Backtracking decision tree 1](/blog/post-images/2024-05-17/backtracking-subsets-nums.gif)
+![Backtracking decision tree 1](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-17/backtracking-subsets-nums.gif)
 
 For each item in `items`, we have initially two choices: to include the item, or not to include it.
 
@@ -61,7 +61,7 @@ For each level $n$ in this _decision tree_, we have the option to include the ne
 
 Let's simplify the example a bit, and say that `items` is now `['a', 'b']` (**We'll ignore the problem specifics for now**).
 
-![Backtracking decision tree 2](/blog/post-images/2024-05-17/backtracking-subsets-2.gif)
+![Backtracking decision tree 2](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-17/backtracking-subsets-2.gif)
 
 In this case, we can use backtracking like this:
 
@@ -185,7 +185,7 @@ _Add `'b'`?_ and _Go ahead?_ arrows on the second level are calls to `backtrack(
 `backtrack(2)` calls are when we reach the "dead ends," in those cases, we add `currentSubset` to the `result`.
 We always reach the base case in a `backtrack(2)` call, obviously because it's only when the `idx` equals `items.length`.
 
-![Backtracking function](/blog/post-images/2024-05-17/backtracking-subsets-func.gif)
+![Backtracking function](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-17/backtracking-subsets-func.gif)
 
 <Note>
 We modified the function in the above examples to work with strings, but in the actual solution we'll only deal with numbers, so in TypeScript, `result` and `currentSubset` will look like this:
