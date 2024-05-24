@@ -1,0 +1,221 @@
+---
+title: "LeetCode Meditations: Implement Trie (Prefix Tree)"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Implement Trie (Prefix Tree) problem.
+slug: leetcode-meditations-implement-trie-prefix-tree
+date: 2024-05-24
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-24/49-lm.png)
+
+The description for [this problem](https://leetcode.com/problems/implement-trie-prefix-tree) is:
+
+> A [**trie**](https://en.wikipedia.org/wiki/Trie) (pronounced as "try") or **prefix tree** is a tree data structure used to efficiently store and retrieve keys in a dataset of strings. There are various applications of this data structure, such as autocomplete and spellchecker.
+>
+> Implement the Trie class:
+> - `Trie()` Initializes the trie object.
+> - `void insert(String word)` Inserts the string `word` into the trie.
+> - `boolean search(String word)` Returns `true` if the string `word` is in the trie (i.e., was inserted before), and `false` otherwise.
+> - `boolean startsWith(String prefix)` Returns `true` if there is a previously inserted string `word` that has the prefix `prefix`, and `false` otherwise.
+
+
+For example: 
+
+```
+Input
+['Trie', 'insert', 'search', 'search', 'startsWith', 'insert', 'search']
+[[], ['apple'], ['apple'], ['app'], ['app'], ['app'], ['app']]
+
+Output
+[null, null, true, false, true, null, true]
+
+Explanation
+Trie trie = new Trie();
+trie.insert('apple');
+trie.search('apple');   // return True
+trie.search('app');     // return False
+trie.startsWith('app'); // return True
+trie.insert('app');
+trie.search('app');     // return True
+```
+
+---
+
+We have seen in [the previous article](https://rivea0.github.io/blog/leetcode-meditations-chapter-10-tries) how to create a trie, insert a word, and search for a word, as well as deleting a word.
+
+This problem requires only the first three of them, and additionally a `startsWith` method to search for a prefix.
+
+In the previous version, we've created our trie using an array, but let's use another approach here. We'll make use of [the `Map` object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map#instance_methods), which is slightly more readable and efficient.
+
+_We used JavaScript in the previous article, but for this solution we'll continue using TypeScript._
+
+---
+
+Let's start with a trie node.
+
+We'll create a `TrieNode` class that has `children` which is initiated as a `Map` whose keys are `string`s and the values are `TrieNode`s. 
+
+Our node will also have an `isEndOfWord` flag to indicate whether it represents the end character of a word:
+
+```ts
+class TrieNode {
+  public children: Map<string, TrieNode>;
+  public isEndOfWord: boolean;
+
+  constructor() {
+    this.children = new Map();
+    this.isEndOfWord = false;    
+  }
+}
+```
+
+Now, on to the `Trie` itself.
+
+We'll start with creating an empty root note in our `constructor`:
+
+```ts
+class Trie {
+  public root: TrieNode;
+
+  constructor() {
+    this.root = new TrieNode();
+  }
+  ...
+}
+```
+
+To insert a word, we'll traverse each character, and starting with our root node, insert them one by one. 
+
+First, we'll initialize a `currentNode` variable which points to our root node, and we'll update it each time we add a character. Once we add all the characters, we'll mark that node's `isEndOfWord` as `true`:
+
+```ts
+insert(word: string): void {
+  let currentNode = this.root;
+  for (const char of word) {
+    if (!currentNode.children.has(char)) {
+      currentNode.children.set(char, new TrieNode());
+    }
+    currentNode = currentNode.children.get(char) as TrieNode;
+  }
+
+  currentNode.isEndOfWord = true;
+}
+```
+
+<Note>
+We'll be casting `currentNode.children.get(char)` as a `TrieNode`, because TypeScript thinks that it might be `undefined`. This is one of those times that we know more than the TS compiler, so we're using a [type assertion](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions).
+
+Alternatively, we could've also used a [non-null assertion operator](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#non-null-assertion-operator-postfix) that asserts values as non `null` or `undefined`, like this:
+
+```ts
+currentNode = currentNode.children.get(char)!;
+```
+</Note>
+
+To search a word, we'll do a similar thing. We'll iterate through each character, and check if it's in our trie. If not, we can immediately return `false`. Otherwise, we'll return `isEndOfWord` of the last node we reach. So, if that character is indeed the end of a word, that word is in our trie:
+
+```ts
+search(word: string): boolean {
+  let currentNode = this.root;
+  for (const char of word) {
+    if (!currentNode.children.has(char)) {
+      return false;
+    }
+    currentNode = currentNode.children.get(char) as TrieNode;
+  }
+
+  return currentNode.isEndOfWord;
+}
+```
+
+The `startsWith` method also looks very similar, only that we don't need to check `isEndOfWord` of any node. We're just checking for the existence of the prefix we're given, so we'll traverse all the characters in it, and once we reach the end (_that all characters are in our trie_), we can return `true`: 
+
+```ts
+startsWith(prefix: string): boolean {
+  let currentNode = this.root;
+  for (const char of prefix) {
+    if (!currentNode.children.has(char)) {
+      return false;
+    }
+    currentNode = currentNode.children.get(char) as TrieNode;
+  }
+
+  return true;
+}
+```
+
+And, here is the whole solution:
+
+```ts
+class TrieNode {
+  public children: Map<string, TrieNode>;
+  public isEndOfWord: boolean;
+
+  constructor() {
+    this.children = new Map();
+    this.isEndOfWord = false;    
+  }
+}
+
+class Trie {
+  public root: TrieNode;
+
+  constructor() {
+    this.root = new TrieNode();
+  }
+
+  insert(word: string): void {
+    let currentNode = this.root;
+    for (const char of word) {
+      if (!currentNode.children.has(char)) {
+        currentNode.children.set(char, new TrieNode());
+      }
+      currentNode = currentNode.children.get(char) as TrieNode;
+    }
+
+    currentNode.isEndOfWord = true;
+  }
+
+  search(word: string): boolean {
+    let currentNode = this.root;
+    for (const char of word) {
+      if (!currentNode.children.has(char)) {
+        return false;
+      }
+      currentNode = currentNode.children.get(char) as TrieNode;
+    }
+
+    return currentNode.isEndOfWord;
+  }
+
+  startsWith(prefix: string): boolean {
+    let currentNode = this.root;
+    for (const char of prefix) {
+      if (!currentNode.children.has(char)) {
+        return false;
+      }
+      currentNode = currentNode.children.get(char) as TrieNode;
+    }
+
+    return true;
+  }
+}
+
+/**
+ * Your Trie object will be instantiated and called as such:
+ * var obj = new Trie()
+ * obj.insert(word)
+ * var param_2 = obj.search(word)
+ * var param_3 = obj.startsWith(prefix)
+ */
+```
+
+#### Time and space complexity
+
+Both the time and space complexity of inserting a word are $O(n)$ where $n$ is the number of characters — we traverse through each of them once, and the space requirements will grow as the number of characters of the word grows.
+
+`search` and `startsWith` both have $O(n)$ time complexity, as we're iterating through each character in a given string input. They also both have $O(1)$ space complexity because we don't need any additional space.
+
+---
+
+Next up is the problem [Design Add and Search Words Data Structure](https://leetcode.com/problems/design-add-and-search-words-data-structure). Until then, happy coding.
