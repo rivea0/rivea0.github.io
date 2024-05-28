@@ -4,9 +4,203 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 24 May 2024 19:46:28 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 28 May 2024 20:29:58 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Design Add and Search Words Data Structure]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-27/50-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/design-add-and-search-words-data-structure" target="_blank" rel="noopener noreferrer">Design Add and Search Words Data Structure</a>:</p>
+<blockquote>
+<p>Design a data structure that supports adding new words and finding if a string matches any previously added string.</p>
+<p>Implement the <code>WordDictionary</code> class:</p>
+<ul>
+<li><code>WordDictionary()</code> Initializes the object.</li>
+<li><code>void addWord(word)</code> Adds <code>word</code> to the data structure, it can be matched later.</li>
+<li><code>bool search(word)</code> Returns <code>true</code> if there is any string in the data structure that matches <code>word</code> or <code>false</code> otherwise. <code>word</code> may contain dots <code>&#39;.&#39;</code> where dots can be matched with any letter.</li>
+</ul>
+</blockquote>
+<p>For example:</p>
+<pre><code class="language-ts">WordDictionary wordDictionary = new WordDictionary();
+wordDictionary.addWord(&#39;bad&#39;);
+wordDictionary.addWord(&#39;dad&#39;);
+wordDictionary.addWord(&#39;mad&#39;);
+wordDictionary.search(&#39;pad&#39;); // return False
+wordDictionary.search(&#39;bad&#39;); // return True
+wordDictionary.search(&#39;.ad&#39;); // return True
+wordDictionary.search(&#39;b..&#39;); // return True
+</code></pre>
+<p>We also have some constraints:</p>
+<ul>
+<li><code>1 &lt;= word.length &lt;= 25</code></li>
+<li><code>word</code> in <code>addWord</code> consists of lowercase English letters.</li>
+<li><code>word</code> in <code>search</code> consists of <code>&#39;.&#39;</code> or lowercase English letters.</li>
+<li>There will be at most <code>2</code> dots in <code>word</code> for <code>search</code> queries.</li>
+<li>At most <code>10^4</code> calls will be made to <code>addWord</code> and <code>search</code>.</li>
+</ul>
+<hr>
+<p>Since we&#39;re dealing with words, especially <em>storing</em> and <em>searching</em> a lot of words, <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-10-tries" target="_blank" rel="noopener noreferrer">the trie data structure</a> can be efficient to use here.</p>
+<p>Adding words is easy — in fact, we&#39;ve seen how to insert a word into a trie in <a href="https://rivea0.github.io/blog/leetcode-meditations-implement-trie-prefix-tree" target="_blank" rel="noopener noreferrer">the previous problem</a>.</p>
+<p>However, searching seems to be a bit more challenging since we have to do something similar to a <a href="https://en.wikipedia.org/wiki/Regular_expression" target="_blank" rel="noopener noreferrer">regex</a> search, using the dot character as a wildcard.</p>
+<p>Before that, let&#39;s take a deep breath, and start with creating a simple trie node.</p>
+<hr>
+<p>A simple trie node might look like this:</p>
+<pre><code class="language-ts">class TrieNode {
+  public children: Map&lt;string, TrieNode&gt;;
+  public isEndOfWord: boolean;
+
+  constructor() {
+    this.children = new Map();
+    this.isEndOfWord = false;
+  }
+}
+</code></pre>
+<p>Our <code>TrieNode</code> class has <code>children</code> that is a <code>Map</code> with <code>string</code>s as keys, and <code>TrieNode</code>s as values.</p>
+<p>It also has an <code>isEndOfWord</code> flag to mark the node as the end character of a word.</p>
+<p>The <code>WordDictionary</code> class is going to be a trie, so we can initialize our root node in the <code>constructor</code>:</p>
+<pre><code class="language-ts">class WordDictionary {
+  public root: TrieNode;
+
+  constructor() {
+    this.root = new TrieNode();    
+  }
+  ...
+}
+</code></pre>
+<p>Adding a word is the exact same thing we did in <code>insert</code> function of <a href="https://rivea0.github.io/blog/leetcode-meditations-implement-trie-prefix-tree" target="_blank" rel="noopener noreferrer">the previous problem</a>.</p>
+<p>We&#39;ll traverse each character, and one by one, add it to our trie. We&#39;ll create a <code>currentNode</code> that initially points to the root node, and update it as we go. At the end, we&#39;ll mark the last node as the end of the word:</p>
+<pre><code class="language-ts">addWord(word: string): void {
+  let currentNode = this.root;
+
+  for (const char of word) {
+    if (!currentNode.children.has(char)) {
+      currentNode.children.set(char, new TrieNode());
+    }
+
+    currentNode = currentNode.children.get(char) as TrieNode;
+  }
+
+  currentNode.isEndOfWord = true;
+}
+</code></pre>
+<Note>
+Similar to the previous problem, we're casting `currentNode.children.get(char)` as a `TrieNode`, because TypeScript thinks that it might be `undefined`. This is one of those times that we know more than the TS compiler, so we're using a [type assertion](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions).
+
+<p>Alternatively, we could&#39;ve also used a <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#non-null-assertion-operator-postfix" target="_blank" rel="noopener noreferrer">non-null assertion operator</a> that asserts values as non <code>null</code> or <code>undefined</code>, like this:</p>
+<pre><code class="language-ts">currentNode = currentNode.children.get(char)!;
+</code></pre>
+</Note>
+
+<p>Now, it gets a little confusing when we need to implement <code>search</code>. We need to be able to match any letter for a dot, and the idea here is about <em>recursively checking the nodes</em>. </p>
+<p>For example, if we are to search for <code>a.c</code>, first we check if <code>a</code> exists, then go on to its children two levels below to see if <code>c</code> exists as the last character. If we don&#39;t reach our goal on our first try, we need to <em>backtrack</em>, and search through the other children of <code>a</code> again.</p>
+<p>So, the idea is that if the current character of the <code>word</code> we&#39;re searching for is a dot (<code>.</code>), then, we&#39;ll go through the children of the current node, and <em>do the same thing for each child, continuing with each character in the <code>word</code></em>.</p>
+<p>Let&#39;s see another example.</p>
+<p>If the word is <code>s.y</code>, we first check if <code>s</code> exists as a child node of the root, if so, we go on to check if it has any child node that has a child node of <code>y</code>, and it marks the end of the word. We could have <code>say</code> or <code>sky</code> or <code>spy</code>, etc., it doesn&#39;t matter. As soon as it matches our criteria, we can return <code>true</code> immediately.</p>
+<p>Note that for each child, we&#39;re essentially doing the same thing, but with the next character in <code>word</code> — it&#39;s a recursive function. In fact, it&#39;s a <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#dfs" target="_blank" rel="noopener noreferrer">depth-first search</a>.</p>
+<p>We&#39;ll keep track of the current index of the character we&#39;re looking at in <code>word</code> as well as the current node.</p>
+<p>If the character is a dot (<code>.</code>), we&#39;ll go on to check each child, incrementing the current character index. Otherwise, we&#39;ll do our usual search. If the character is not in the children of the current node, we can return <code>false</code> immediately. If we have that character, we&#39;ll recursively search again, incrementing the character index and updating the current node:</p>
+<pre><code class="language-ts">function dfs(currentCharIdx: number, currentNode: TrieNode) {
+  if (currentCharIdx === word.length) {
+    return currentNode.isEndOfWord;
+  }
+
+  const char = word[currentCharIdx];
+
+  if (char === &#39;.&#39;) {
+    for (const child of currentNode.children.values()) {
+      if (dfs(currentCharIdx + 1, child)) {
+        return true;
+      }
+    }
+    return false;
+  } else {
+    if (!currentNode.children.has(char)) {
+      return false;
+    }
+    
+    return dfs(currentCharIdx + 1, currentNode.children.get(char) as TrieNode);
+  }
+}
+</code></pre>
+<p>And, inside <code>search</code>, we can simply return whatever this function returns, passing it the first index of <code>word</code> and our <code>root</code> as arguments:</p>
+<pre><code class="language-ts">return dfs(0, this.root);
+</code></pre>
+<p>Here is the final solution in TypeScript:</p>
+<pre><code class="language-ts">class TrieNode {
+  public children: Map&lt;string, TrieNode&gt;;
+  public isEndOfWord: boolean;
+
+  constructor() {
+    this.children = new Map();
+    this.isEndOfWord = false;
+  }
+}
+
+class WordDictionary {
+  public root: TrieNode;
+
+  constructor() {
+    this.root = new TrieNode();
+  }
+
+  addWord(word: string): void {
+    let currentNode = this.root;
+
+    for (const char of word) {
+      if (!currentNode.children.has(char)) {
+        currentNode.children.set(char, new TrieNode());
+      }
+      currentNode = currentNode.children.get(char) as TrieNode;
+    }
+    currentNode.isEndOfWord = true;
+  }
+
+  search(word: string): boolean {
+    function dfs(currentCharIdx: number, currentNode: TrieNode) {
+      if (currentCharIdx === word.length) {
+        return currentNode.isEndOfWord;
+      }
+
+      const char = word[currentCharIdx];
+
+      if (char === &#39;.&#39;) {
+        for (const child of currentNode.children.values()) {
+          if (dfs(currentCharIdx + 1, child)) {
+            return true;
+          }
+        }
+        return false;
+      } else {
+        if (!currentNode.children.has(char)) {
+          return false;
+        }
+        
+        return dfs(currentCharIdx + 1, currentNode.children.get(char) as TrieNode);
+      }
+    }
+    
+    return dfs(0, this.root);
+  }
+}
+
+/**
+ * Your WordDictionary object will be instantiated and called as such:
+ * var obj = new WordDictionary()
+ * obj.addWord(word)
+ * var param_2 = obj.search(word)
+ */
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity of adding a word is $O(n)$ where $n$ is the length of the word — because we iterate through each character once, doing a constant operation each time. The space complexity is also $O(n)$ as our need for additional space will grow as the length of the word we&#39;re adding grows.</p>
+<p>The time complexity of searching is—I think—$O(n * m)$ where $n$ is the length of the word and $m$ is the total number of nodes. In the worst case where all the characters are dots, we&#39;ll search the entire tree for the word. The space complexity will be $O(h)$ where $h$ is the height of the trie, because of the recursive call stack.</p>
+<hr>
+<p>Next up, we&#39;ll look at the last problem in this chapter, <a href="https://leetcode.com/problems/word-search-ii" target="_blank" rel="noopener noreferrer">Word Search II</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-design-add-and-search-words-data-structure</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-design-add-and-search-words-data-structure</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 28 May 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Implement Trie (Prefix Tree)]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-24/49-lm.png" alt="Cover image"></p>
