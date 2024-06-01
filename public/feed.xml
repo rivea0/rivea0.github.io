@@ -4,9 +4,301 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 28 May 2024 20:29:58 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 01 Jun 2024 18:54:36 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Word Search II]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-01/51-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/word-search-ii" target="_blank" rel="noopener noreferrer">Word Search II</a>:</p>
+<blockquote>
+<p>Given an <code>m x n</code> <code>board</code> of characters and a list of strings <code>words</code>, return <em>all words on the board</em>.</p>
+<p>Each word must be constructed from letters of sequentially adjacent cells, where <strong>adjacent cells</strong> are horizontally or vertically neighboring. The same letter cell may not be used more than once in a word.</p>
+</blockquote>
+<p>For example:</p>
+<img src="https://assets.leetcode.com/uploads/2020/11/07/search1.jpg" alt="Example image 1" />
+
+<pre><code>Input: board = [
+  [&#39;o&#39;, &#39;a&#39;, &#39;a&#39;, &#39;n&#39;],
+  [&#39;e&#39;, &#39;t&#39;, &#39;a&#39;, &#39;e&#39;],
+  [&#39;i&#39;, &#39;h&#39;, &#39;k&#39;, &#39;r&#39;],
+  [&#39;i&#39;, &#39;f&#39;, &#39;l&#39;, &#39;v&#39;],
+], words = [&#39;oath&#39;, &#39;pea&#39;, &#39;eat&#39;, &#39;rain&#39;]
+
+Output: [&#39;eat&#39;, &#39;oath&#39;]
+</code></pre>
+<p>Or:</p>
+<img src="https://assets.leetcode.com/uploads/2020/11/07/search2.jpg" alt="Example image 2" />
+
+<pre><code>Input: board = [
+  [&#39;a&#39;, &#39;b&#39;], 
+  [&#39;c&#39;, &#39;d&#39;]
+], words = [&#39;abcb&#39;]
+
+Output: []
+</code></pre>
+<p>Also, our constraints are:</p>
+<ul>
+<li><code>m == board.length</code></li>
+<li><code>n == board[i].length</code></li>
+<li><code>1 &lt;= m, n &lt;= 12</code></li>
+<li><code>board[i][j]</code> is a lowercase English letter.</li>
+<li><code>1 &lt;= words.length &lt;= 3 * 10^4</code></li>
+<li><code>1 &lt;= words[i].length &lt;= 10</code></li>
+<li><code>words[i]</code> consists of lowercase English letters.</li>
+<li>All the strings of <code>words</code> are unique.</li>
+</ul>
+<hr>
+<p>We&#39;ve seen the first iteration of this problem where we needed to search for only one word.<br>It&#39;s easy to think that, well, we can just loop over the words this time, and return those that our board has. Simple as that.</p>
+<p>For example, if you remember the <code>exist</code> function (which uses depth-first search) that <a href="https://rivea0.github.io/blog/leetcode-meditations-word-search" target="_blank" rel="noopener noreferrer">we implemented in the previous version of this problem</a>, you might think that it&#39;s easy to do this:</p>
+<pre><code class="language-ts">function findWords(board: string[][], words: string[]): string[] {
+  let result = [];
+
+  for (const word of words) {
+    if (exist(board, word)) {
+      result.push(word);
+    }
+  }
+
+  return result;
+}
+</code></pre>
+<p>However, this is going to be a terrible approach with a runtime of probably $O(\text{length of rows } * \text{length of columns } * 4^{\text{length of the word }} * \text{ number of words})$.</p>
+<Note>
+In `exist`, we [used](https://rivea0.github.io/blog/leetcode-meditations-word-search) depth-first search to look for the up, down, left and right directions — hence, $4^\text{length of the word}$.
+</Note>
+
+<p>If we try that, we&#39;ll treat ourselves a good old <strong>Time Limit Exceeded</strong> error in one of the test cases. So, we need to find another way to solve this problem — which means it&#39;s time to take a deep breath.</p>
+<hr>
+<p>Instead of going through each word in <code>words</code> and looking for it in <code>board</code>, we can look through <code>board</code> first. If the character we&#39;re looking at is in <code>words</code>, then we&#39;ll continue searching through its directions until we find the complete word (or not). </p>
+<p>Because we&#39;re doing a character lookup (or basically, a <em>prefix search</em>), <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-10-tries" target="_blank" rel="noopener noreferrer">trie</a> is going to be an efficient choice of data structure here.</p>
+<p>Let&#39;s start with creating our simple trie node which has <code>children</code>, and a flag <code>isEndOfWord</code> to mark it as the end of the word character:</p>
+<pre><code class="language-ts">class TrieNode {
+  public children: Map&lt;string, TrieNode&gt;;
+  public isEndOfWord: boolean;
+
+  constructor() {
+    this.children = new Map();
+    this.isEndOfWord = false;
+  }
+}
+</code></pre>
+<p>Then, we&#39;ll create our trie, but for now, we&#39;ll only have an <code>addWord</code> method. This is exactly what we&#39;ve seen for the last two problems, so it&#39;s easy:</p>
+<pre><code class="language-ts">class Trie {
+  public root: TrieNode;
+
+  constructor() {
+    this.root = new TrieNode();
+  }
+
+  addWord(word: string) {
+    let currentNode = this.root;
+    for (const char of word) {
+      if (!currentNode.children.has(char)) {
+        currentNode.children.set(char, new TrieNode());
+      }
+      currentNode = currentNode.children.get(char) as TrieNode;
+    }
+
+    currentNode.isEndOfWord = true;
+  }
+}
+</code></pre>
+<p>Traversing each character in <code>word</code>, we add it to our trie, updating the current node (which starts as our root node, of course) as we go. Once we reach the last character, we mark it as the end of the word.</p>
+<Note>
+Similar to the previous problems, we're casting `currentNode.children.get(char)` as a `TrieNode`, because TypeScript thinks that it might be `undefined`. This is one of those times that we know more than the TS compiler, so we're using a [type assertion](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions).
+
+<p>Alternatively, we could&#39;ve also used a <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#non-null-assertion-operator-postfix" target="_blank" rel="noopener noreferrer">non-null assertion operator</a> that asserts values as non <code>null</code> or <code>undefined</code>, like this:</p>
+<pre><code class="language-ts">currentNode = currentNode.children.get(char)!;
+</code></pre>
+</Note>
+
+<p>Now, the first thing to do if we want to look up the words in our trie is... to add them to our trie, of course!<br>Inside the <code>findWords</code> function, we can do that easily:</p>
+<pre><code class="language-ts">let trie = new Trie();
+
+for (const word of words) {
+  trie.addWord(word);
+}
+</code></pre>
+<p>We&#39;ll also have a <code>result</code> array to add the words that are in <code>board</code>:</p>
+<pre><code class="language-ts">let result: string[] = [];
+</code></pre>
+<p>This array will be modified by the function that does the depth-first search, so that at the end of our main function <code>findWords</code>, we can just return it.</p>
+<p>For each cell, we&#39;ll run a depth-first search <em>if that character is the start of a word in <code>words</code></em>:</p>
+<pre><code class="language-ts">for (let i = 0; i &lt; rowsLength; i++) {
+  for (let j = 0; j &lt; colsLength; j++) {
+    if (trie.root.children.has(board[i][j])) {
+      dfs(i, j, trie.root.children.get(board[i][j]) as TrieNode, []);
+    }
+  }
+}
+</code></pre>
+<p>So, if <code>board[i][j]</code> (which is the current character) is the first character of a word in <code>words</code>, we&#39;ll run <code>dfs</code>, passing it the arguments of the current row and column, as well as the next character (<code>trie.root.children.get(board[i][j])</code>). We&#39;ll also pass it an empty array to keep track of the path we&#39;re exploring.</p>
+<p>Now let&#39;s look at the <code>dfs</code> function itself.<br>The first thing we need to do is to add the current character (the current cell) to our path, and mark it as &quot;visited.&quot; We can mark it with an asterisk (<code>*</code>) to do that:</p>
+<pre><code class="language-ts">let currentChar = board[currentRow][currentCol];
+path.push(currentChar);
+board[currentRow][currentCol] = &#39;*&#39;;
+</code></pre>
+<p>Now, if the current node we&#39;re looking at is the end character of a word, that means our <code>path</code> consists of all the letters of a word in <code>words</code>, so we can add it to <code>result</code> as a string. After that, we&#39;ll mark that node as <em>not the end of a word</em>, because in our next iterations, that node might not be the end character of another word:</p>
+<pre><code class="language-ts">if (currentNode.isEndOfWord) {
+  result.push(path.join(&#39;&#39;));
+  currentNode.isEndOfWord = false;
+}
+</code></pre>
+<p>From that current cell, we&#39;ll look at all the directions we can go as long as we stay within the bounds of <code>board</code>, and that next character is <em>the</em> next character in that word (if it&#39;s a child node of the current node):</p>
+<pre><code class="language-ts">// Coordinations to go right, left, down, and up
+let coords = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+for (const [r, c] of coords) {
+  let [rowToGo, colToGo] = [currentRow + r, currentCol + c];
+
+  if (!outOfBounds(rowToGo, colToGo) &amp;&amp; currentNode.children.has(board[rowToGo][colToGo])) {
+    dfs(
+      rowToGo,
+      colToGo,
+      currentNode.children.get(board[rowToGo][colToGo]) as TrieNode,
+      path
+    );
+  }
+}
+</code></pre>
+<p>Once we have done exploring our options, we need to backtrack, so we need to pop the last character from our <code>path</code> and reset the cell to its original character:</p>
+<pre><code class="language-ts">path.pop();
+board[currentRow][currentCol] = currentChar;
+</code></pre>
+<p>And, that&#39;s pretty much it for the <code>dfs</code> function:</p>
+<pre><code class="language-ts">function dfs(currentRow: number, currentCol: number, currentNode: TrieNode, path: string[]) {
+  let currentChar = board[currentRow][currentCol];
+  path.push(currentChar);
+  board[currentRow][currentCol] = &#39;*&#39;;
+
+  // If we find a word, we&#39;ll add it to result, and
+  // mark that node as not the end character
+  // because it might be in another word
+  if (currentNode.isEndOfWord) {
+    result.push(path.join(&#39;&#39;));
+    currentNode.isEndOfWord = false;
+  }
+
+  // Coordinations to go right, left, down, and up
+  let coords = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+  for (const [r, c] of coords) {
+    let [rowToGo, colToGo] = [currentRow + r, currentCol + c];
+
+    if (!outOfBounds(rowToGo, colToGo) &amp;&amp; currentNode.children.has(board[rowToGo][colToGo])) {
+      dfs(
+        rowToGo,
+        colToGo,
+        currentNode.children.get(board[rowToGo][colToGo]) as TrieNode,
+        path
+      );
+    }
+  }
+
+  path.pop();
+  board[currentRow][currentCol] = currentChar;
+}
+</code></pre>
+<p>And, the whole solution looks like this:</p>
+<pre><code class="language-ts">class TrieNode {
+  public children: Map&lt;string, TrieNode&gt;;
+  public isEndOfWord: boolean;
+
+  constructor() {
+    this.children = new Map();
+    this.isEndOfWord = false;
+  }
+}
+
+class Trie {
+  public root: TrieNode;
+
+  constructor() {
+    this.root = new TrieNode();
+  }
+
+  addWord(word: string) {
+    let currentNode = this.root;
+    for (const char of word) {
+      if (!currentNode.children.has(char)) {
+        currentNode.children.set(char, new TrieNode());
+      }
+      currentNode = currentNode.children.get(char) as TrieNode;
+    }
+
+    currentNode.isEndOfWord = true;
+  }
+}
+
+function findWords(board: string[][], words: string[]): string[] {
+  const rowsLength = board.length;
+  const colsLength = board[0].length;
+
+  function outOfBounds(r: number, c: number) {
+    return r &lt; 0 || c &lt; 0 || r &gt;= rowsLength || c &gt;= colsLength;
+  }
+
+  let result: string[] = [];
+  let trie = new Trie();
+
+  for (const word of words) {
+    trie.addWord(word);
+  }
+
+  function dfs(currentRow: number, currentCol: number, currentNode: TrieNode, path: string[]) {
+    let currentChar = board[currentRow][currentCol];
+    path.push(currentChar);
+    board[currentRow][currentCol] = &#39;*&#39;;
+
+    // If we find a word, we&#39;ll add it to result, and
+    // mark that node as not the end character
+    // because it might be in another word
+    if (currentNode.isEndOfWord) {
+      result.push(path.join(&#39;&#39;));
+      currentNode.isEndOfWord = false;
+    }
+
+    // Coordinations to go right, left, down, and up
+    let coords = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+    for (const [r, c] of coords) {
+      let [rowToGo, colToGo] = [currentRow + r, currentCol + c];
+
+      if (!outOfBounds(rowToGo, colToGo) &amp;&amp; currentNode.children.has(board[rowToGo][colToGo])) {
+        dfs(
+          rowToGo,
+          colToGo,
+          currentNode.children.get(board[rowToGo][colToGo]) as TrieNode,
+          path
+        );
+      }
+    }
+
+    path.pop();
+    board[currentRow][currentCol] = currentChar;
+  }
+
+  for (let i = 0; i &lt; rowsLength; i++) {
+    for (let j = 0; j &lt; colsLength; j++) {
+      if (trie.root.children.has(board[i][j])) {
+        dfs(i, j, trie.root.children.get(board[i][j]) as TrieNode, []);
+      }
+    }
+  }
+
+  return result;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity of <code>findWords</code> can be, in the worst case, $O(m * n * w)$ where $m$ is the length of rows, $n$ is the length of columns, and $w$ is the total number of words — because we might explore all the cells searching for each word. </p>
+<p>For the space complexity, first, we have our trie whose storage needs will grow as the total number of characters in <code>words</code> grow. We can say that it&#39;s $O(s)$ where $s$ is the number of all characters in <code>words</code>. We also store a <code>path</code> array in our depth-first search, in the worst case where we need to store every unique cell, we&#39;ll end up storing the whole board, so it can have $O(m * n)$ space complexity where $m$ is the length of rows and $n$ is the length of columns.<br>Combining them together, I think, the space complexity might end up being $O(c + m * n)$.</p>
+<hr>
+<p>If some of the parts still doesn&#39;t make sense, that&#39;s okay. This is a very, <em>very</em> tough problem, and honestly, backtracking is one of the most challenging concepts that&#39;s somewhat easy to wrap your mind around theoretically, but not so easy in practice.</p>
+<p>Now that we&#39;re done with this chapter as well, it&#39;s time for another deep breath.<br>Next up, we&#39;ll take a look at the graph data structure. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-word-search-ii</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-word-search-ii</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 01 Jun 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Design Add and Search Words Data Structure]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-05-27/50-lm.png" alt="Cover image"></p>
