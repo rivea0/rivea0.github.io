@@ -348,7 +348,7 @@ function findWords(board: string[][], words: string[]): string[] {
 The time complexity of `findWords` can be, in the worst case, $O(m * n * w)$ where $m$ is the length of rows, $n$ is the length of columns, and $w$ is the total number of words — because we might explore all the cells searching for each word. 
 
 For the space complexity, first, we have our trie whose storage needs will grow as the total number of characters in `words` grow. We can say that it's $O(s)$ where $s$ is the number of all characters in `words`. We also store a `path` array in our depth-first search, in the worst case where we need to store every unique cell, we'll end up storing the whole board, so it can have $O(m * n)$ space complexity where $m$ is the length of rows and $n$ is the length of columns.
-Combining them together, I think, the space complexity might end up being $O(c + m * n)$.
+Combining them together, I think, the space complexity might end up being $O(s + m * n)$.
 
 ---
 
