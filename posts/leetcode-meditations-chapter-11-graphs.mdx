@@ -1,0 +1,576 @@
+---
+title: "LeetCode Meditations — Chapter 11: Graphs"
+tags: [Computer Science, TypeScript, JavaScript]
+description: The eleventh chapter of LeetCode Meditation series.
+slug: leetcode-meditations-chapter-11-graphs
+date: 2024-06-07
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/52-lm-ch11.png)
+
+## Table of contents
+- [Introduction](#intro)
+- [Representing graphs](#representing-graphs)
+    - [Edge List](#edge-list)
+    - [Adjacency Matrix](#adjacency-matrix)
+    - [Adjacency List](#adjacency-list)
+- [Traversals](#traversals)
+    - [Breadth-First Search (DFS)](#bfs)
+    - [Depth-First Search (BFS)](#dfs)
+- [Resources](#resources)
+
+---
+
+<a name="intro"></a>
+A graph is probably _the_ data structure that everyone is familiar with, regardless of their profession or interests.
+
+[Graph theory](https://en.wikipedia.org/wiki/Graph_theory#Representation) is a very broad topic, but we'll simply look at some of the main ingredients of what makes a graph and how to represent it, as well as basic graph traversals. 
+
+---
+
+In a graph, there are two main components: vertices (or nodes) and edges that connect those vertices.
+
+<Note>
+Here, we're going to use "vertex" and "node" interchangeably.
+
+The terms "adjacent vertices" and "neighbors" are used interchangeably as well.
+</Note>
+
+A graph can be **directed** or **undirected**. With a directed edge, we have an _origin_ and a _destination_ vertex. On the other hand, an undirected edge is _bidirectional_, origin and destination are not fixed.
+
+<Note>
+There might also be [_mixed graphs_](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)#Mixed_graph) that have both directed and undirected edges.
+</Note>
+
+A graph can also be weighted or unweighted, each edge can have different weights, usually representing the cost of going from one vertex to the other.
+
+We can define a graph like this: 
+
+$$G = (V, \ E)$$
+
+$V$ is a set of vertices, and $E$ is a set of edges.
+
+For example, if we have a directed graph like this:
+
+![Directed graph](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/digraph.gif)
+
+Then, we have the vertices:
+
+$$V = \{A, \ B, \ C, \ D\}$$
+
+And, the edges are:
+
+$$E = \{(A, \ B), \ (A, \ C), \ (C, \ B), \ (C, \ D)\, \ (D, \ C)\}$$
+
+If we have an undirected graph such as this one:
+
+![Undirected graph](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/undirected.gif)
+
+We have the same vertices:
+
+$$V = \{A, \ B, \ C, \ D\}$$
+
+But our edges can look like this:
+
+$$E = \{\{B, \ A\}, \{A, \ C\}, \{C, \ B\}, \{D, \ C\}\}$$
+
+<Note>
+We use parentheses when it comes to directed edges, but curly braces with undirected edges as there is no direction from one vertex to the other.
+</Note>
+
+When two vertices share an edge, they are **_adjacent_** to each other. The **_degree_** of a vertex is the number of adjacent vertices to it. <mark>We can also define the degree as the number of edges coming out of the vertex.</mark>
+For example, in the above image, the vertex A has the degree of 2.
+
+---
+
+A **simple path** is the one that we don't repeat any vertices while traversing the graph.
+
+An example might look like this:
+
+![Simple path example](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/simple-path.gif)
+
+A **cycle** is a simple path, except that we end up at the vertex we started with:
+
+![Cycle example](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/cycle.gif)
+
+---
+
+<a name="representing-graphs"></a>
+When it comes to representing graphs, there are several ways to do it, and we'll look at three of them: an edge list, an adjacency matrix, and an adjacency list.
+
+<a name="edge-list"></a>
+### Edge List
+
+We can simply put all the edges in an array:
+
+```
+[ [A, B], [A, C], [B, C], [C, D] ]
+```
+
+However, to find an edge in an edge list, we'll have to iterate through them, so it will have $O(E)$ time complexity, where in the worst case, we'll search the whole list to find an edge. Similarly, it needs $O(E)$ amount of space to represent all the edges.
+
+<a name="adjacency-matrix"></a>
+### Adjacency Matrix
+
+The adjacency matrix for our example might look like this:
+
+$$\left\lceil\begin{matrix}& A & B & C & D \\A & 0 & 1 & 1 & 0 \\B & 1 & 0 & 1 & 0 \\C & 1 & 1 & 0 & 1 \\D & 0 & 0 & 1 & 0\end{matrix}\right\rceil$$
+
+Each row is for a vertex, and the matching column shows the relationship between those vertices. For example, the vertex A doesn't have an edge pointing to D, so the cell that matches A and D is 0. On the other hand, A is connected to B and C, so those cells have the value 1.
+
+<Note>
+If the graph is weighted, we can simply put the weight instead of `1`, and when there is no edge, the value can stay `0`.
+</Note>
+
+<br />
+
+<Note>
+An adjacency matrix will have 0s in the "main diagonal," showing that there are no self-loops.
+</Note>
+
+Let's try implementing it in TypeScript.
+
+We'll start with a minimal graph vertex:
+
+```ts
+class GraphVertex {
+  public value: string | number;
+
+  constructor(value: string | number) {
+    this.value = value;
+  }
+}
+```
+
+Now we can define our graph. We'll make it really simple with three properties to hold: `matrix` to represent the graph as an adjacency matrix, `vertices` to hold vertices, and `isDirected` to indicate whether our graph is directed:
+
+```ts
+class Graph {
+  public matrix: number[][];
+  public vertices: GraphVertex[];
+  public isDirected: boolean;
+
+  constructor(vertices: GraphVertex[], isDirected = true) {
+    this.vertices = vertices;
+    this.isDirected = isDirected;
+    ...
+  }
+
+  ...
+}
+```
+
+Initializing our adjacency matrix might look like this:
+
+```ts
+this.matrix = Array.from({ length: vertices.length }, () => {
+  return Array.from({ length: vertices.length }, () => 0)
+});
+```
+
+We'll have an array with the length of vertices, each item in the array is an array with the length of vertices as well, but filled with zeroes. 
+
+In our example with four vertices, the initial adjacency matrix looks like this:
+
+```ts
+[ [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0] ]
+```
+
+Then, adding an edge is just marking the corresponding value as `1`, so that we can represent a connection between two vertices:
+
+```ts
+this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] = 1;
+```
+
+<Note>
+This implementation assumes that all vertices are distinct.
+</Note>
+
+<br />
+
+<Note>
+If we have an undirected graph, we can have it both ways:
+
+```ts
+if (!this.isDirected) {
+  this.matrix[this.vertices.indexOf(v2)][this.vertices.indexOf(v1)] = 1;
+}
+```
+</Note>
+
+Removing an edge, in this case, will be just resetting the value to `0`:
+
+```ts
+this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] = 0;
+```
+
+And, checking for the existence of an edge is simply checking whether the corresponding value is `0` or not:
+
+```ts
+this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] !== 0;
+```
+
+And, here is the whole example:
+
+```ts
+class Graph {
+  public matrix: number[][];
+  public vertices: GraphVertex[];
+  public isDirected: boolean;
+
+  constructor(vertices: GraphVertex[], isDirected = true) {
+    this.vertices = vertices;
+    this.matrix = Array.from({ length: vertices.length }, () => {
+      return Array.from({ length: vertices.length }, () => 0)
+    });
+    this.isDirected = isDirected;
+  }
+
+  addEdge(v1: GraphVertex, v2: GraphVertex) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] = 1;
+
+    if (!this.isDirected) {
+      this.matrix[this.vertices.indexOf(v2)][this.vertices.indexOf(v1)] = 1;
+    }
+  }
+
+  /* 
+  For a weighted graph:
+
+  addEdge(v1: GraphVertex, v2: GraphVertex, weight: number) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] = weight;
+    if (!this.isDirected) {
+      this.matrix[this.vertices.indexOf(v2)][this.vertices.indexOf(v1)] = weight;
+    }
+  }
+  */
+
+  removeEdge(v1: GraphVertex, v2: GraphVertex) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] = 0;
+
+    if (!this.isDirected) {
+      this.matrix[this.vertices.indexOf(v2)][this.vertices.indexOf(v1)] = 0;
+    }
+  }
+
+  hasEdge(v1: GraphVertex, v2: GraphVertex) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    return this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] !== 0;
+  }
+
+  getAdjacencyMatrix() {
+    return this.matrix;
+  }
+
+  _checkVertexIsInGraph(v: GraphVertex) {
+    if (!this.vertices.includes(v)) {
+      throw new Error('Vertex doesn\'t exist');
+    }
+  }
+}
+
+
+let a = new GraphVertex('A');
+let b = new GraphVertex('B');
+let c = new GraphVertex('C');
+let d = new GraphVertex('D');
+
+let graph = new Graph([a, b, c, d], false);
+
+graph.addEdge(a, b);
+graph.addEdge(a, c);
+graph.addEdge(b, c);
+graph.addEdge(c, d);
+
+console.log(graph.getAdjacencyMatrix());
+// -> [ [0, 1, 1, 0], [1, 0, 1, 0], [1, 1, 0, 1], [0, 0, 1, 0] ]
+
+```
+
+Operations on an adjacency matrix has $O(1)$ time complexity; however, our storage needs will be $O(V^2)$ where $V$ is the number of vertices.
+
+<a name="adjacency-list"></a>
+### Adjacency List
+
+In an adjacency list, usually a hashmap _or_ an array of linked lists is used. For example:
+
+```ts
+let graph = {
+  'A': ['B', 'C'],
+  'B': ['A', 'C'],
+  'C': ['A', 'B', 'D'],
+  'D': ['C']
+}
+```
+
+Let's see how we can modify our code above to use an adjacency list instead.
+
+Instead of having a `matrix` which is an array of arrays, we can have a [`Map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) that maps the vertices to an array of their neighbors.
+
+We can initialize it as a map that has the vertices as keys, each of which has a value of an empty array for now:
+
+```ts
+this.list = new Map<GraphVertex, GraphVertex[]>();
+for (const v of vertices) {
+  this.list.set(v, []);
+}
+```
+
+Adding an edge will be just pushing to the array of corresponding vertex:
+
+```ts
+this.list.get(v1)!.push(v2);
+```
+
+<Note>
+If our graph is undirected, we can do it both ways here as well:
+
+```ts
+if (!this.isDirected) {
+  this.list.get(v2)!.push(v1);
+}
+```
+</Note>
+
+Removing an edge will be deleting that vertex from the array:
+
+```ts
+this.list.set(v1, this.list.get(v1)!.filter(v => v !== v2));
+```
+
+Checking if an edge exists is just checking the existence of that vertex in the array:
+
+```ts
+this.list.get(v1)!.includes(v2);
+```
+
+<Note>
+We're using a [non-null assertion operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-0.html#non-null-assertion-operator).
+As we'll see below, we're first checking if the vertex is in the graph. And since we're adding all the vertices in the graph as keys to `this.list`, we're sure that getting that vertex from the list is not `undefined`. However, TypeScript will warn us because if a key is not found in a `Map` object, it could [potentially return `undefined`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/get#return_value).
+</Note>
+
+Here is our graph:
+
+```ts
+class Graph {
+  public list: Map<GraphVertex, GraphVertex[]>;
+  public vertices: GraphVertex[];
+  public isDirected: boolean;
+
+  constructor(vertices: GraphVertex[], isDirected = true) {
+    this.vertices = vertices;
+    this.list = new Map();
+    for (const v of vertices) {
+      this.list.set(v, []);
+    }
+    this.isDirected = isDirected;
+  }
+
+  addEdge(v1: GraphVertex, v2: GraphVertex) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    this.list.get(v1)!.push(v2);
+    
+    if (!this.isDirected) {
+      this.list.get(v2)!.push(v1);
+    }
+  }
+
+  removeEdge(v1: GraphVertex, v2: GraphVertex) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    this.list.set(v1, this.list.get(v1)!.filter(v => v !== v2));
+
+    if (!this.isDirected) {
+      this.list.set(v2, this.list.get(v2)!.filter(v => v !== v1));
+    }
+  }
+
+  hasEdge(v1: GraphVertex, v2: GraphVertex) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    return this.list.get(v1)!.includes(v2);
+  }
+
+  getAdjacencyList() {
+    return this.list;
+  }
+
+  _checkVertexIsInGraph(v: GraphVertex) {
+    if (!this.vertices.includes(v)) {
+      throw new Error('Vertex doesn\'t exist');
+    }
+  }
+}
+
+
+let a = new GraphVertex('A');
+let b = new GraphVertex('B');
+let c = new GraphVertex('C');
+let d = new GraphVertex('D');
+
+let graph = new Graph([a, b, c, d], false);
+
+graph.addEdge(a, b);
+graph.addEdge(a, c);
+graph.addEdge(b, c);
+graph.addEdge(c, d);
+
+console.log(graph.getAdjacencyList());
+
+/* Output:
+
+Map (4) {
+  GraphVertex: { "value": "A" } => [
+    GraphVertex: { "value": "B" }, 
+    GraphVertex: { "value": "C" }
+  ], 
+  GraphVertex: { "value": "B" } => [
+    GraphVertex: { "value": "A" }, 
+    GraphVertex: { "value": "C" }
+  ], 
+  GraphVertex: { "value": "C" } => [
+    GraphVertex: { "value": "A" }, 
+    GraphVertex: { "value": "B" }, 
+    GraphVertex: { "value": "D" }
+  ], 
+  GraphVertex: { "value": "D" } => [
+    GraphVertex: { "value": "C" }
+  ]
+} 
+
+*/
+```
+
+Getting the neighbors of a vertex is $O(1)$ because we're just looking up a key in a map. However, finding a particular edge can be $O(d)$ where $d$ is the number of degrees of the vertex, because we might need to traverse all the neighbors to find it. And, it could be $V - 1$ where $V$ is the number of vertices in the graph. It's the case when that vertex has all the other vertices as its neighbor.
+
+The space complexity can be $O(V + E)$ where $V$ is the number of vertices and $E$ is the number of edges.
+
+---
+
+<a name="traversals"></a>
+Continuing with the adjacency list representation, let's now take a look at two (very familiar!) ways to traverse a graph: breadth-first search and depth-first search.
+
+But first, we'll modify our graph a little bit. We'll add a new vertex `'E'` and update some edges:
+
+```ts
+let a = new GraphVertex('A');
+let b = new GraphVertex('B');
+let c = new GraphVertex('C');
+let d = new GraphVertex('D');
+let e = new GraphVertex('E');
+
+
+let graph = new Graph([a, b, c, d, e], false);
+
+graph.addEdge(a, b);
+graph.addEdge(a, c);
+graph.addEdge(b, d);
+graph.addEdge(c, e);
+```
+
+The important idea to remember is that <mark>there is no hierarchy of vertices, so we don't have a root node.</mark> 
+
+For a breadth-first or depth-first search, <mark>we can use an arbitrary node as a starting point.</mark>
+
+<a name="bfs"></a>
+### Breadth-First Search
+
+With our new graph, a breadth-first search traversal looks like this:
+
+![Breadth-first search](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/bfs-graph.gif)
+
+When it comes to breadth-first search, usually a queue is used, and the idea is simple: given a current node, we'll add the adjacent nodes first, marking them as visited as we go.
+
+Inside the `Graph` class, we can implement a `bfs` method that does just that:
+
+```ts
+bfs(startNode: GraphVertex) {
+  const visited = new Set();
+  const queue = [startNode];
+  visited.add(startNode);
+
+  while (queue.length > 0) {
+    const currentNode = queue.shift();
+    // console.log(currentNode);
+    this.list.get(currentNode as GraphVertex)!.forEach((node) => {
+      if (!visited.has(node)) {
+        visited.add(node);
+        queue.push(node);
+      }
+    });
+  }
+}
+```
+
+If we log `currentNode` to console each time we go, it's as we expected:
+
+```
+GraphVertex { value: 'A' }
+GraphVertex { value: 'B' }
+GraphVertex { value: 'C' }
+GraphVertex { value: 'D' }
+GraphVertex { value: 'E' } 
+```
+
+With the adjacency list, using a BFS has $O(V + E)$ time complexity (sum of the vertices and edges) as we're traversing the whole graph.
+
+<a name="dfs"></a>
+### Depth-First Search
+
+With the same modified graph, a depth-first search looks like this:
+
+![Depth-first search](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/dfs-graph.gif)
+
+With depth-first search there is usually recursion involved as we're <mark>traversing through a path until we have visited all the nodes in that path.</mark> Once we hit a dead end, we'll _backtrack_ and continue exploring until we have visited all the vertices in the graph.
+
+```ts
+dfs(startNode: GraphVertex, visited = new Set()) {
+  visited.add(startNode);
+  // console.log(startNode);
+  this.list.get(startNode)!.forEach((node) => {
+    if (!visited.has(node)) {
+      this.dfs(node, visited);
+    }
+  });
+}
+```
+
+Starting with a node, we check how deep we can go from there. Once we reach a dead end (when the `dfs` inside `forEach` returns), we continue checking other neighbors (with `forEach`) until none is left. We essentially do the same thing until all the vertices are visited.
+
+Logging the output matches our expectation:
+
+```
+GraphVertex { value: 'A' }
+GraphVertex { value: 'B' }
+GraphVertex { value: 'D' }
+GraphVertex { value: 'C' }
+GraphVertex { value: 'E' }
+```
+
+The time complexity for a depth-first search traversal of a graph is the similar to BFS, $O(V + E)$.
+
+---
+
+The first problem we'll look at in this chapter is [Number of Islands](https://leetcode.com/problems/number-of-islands). Until then, happy coding.
+
+<a name="resources"></a>
+### Resources
+- [Graphs - brilliant.org](https://brilliant.org/wiki/graphs/)
+- [Time and Space Complexity of Adjacency Matrix and List - baeldung.com](https://www.baeldung.com/cs/adjacency-matrix-list-complexity)
+- ["Going Broad In A Graph: BFS Traversal" - Vaidehi Joshi](https://medium.com/basecs/going-broad-in-a-graph-bfs-traversal-959bd1a09255)
+- ["Deep Dive Through A Graph: DFS Traversal" - Vaidehi Joshi](https://medium.com/basecs/deep-dive-through-a-graph-dfs-traversal-8177df5d0f13)

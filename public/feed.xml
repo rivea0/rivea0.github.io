@@ -4,9 +4,461 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 01 Jun 2024 18:54:36 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 07 Jun 2024 13:26:08 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations — Chapter 11: Graphs]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/52-lm-ch11.png" alt="Cover image"></p>
+<h2>Table of contents</h2>
+<ul>
+<li><a href="#intro" target="_blank" rel="noopener noreferrer">Introduction</a></li>
+<li><a href="#representing-graphs" target="_blank" rel="noopener noreferrer">Representing graphs</a><ul>
+<li><a href="#edge-list" target="_blank" rel="noopener noreferrer">Edge List</a></li>
+<li><a href="#adjacency-matrix" target="_blank" rel="noopener noreferrer">Adjacency Matrix</a></li>
+<li><a href="#adjacency-list" target="_blank" rel="noopener noreferrer">Adjacency List</a></li>
+</ul>
+</li>
+<li><a href="#traversals" target="_blank" rel="noopener noreferrer">Traversals</a><ul>
+<li><a href="#bfs" target="_blank" rel="noopener noreferrer">Breadth-First Search (DFS)</a></li>
+<li><a href="#dfs" target="_blank" rel="noopener noreferrer">Depth-First Search (BFS)</a></li>
+</ul>
+</li>
+<li><a href="#resources" target="_blank" rel="noopener noreferrer">Resources</a></li>
+</ul>
+<hr>
+<p><a name="intro"></a><br>A graph is probably <em>the</em> data structure that everyone is familiar with, regardless of their profession or interests.</p>
+<p><a href="https://en.wikipedia.org/wiki/Graph_theory#Representation" target="_blank" rel="noopener noreferrer">Graph theory</a> is a very broad topic, but we&#39;ll simply look at some of the main ingredients of what makes a graph and how to represent it, as well as basic graph traversals. </p>
+<hr>
+<p>In a graph, there are two main components: vertices (or nodes) and edges that connect those vertices.</p>
+<Note>
+Here, we're going to use "vertex" and "node" interchangeably.
+
+<p>The terms &quot;adjacent vertices&quot; and &quot;neighbors&quot; are used interchangeably as well.<br></Note></p>
+<p>A graph can be <strong>directed</strong> or <strong>undirected</strong>. With a directed edge, we have an <em>origin</em> and a <em>destination</em> vertex. On the other hand, an undirected edge is <em>bidirectional</em>, origin and destination are not fixed.</p>
+<Note>
+There might also be [_mixed graphs_](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)#Mixed_graph) that have both directed and undirected edges.
+</Note>
+
+<p>A graph can also be weighted or unweighted, each edge can have different weights, usually representing the cost of going from one vertex to the other.</p>
+<p>We can define a graph like this: </p>
+<p>$$G = (V, \ E)$$</p>
+<p>$V$ is a set of vertices, and $E$ is a set of edges.</p>
+<p>For example, if we have a directed graph like this:</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/digraph.gif" alt="Directed graph"></p>
+<p>Then, we have the vertices:</p>
+<p>$$V = {A, \ B, \ C, \ D}$$</p>
+<p>And, the edges are:</p>
+<p>$$E = {(A, \ B), \ (A, \ C), \ (C, \ B), \ (C, \ D), \ (D, \ C)}$$</p>
+<p>If we have an undirected graph such as this one:</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/undirected.gif" alt="Undirected graph"></p>
+<p>We have the same vertices:</p>
+<p>$$V = {A, \ B, \ C, \ D}$$</p>
+<p>But our edges can look like this:</p>
+<p>$$E = {{B, \ A}, {A, \ C}, {C, \ B}, {D, \ C}}$$</p>
+<Note>
+We use parentheses when it comes to directed edges, but curly braces with undirected edges as there is no direction from one vertex to the other.
+</Note>
+
+<p>When two vertices share an edge, they are <strong><em>adjacent</em></strong> to each other. The <strong><em>degree</em></strong> of a vertex is the number of adjacent vertices to it. <mark>We can also define the degree as the number of edges coming out of the vertex.</mark><br>For example, in the above image, the vertex A has the degree of 2.</p>
+<hr>
+<p>A <strong>simple path</strong> is the one that we don&#39;t repeat any vertices while traversing the graph.</p>
+<p>An example might look like this:</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/simple-path.gif" alt="Simple path example"></p>
+<p>A <strong>cycle</strong> is a simple path, except that we end up at the vertex we started with:</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/cycle.gif" alt="Cycle example"></p>
+<hr>
+<p><a name="representing-graphs"></a><br>When it comes to representing graphs, there are several ways to do it, and we&#39;ll look at three of them: an edge list, an adjacency matrix, and an adjacency list.</p>
+<p><a name="edge-list"></a></p>
+<h3>Edge List</h3>
+<p>We can simply put all the edges in an array:</p>
+<pre><code>[ [A, B], [A, C], [B, C], [C, D] ]
+</code></pre>
+<p>However, to find an edge in an edge list, we&#39;ll have to iterate through them, so it will have $O(E)$ time complexity, where in the worst case, we&#39;ll search the whole list to find an edge. Similarly, it needs $O(E)$ amount of space to represent all the edges.</p>
+<p><a name="adjacency-matrix"></a></p>
+<h3>Adjacency Matrix</h3>
+<p>The adjacency matrix for our example might look like this:</p>
+<p>$$\left\lceil\begin{matrix}&amp; A &amp; B &amp; C &amp; D \A &amp; 0 &amp; 1 &amp; 1 &amp; 0 \B &amp; 1 &amp; 0 &amp; 1 &amp; 0 \C &amp; 1 &amp; 1 &amp; 0 &amp; 1 \D &amp; 0 &amp; 0 &amp; 1 &amp; 0\end{matrix}\right\rceil$$</p>
+<p>Each row is for a vertex, and the matching column shows the relationship between those vertices. For example, the vertex A doesn&#39;t have an edge pointing to D, so the cell that matches A and D is 0. On the other hand, A is connected to B and C, so those cells have the value 1.</p>
+<Note>
+If the graph is weighted, we can simply put the weight instead of `1`, and when there is no edge, the value can stay `0`.
+</Note>
+
+<br />
+
+<Note>
+An adjacency matrix will have 0s in the "main diagonal," showing that there are no self-loops.
+</Note>
+
+<p>Let&#39;s try implementing it in TypeScript.</p>
+<p>We&#39;ll start with a minimal graph vertex:</p>
+<pre><code class="language-ts">class GraphVertex {
+  public value: string | number;
+
+  constructor(value: string | number) {
+    this.value = value;
+  }
+}
+</code></pre>
+<p>Now we can define our graph. We&#39;ll make it really simple with three properties to hold: <code>matrix</code> to represent the graph as an adjacency matrix, <code>vertices</code> to hold vertices, and <code>isDirected</code> to indicate whether our graph is directed:</p>
+<pre><code class="language-ts">class Graph {
+  public matrix: number[][];
+  public vertices: GraphVertex[];
+  public isDirected: boolean;
+
+  constructor(vertices: GraphVertex[], isDirected = true) {
+    this.vertices = vertices;
+    this.isDirected = isDirected;
+    ...
+  }
+
+  ...
+}
+</code></pre>
+<p>Initializing our adjacency matrix might look like this:</p>
+<pre><code class="language-ts">this.matrix = Array.from({ length: vertices.length }, () =&gt; {
+  return Array.from({ length: vertices.length }, () =&gt; 0)
+});
+</code></pre>
+<p>We&#39;ll have an array with the length of vertices, each item in the array is an array with the length of vertices as well, but filled with zeroes. </p>
+<p>In our example with four vertices, the initial adjacency matrix looks like this:</p>
+<pre><code class="language-ts">[ [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0] ]
+</code></pre>
+<p>Then, adding an edge is just marking the corresponding value as <code>1</code>, so that we can represent a connection between two vertices:</p>
+<pre><code class="language-ts">this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] = 1;
+</code></pre>
+<Note>
+This implementation assumes that all vertices are distinct.
+</Note>
+
+<br />
+
+<Note>
+If we have an undirected graph, we can have it both ways:
+
+<pre><code class="language-ts">if (!this.isDirected) {
+  this.matrix[this.vertices.indexOf(v2)][this.vertices.indexOf(v1)] = 1;
+}
+</code></pre>
+</Note>
+
+<p>Removing an edge, in this case, will be just resetting the value to <code>0</code>:</p>
+<pre><code class="language-ts">this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] = 0;
+</code></pre>
+<p>And, checking for the existence of an edge is simply checking whether the corresponding value is <code>0</code> or not:</p>
+<pre><code class="language-ts">this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] !== 0;
+</code></pre>
+<p>And, here is the whole example:</p>
+<pre><code class="language-ts">class Graph {
+  public matrix: number[][];
+  public vertices: GraphVertex[];
+  public isDirected: boolean;
+
+  constructor(vertices: GraphVertex[], isDirected = true) {
+    this.vertices = vertices;
+    this.matrix = Array.from({ length: vertices.length }, () =&gt; {
+      return Array.from({ length: vertices.length }, () =&gt; 0)
+    });
+    this.isDirected = isDirected;
+  }
+
+  addEdge(v1: GraphVertex, v2: GraphVertex) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] = 1;
+
+    if (!this.isDirected) {
+      this.matrix[this.vertices.indexOf(v2)][this.vertices.indexOf(v1)] = 1;
+    }
+  }
+
+  /* 
+  For a weighted graph:
+
+  addEdge(v1: GraphVertex, v2: GraphVertex, weight: number) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] = weight;
+    if (!this.isDirected) {
+      this.matrix[this.vertices.indexOf(v2)][this.vertices.indexOf(v1)] = weight;
+    }
+  }
+  */
+
+  removeEdge(v1: GraphVertex, v2: GraphVertex) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] = 0;
+
+    if (!this.isDirected) {
+      this.matrix[this.vertices.indexOf(v2)][this.vertices.indexOf(v1)] = 0;
+    }
+  }
+
+  hasEdge(v1: GraphVertex, v2: GraphVertex) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    return this.matrix[this.vertices.indexOf(v1)][this.vertices.indexOf(v2)] !== 0;
+  }
+
+  getAdjacencyMatrix() {
+    return this.matrix;
+  }
+
+  _checkVertexIsInGraph(v: GraphVertex) {
+    if (!this.vertices.includes(v)) {
+      throw new Error(&#39;Vertex doesn\&#39;t exist&#39;);
+    }
+  }
+}
+
+
+let a = new GraphVertex(&#39;A&#39;);
+let b = new GraphVertex(&#39;B&#39;);
+let c = new GraphVertex(&#39;C&#39;);
+let d = new GraphVertex(&#39;D&#39;);
+
+let graph = new Graph([a, b, c, d], false);
+
+graph.addEdge(a, b);
+graph.addEdge(a, c);
+graph.addEdge(b, c);
+graph.addEdge(c, d);
+
+console.log(graph.getAdjacencyMatrix());
+// -&gt; [ [0, 1, 1, 0], [1, 0, 1, 0], [1, 1, 0, 1], [0, 0, 1, 0] ]
+</code></pre>
+<p>Operations on an adjacency matrix has $O(1)$ time complexity; however, our storage needs will be $O(V^2)$ where $V$ is the number of vertices.</p>
+<p><a name="adjacency-list"></a></p>
+<h3>Adjacency List</h3>
+<p>In an adjacency list, usually a hashmap <em>or</em> an array of linked lists is used. For example:</p>
+<pre><code class="language-ts">let graph = {
+  &#39;A&#39;: [&#39;B&#39;, &#39;C&#39;],
+  &#39;B&#39;: [&#39;A&#39;, &#39;C&#39;],
+  &#39;C&#39;: [&#39;A&#39;, &#39;B&#39;, &#39;D&#39;],
+  &#39;D&#39;: [&#39;C&#39;]
+}
+</code></pre>
+<p>Let&#39;s see how we can modify our code above to use an adjacency list instead.</p>
+<p>Instead of having a <code>matrix</code> which is an array of arrays, we can have a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map" target="_blank" rel="noopener noreferrer"><code>Map</code></a> that maps the vertices to an array of their neighbors.</p>
+<p>We can initialize it as a map that has the vertices as keys, each of which has a value of an empty array for now:</p>
+<pre><code class="language-ts">this.list = new Map&lt;GraphVertex, GraphVertex[]&gt;();
+for (const v of vertices) {
+  this.list.set(v, []);
+}
+</code></pre>
+<p>Adding an edge will be just pushing to the array of corresponding vertex:</p>
+<pre><code class="language-ts">this.list.get(v1)!.push(v2);
+</code></pre>
+<Note>
+If our graph is undirected, we can do it both ways here as well:
+
+<pre><code class="language-ts">if (!this.isDirected) {
+  this.list.get(v2)!.push(v1);
+}
+</code></pre>
+</Note>
+
+<p>Removing an edge will be deleting that vertex from the array:</p>
+<pre><code class="language-ts">this.list.set(v1, this.list.get(v1)!.filter(v =&gt; v !== v2));
+</code></pre>
+<p>Checking if an edge exists is just checking the existence of that vertex in the array:</p>
+<pre><code class="language-ts">this.list.get(v1)!.includes(v2);
+</code></pre>
+<Note>
+We're using a [non-null assertion operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-0.html#non-null-assertion-operator).
+As we'll see below, we're first checking if the vertex is in the graph. And since we're adding all the vertices in the graph as keys to `this.list`, we're sure that getting that vertex from the list is not `undefined`. However, TypeScript will warn us because if a key is not found in a `Map` object, it could [potentially return `undefined`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/get#return_value).
+</Note>
+
+<p>Here is our graph:</p>
+<pre><code class="language-ts">class Graph {
+  public list: Map&lt;GraphVertex, GraphVertex[]&gt;;
+  public vertices: GraphVertex[];
+  public isDirected: boolean;
+
+  constructor(vertices: GraphVertex[], isDirected = true) {
+    this.vertices = vertices;
+    this.list = new Map();
+    for (const v of vertices) {
+      this.list.set(v, []);
+    }
+    this.isDirected = isDirected;
+  }
+
+  addEdge(v1: GraphVertex, v2: GraphVertex) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    this.list.get(v1)!.push(v2);
+    
+    if (!this.isDirected) {
+      this.list.get(v2)!.push(v1);
+    }
+  }
+
+  removeEdge(v1: GraphVertex, v2: GraphVertex) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    this.list.set(v1, this.list.get(v1)!.filter(v =&gt; v !== v2));
+
+    if (!this.isDirected) {
+      this.list.set(v2, this.list.get(v2)!.filter(v =&gt; v !== v1));
+    }
+  }
+
+  hasEdge(v1: GraphVertex, v2: GraphVertex) {
+    this._checkVertexIsInGraph(v1);
+    this._checkVertexIsInGraph(v2);
+
+    return this.list.get(v1)!.includes(v2);
+  }
+
+  getAdjacencyList() {
+    return this.list;
+  }
+
+  _checkVertexIsInGraph(v: GraphVertex) {
+    if (!this.vertices.includes(v)) {
+      throw new Error(&#39;Vertex doesn\&#39;t exist&#39;);
+    }
+  }
+}
+
+
+let a = new GraphVertex(&#39;A&#39;);
+let b = new GraphVertex(&#39;B&#39;);
+let c = new GraphVertex(&#39;C&#39;);
+let d = new GraphVertex(&#39;D&#39;);
+
+let graph = new Graph([a, b, c, d], false);
+
+graph.addEdge(a, b);
+graph.addEdge(a, c);
+graph.addEdge(b, c);
+graph.addEdge(c, d);
+
+console.log(graph.getAdjacencyList());
+
+/* Output:
+
+Map (4) {
+  GraphVertex: { &quot;value&quot;: &quot;A&quot; } =&gt; [
+    GraphVertex: { &quot;value&quot;: &quot;B&quot; }, 
+    GraphVertex: { &quot;value&quot;: &quot;C&quot; }
+  ], 
+  GraphVertex: { &quot;value&quot;: &quot;B&quot; } =&gt; [
+    GraphVertex: { &quot;value&quot;: &quot;A&quot; }, 
+    GraphVertex: { &quot;value&quot;: &quot;C&quot; }
+  ], 
+  GraphVertex: { &quot;value&quot;: &quot;C&quot; } =&gt; [
+    GraphVertex: { &quot;value&quot;: &quot;A&quot; }, 
+    GraphVertex: { &quot;value&quot;: &quot;B&quot; }, 
+    GraphVertex: { &quot;value&quot;: &quot;D&quot; }
+  ], 
+  GraphVertex: { &quot;value&quot;: &quot;D&quot; } =&gt; [
+    GraphVertex: { &quot;value&quot;: &quot;C&quot; }
+  ]
+} 
+
+*/
+</code></pre>
+<p>Getting the neighbors of a vertex is $O(1)$ because we&#39;re just looking up a key in a map. However, finding a particular edge can be $O(d)$ where $d$ is the number of degrees of the vertex, because we might need to traverse all the neighbors to find it. And, it could be $V - 1$ where $V$ is the number of vertices in the graph. It&#39;s the case when that vertex has all the other vertices as its neighbor.</p>
+<p>The space complexity can be $O(V + E)$ where $V$ is the number of vertices and $E$ is the number of edges.</p>
+<hr>
+<p><a name="traversals"></a><br>Continuing with the adjacency list representation, let&#39;s now take a look at two (very familiar!) ways to traverse a graph: breadth-first search and depth-first search.</p>
+<p>But first, we&#39;ll modify our graph a little bit. We&#39;ll add a new vertex <code>&#39;E&#39;</code> and update some edges:</p>
+<pre><code class="language-ts">let a = new GraphVertex(&#39;A&#39;);
+let b = new GraphVertex(&#39;B&#39;);
+let c = new GraphVertex(&#39;C&#39;);
+let d = new GraphVertex(&#39;D&#39;);
+let e = new GraphVertex(&#39;E&#39;);
+
+
+let graph = new Graph([a, b, c, d, e], false);
+
+graph.addEdge(a, b);
+graph.addEdge(a, c);
+graph.addEdge(b, d);
+graph.addEdge(c, e);
+</code></pre>
+<p>The important idea to remember is that <mark>there is no hierarchy of vertices, so we don&#39;t have a root node.</mark> </p>
+<p>For a breadth-first or depth-first search, <mark>we can use an arbitrary node as a starting point.</mark></p>
+<p><a name="bfs"></a></p>
+<h3>Breadth-First Search</h3>
+<p>With our new graph, a breadth-first search traversal looks like this:</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/bfs-graph.gif" alt="Breadth-first search"></p>
+<p>When it comes to breadth-first search, usually a queue is used, and the idea is simple: given a current node, we&#39;ll add the adjacent nodes first, marking them as visited as we go.</p>
+<p>Inside the <code>Graph</code> class, we can implement a <code>bfs</code> method that does just that:</p>
+<pre><code class="language-ts">bfs(startNode: GraphVertex) {
+  const visited = new Set();
+  const queue = [startNode];
+  visited.add(startNode);
+
+  while (queue.length &gt; 0) {
+    const currentNode = queue.shift();
+    // console.log(currentNode);
+    this.list.get(currentNode as GraphVertex)!.forEach((node) =&gt; {
+      if (!visited.has(node)) {
+        visited.add(node);
+        queue.push(node);
+      }
+    });
+  }
+}
+</code></pre>
+<p>If we log <code>currentNode</code> to console each time we go, it&#39;s as we expected:</p>
+<pre><code>GraphVertex { value: &#39;A&#39; }
+GraphVertex { value: &#39;B&#39; }
+GraphVertex { value: &#39;C&#39; }
+GraphVertex { value: &#39;D&#39; }
+GraphVertex { value: &#39;E&#39; } 
+</code></pre>
+<p>With the adjacency list, using a BFS has $O(V + E)$ time complexity (sum of the vertices and edges) as we&#39;re traversing the whole graph.</p>
+<p><a name="dfs"></a></p>
+<h3>Depth-First Search</h3>
+<p>With the same modified graph, a depth-first search looks like this:</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/dfs-graph.gif" alt="Depth-first search"></p>
+<p>With depth-first search there is usually recursion involved as we&#39;re <mark>traversing through a path until we have visited all the nodes in that path.</mark> Once we hit a dead end, we&#39;ll <em>backtrack</em> and continue exploring until we have visited all the vertices in the graph.</p>
+<pre><code class="language-ts">dfs(startNode: GraphVertex, visited = new Set()) {
+  visited.add(startNode);
+  // console.log(startNode);
+  this.list.get(startNode)!.forEach((node) =&gt; {
+    if (!visited.has(node)) {
+      this.dfs(node, visited);
+    }
+  });
+}
+</code></pre>
+<p>Starting with a node, we check how deep we can go from there. Once we reach a dead end (when the <code>dfs</code> inside <code>forEach</code> returns), we continue checking other neighbors (with <code>forEach</code>) until none is left. We essentially do the same thing until all the vertices are visited.</p>
+<p>Logging the output matches our expectation:</p>
+<pre><code>GraphVertex { value: &#39;A&#39; }
+GraphVertex { value: &#39;B&#39; }
+GraphVertex { value: &#39;D&#39; }
+GraphVertex { value: &#39;C&#39; }
+GraphVertex { value: &#39;E&#39; }
+</code></pre>
+<p>The time complexity for a depth-first search traversal of a graph is the similar to BFS, $O(V + E)$.</p>
+<hr>
+<p>The first problem we&#39;ll look at in this chapter is <a href="https://leetcode.com/problems/number-of-islands" target="_blank" rel="noopener noreferrer">Number of Islands</a>. Until then, happy coding.</p>
+<p><a name="resources"></a></p>
+<h3>Resources</h3>
+<ul>
+<li><a href="https://brilliant.org/wiki/graphs/" target="_blank" rel="noopener noreferrer">Graphs - brilliant.org</a></li>
+<li><a href="https://www.baeldung.com/cs/adjacency-matrix-list-complexity" target="_blank" rel="noopener noreferrer">Time and Space Complexity of Adjacency Matrix and List - baeldung.com</a></li>
+<li><a href="https://medium.com/basecs/going-broad-in-a-graph-bfs-traversal-959bd1a09255" target="_blank" rel="noopener noreferrer">&quot;Going Broad In A Graph: BFS Traversal&quot; - Vaidehi Joshi</a></li>
+<li><a href="https://medium.com/basecs/deep-dive-through-a-graph-dfs-traversal-8177df5d0f13" target="_blank" rel="noopener noreferrer">&quot;Deep Dive Through A Graph: DFS Traversal&quot; - Vaidehi Joshi</a></li>
+</ul>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-11-graphs</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-11-graphs</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Fri, 07 Jun 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Word Search II]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-01/51-lm.png" alt="Cover image"></p>
@@ -289,7 +741,7 @@ function findWords(board: string[][], words: string[]): string[] {
 </code></pre>
 <h4>Time and space complexity</h4>
 <p>The time complexity of <code>findWords</code> can be, in the worst case, $O(m * n * w)$ where $m$ is the length of rows, $n$ is the length of columns, and $w$ is the total number of words — because we might explore all the cells searching for each word. </p>
-<p>For the space complexity, first, we have our trie whose storage needs will grow as the total number of characters in <code>words</code> grow. We can say that it&#39;s $O(s)$ where $s$ is the number of all characters in <code>words</code>. We also store a <code>path</code> array in our depth-first search, in the worst case where we need to store every unique cell, we&#39;ll end up storing the whole board, so it can have $O(m * n)$ space complexity where $m$ is the length of rows and $n$ is the length of columns.<br>Combining them together, I think, the space complexity might end up being $O(c + m * n)$.</p>
+<p>For the space complexity, first, we have our trie whose storage needs will grow as the total number of characters in <code>words</code> grow. We can say that it&#39;s $O(s)$ where $s$ is the number of all characters in <code>words</code>. We also store a <code>path</code> array in our depth-first search, in the worst case where we need to store every unique cell, we&#39;ll end up storing the whole board, so it can have $O(m * n)$ space complexity where $m$ is the length of rows and $n$ is the length of columns.<br>Combining them together, I think, the space complexity might end up being $O(s + m * n)$.</p>
 <hr>
 <p>If some of the parts still doesn&#39;t make sense, that&#39;s okay. This is a very, <em>very</em> tough problem, and honestly, backtracking is one of the most challenging concepts that&#39;s somewhat easy to wrap your mind around theoretically, but not so easy in practice.</p>
 <p>Now that we&#39;re done with this chapter as well, it&#39;s time for another deep breath.<br>Next up, we&#39;ll take a look at the graph data structure. Until then, happy coding.</p>
