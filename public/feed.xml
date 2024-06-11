@@ -4,9 +4,294 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 07 Jun 2024 13:26:08 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 11 Jun 2024 12:05:17 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Number of Islands]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-11/53-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/number-of-islands" target="_blank" rel="noopener noreferrer">this problem</a>:</p>
+<blockquote>
+<p>Given an <code>m x n</code> 2D binary grid <code>grid</code> which represents a map of <code>&#39;1&#39;</code>s (land) and <code>&#39;0&#39;</code>s (water), return <em>the number of islands</em>.</p>
+<p>An <strong>island</strong> is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: grid = [
+  [&#39;1&#39;, &#39;1&#39;, &#39;1&#39;, &#39;1&#39;, &#39;0&#39;],
+  [&#39;1&#39;, &#39;1&#39;, &#39;0&#39;, &#39;1&#39;, &#39;0&#39;],
+  [&#39;1&#39;, &#39;1&#39;, &#39;0&#39;, &#39;0&#39;, &#39;0&#39;],
+  [&#39;0&#39;, &#39;0&#39;, &#39;0&#39;, &#39;0&#39;, &#39;0&#39;],
+]
+
+Output: 1
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: grid = [
+  [&#39;1&#39;, &#39;1&#39;, &#39;0&#39;, &#39;0&#39;, &#39;0&#39;],
+  [&#39;1&#39;, &#39;1&#39;, &#39;0&#39;, &#39;0&#39;, &#39;0&#39;],
+  [&#39;0&#39;, &#39;0&#39;, &#39;1&#39;, &#39;0&#39;, &#39;0&#39;],
+  [&#39;0&#39;, &#39;0&#39;, &#39;0&#39;, &#39;1&#39;, &#39;1&#39;],
+]
+
+Output: 3
+</code></pre>
+<hr>
+<h3>With depth-first search</h3>
+<p>This one is slightly in the spirit of the <a href="https://rivea0.github.io/blog/leetcode-meditations-word-search" target="_blank" rel="noopener noreferrer">Word Search</a> <a href="https://rivea0.github.io/blog/leetcode-meditations-word-search-ii" target="_blank" rel="noopener noreferrer">problems</a> that we&#39;ve looked at before.</p>
+<p>We need to gather all the cells with the value <code>&#39;1&#39;</code> as &quot;islands&quot; and count them up. One simple idea is that starting from a cell with the value <code>&#39;1&#39;</code>, we can run a <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-7-trees#dfs" target="_blank" rel="noopener noreferrer">depth-first search</a> to see how many <code>&#39;1&#39;</code>-valued cells are nearby. Once we reach a boundary, we can update our count of islands and return from our DFS function.</p>
+<p>Before we start doing that, the very first thing to do is to check if we have a grid at all. In that case, we wouldn&#39;t have any &quot;islands,&quot; so we can return <code>0</code>:</p>
+<pre><code class="language-ts">if (!grid.length) {
+  return 0;
+}
+</code></pre>
+<p>We&#39;re going to loop over all the cells, so, first we can keep the length of the rows and columns in variables <code>rowsLength</code> and <code>colsLength</code>:</p>
+<pre><code class="language-ts">const rowsLength = grid.length;
+const colsLength = grid[0].length;
+</code></pre>
+<p>Then, we can initialize a set called <code>visited</code> to mark the cells as &quot;visited&quot; as we go. We need to get the row and column numbers inside this set (for example, <code>i</code> and <code>j</code> for the cell <code>grid[i][j]</code>), but it&#39;s a bit tricky when it comes to JavaScript/TypeScript. The reason is that since <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank" rel="noopener noreferrer">arrays are also objects</a>, checking for the existence of an array in a set will be meaningless, as the array we&#39;re comparing will be a different object in memory. For example, we can do something like this:</p>
+<pre><code class="language-ts">let a = [1, 2];
+let aSet = new Set();
+aSet.add(a);
+// -&gt; Set(1) { [ 1, 2 ] }
+</code></pre>
+<p>But, checking for the existence of what seems to be the &quot;same&quot; array returns <code>false</code>:</p>
+<pre><code class="language-ts">aSet.has([1, 2]);
+// -&gt; false
+</code></pre>
+<Note>
+In Python, for example, [tuples](https://docs.python.org/3/library/stdtypes.html#tuple) can be used for that quite easily:
+
+<pre><code class="language-python">&gt;&gt;&gt; n = (1, 2)
+&gt;&gt;&gt; n_set = set()
+&gt;&gt;&gt; n_set.add(n)
+&gt;&gt;&gt; n_set
+{(1, 2)}
+&gt;&gt;&gt; (1, 2) in n_set
+True
+</code></pre>
+<p>However, things are a bit different in JavaScript/TypeScript land. For more information, see <a href="https://stackoverflow.com/questions/63179867/set-of-tuples-in-javascript" target="_blank" rel="noopener noreferrer">this Stack Overflow thread</a>.<br></Note></p>
+<p>For that reason, we can use strings to add the coordinate of a cell into our <code>visited</code> set. We&#39;ll first initialize it as empty for now:</p>
+<pre><code class="language-ts">const visited: Set&lt;string&gt; = new Set();
+</code></pre>
+<p>We&#39;ll also keep an <code>islandCount</code> variable to return the number of islands at the end:</p>
+<pre><code class="language-ts">let islandCount = 0;
+</code></pre>
+<p>Now we can simply go through each cell; if it&#39;s marked as <code>&#39;1&#39;</code> and we haven&#39;t visited it yet, we can run <code>dfs</code> from that cell onwards, and update our <code>islandCount</code>:</p>
+<pre><code class="language-ts">for (let i = 0; i &lt; rowsLength; i++) {
+  for (let j = 0; j &lt; colsLength; j++) {
+    if (grid[i][j] === &#39;1&#39; &amp;&amp; !visited.has(`${i},${j}`)) {
+      dfs(i, j);
+      islandCount++;
+    }
+  }
+}
+</code></pre>
+<p>But, how can we write the <code>dfs</code> function? First, perhaps, by taking a deep breath.</p>
+<hr>
+<p>Let&#39;s think about the base case for our <code>dfs</code> function. </p>
+<p>If the cell we&#39;re looking at is out of bounds <em>or</em> it&#39;s marked as <code>&#39;0&#39;</code>, <em>or</em> we have already visited it, we can simply return because we don&#39;t want to look further:</p>
+<pre><code class="language-ts">if (outOfBounds(currentRow, currentCol) ||
+    grid[currentRow][currentCol] === &#39;0&#39; ||
+    visited.has(`${currentRow},${currentCol}`)) {
+  return;
+}
+</code></pre>
+<p>Otherwise, we&#39;ll mark that cell as visited first:</p>
+<pre><code class="language-ts">visited.add(`${currentRow},${currentCol}`);
+</code></pre>
+<p>Then, for each direction from that cell, we&#39;ll run <code>dfs</code> itself:</p>
+<pre><code class="language-ts">// up, down, left, right
+const coords = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+for (const [r, c] of coords) {
+  let [rowToGo, colToGo] = [currentRow + r, currentCol + c];
+  dfs(rowToGo, colToGo);
+}
+</code></pre>
+<p>And, that&#39;s about it. This is what <code>dfs</code> looks like now:</p>
+<pre><code class="language-ts">function dfs(currentRow: number, currentCol: number) {
+  if (outOfBounds(currentRow, currentCol) ||
+      grid[currentRow][currentCol] === &#39;0&#39; ||
+      visited.has(`${currentRow},${currentCol}`)) {
+    return;
+  }
+
+  visited.add(`${currentRow},${currentCol}`);
+
+  // up, down, left, right
+  const coords = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+  for (const [r, c] of coords) {
+    let [rowToGo, colToGo] = [currentRow + r, currentCol + c];
+    dfs(rowToGo, colToGo);
+  }
+}
+</code></pre>
+<p>The final solution looks like this:</p>
+<pre><code class="language-ts">function numIslands(grid: string[][]): number {
+  if (!grid.length) {
+    return 0;
+  }
+
+  const rowsLength = grid.length;
+  const colsLength = grid[0].length;
+  const visited: Set&lt;string&gt; = new Set();
+  let islandCount = 0;
+
+  function outOfBounds(r: number, c: number) {
+    return r &lt; 0 || c &lt; 0 || r &gt;= rowsLength || c &gt;= colsLength;
+  }
+
+  function dfs(currentRow: number, currentCol: number) {
+    if (outOfBounds(currentRow, currentCol) ||
+        grid[currentRow][currentCol] === &#39;0&#39; ||
+        visited.has(`${currentRow},${currentCol}`)) {
+      return;
+    }
+
+    visited.add(`${currentRow},${currentCol}`);
+
+    // up, down, left, right
+    const coords = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for (const [r, c] of coords) {
+      let [rowToGo, colToGo] = [currentRow + r, currentCol + c];
+      dfs(rowToGo, colToGo);
+    }
+  }
+
+  for (let i = 0; i &lt; rowsLength; i++) {
+    for (let j = 0; j &lt; colsLength; j++) {
+      if (grid[i][j] === &#39;1&#39; &amp;&amp; !visited.has(`${i},${j}`)) {
+        dfs(i, j);
+        islandCount++;
+      }
+    }
+  }
+
+  return islandCount;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity for this solution will be $O(n * m)$ where $n$ is the number of rows and $m$ is the number of columns, as we&#39;re visiting each cell with a nested loop. Since we&#39;re marking the cells as visited as we go, the <code>dfs</code> function will have a lesser contribution to the time complexity than looping over the whole grid.</p>
+<p>The space complexity is, I think, $O(n * m)$ where $n$ is the number of rows and $m$ is the number of columns, as in the worst case the recursion stack can grow proportionately to the size of the grid.</p>
+<hr>
+<h3>With breadth-first search</h3>
+<p>There is also a breadth-first solution as shown by <a href="https://www.youtube.com/watch?v=pV2kpPD66nE" target="_blank" rel="noopener noreferrer">NeetCode</a> that looks very similar to what we did with the depth-first search version.</p>
+<p>As usual with BFS, we&#39;ll keep a queue to add the row and column indices of neighboring cells:</p>
+<pre><code class="language-ts">let queue: [number, number][] = [];
+</code></pre>
+<Note>
+Here, we're using TypeScript's [tuple type](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) to specify that our queue will be an array of arrays, each of which consists of     two numbers.
+</Note>
+
+<p>Then, we&#39;ll immediately mark the cell as visited and add it to <code>queue</code>:</p>
+<pre><code class="language-ts">visited.add(`${currentRow},${currentCol}`);
+queue.push([currentRow, currentCol]);
+</code></pre>
+<p>While we still have neighboring cells to look at (<code>queue.length &gt; 0</code>), we can add the ones we want to visit to our <code>queue</code>, and mark them as visited. It&#39;s very similar to what we did with <code>dfs</code>:</p>
+<pre><code class="language-ts">while (queue.length &gt; 0) {
+  let [currentRow, currentCol] = queue.shift() as [number, number];
+
+  // up, down, left, right
+  const coords = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+  for (const [r, c] of coords) {
+    let [rowToGo, colToGo] = [currentRow + r, currentCol + c];
+      if (!outOfBounds(rowToGo, colToGo) &amp;&amp;
+          grid[rowToGo][colToGo] === &#39;1&#39; &amp;&amp;
+          !visited.has(`${rowToGo},${colToGo}`)
+      ) {
+          queue.push([rowToGo, colToGo]);
+          visited.add(`${rowToGo},${colToGo}`);
+      }
+    }
+  }
+</code></pre>
+<p>That&#39;s pretty much it for the <code>bfs</code> function:</p>
+<pre><code class="language-ts">function bfs(currentRow: number, currentCol: number) {
+  let queue: [number, number][] = [];
+  visited.add(`${currentRow},${currentCol}`);
+  queue.push([currentRow, currentCol]);
+
+  while (queue.length &gt; 0) {
+    let [currentRow, currentCol] = queue.shift() as [number, number];
+
+    // up, down, left, right
+    const coords = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+    for (const [r, c] of coords) {
+      let [rowToGo, colToGo] = [currentRow + r, currentCol + c];
+      if (!outOfBounds(rowToGo, colToGo) &amp;&amp;
+          grid[rowToGo][colToGo] === &#39;1&#39; &amp;&amp;
+          !visited.has(`${rowToGo},${colToGo}`)
+      ) {
+          queue.push([rowToGo, colToGo]);
+          visited.add(`${rowToGo},${colToGo}`);
+      }
+    }
+  }
+}
+</code></pre>
+<p>And, the final version looks like this:</p>
+<pre><code class="language-ts">function numIslands(grid: string[][]): number {
+  if (!grid.length) {
+    return 0;
+  }
+
+  const rowsLength = grid.length;
+  const colsLength = grid[0].length;
+  const visited: Set&lt;string&gt; = new Set();
+  let islandCount = 0;
+
+  function outOfBounds(r: number, c: number) {
+    return r &lt; 0 || c &lt; 0 || r &gt;= rowsLength || c &gt;= colsLength;
+  }
+
+  function bfs(currentRow: number, currentCol: number) {
+    let queue: [number, number][] = [];
+    visited.add(`${currentRow},${currentCol}`);
+    queue.push([currentRow, currentCol]);
+
+    while (queue.length &gt; 0) {
+      let [currentRow, currentCol] = queue.shift() as [number, number];
+
+      // up, down, left, right
+      const coords = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+      for (const [r, c] of coords) {
+        let [rowToGo, colToGo] = [currentRow + r, currentCol + c];
+        if (!outOfBounds(rowToGo, colToGo) &amp;&amp;
+            grid[rowToGo][colToGo] === &#39;1&#39; &amp;&amp;
+            !visited.has(`${rowToGo},${colToGo}`)
+        ) {
+            queue.push([rowToGo, colToGo]);
+            visited.add(`${rowToGo},${colToGo}`);
+        }
+      }
+    }
+  }
+
+  for (let i = 0; i &lt; rowsLength; i++) {
+    for (let j = 0; j &lt; colsLength; j++) {
+      if (grid[i][j] === &#39;1&#39; &amp;&amp; !visited.has(`${i},${j}`)) {
+        bfs(i, j);
+        islandCount++;
+      }
+    }
+  }
+
+  return islandCount;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity is again $O(n * m)$ for this version, where $n$ is the number of rows and $m$ is the number of columns, as we go through each cell using a nested <code>for</code> loop. As the length of <code>queue</code> doesn&#39;t substantially grow, I think the <code>bfs</code> function inside won&#39;t have a huge influence on the time complexity.</p>
+<p>The space complexity can also be $O(n * m)$ as in the worst case we have all the cells as <code>&#39;1&#39;</code> and have to store all of them in <code>visited</code>.</p>
+<hr>
+<p>Next up is the second problem in this chapter, <a href="https://leetcode.com/problems/clone-graph" target="_blank" rel="noopener noreferrer">Clone Graph</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-number-of-islands</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-number-of-islands</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 11 Jun 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 11: Graphs]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-07/52-lm-ch11.png" alt="Cover image"></p>
