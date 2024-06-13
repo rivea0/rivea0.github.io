@@ -4,9 +4,220 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 11 Jun 2024 12:05:17 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 13 Jun 2024 09:42:21 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Clone Graph]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-13/54-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/clone-graph" target="_blank" rel="noopener noreferrer">Clone Graph</a>:</p>
+<blockquote>
+<p>Given a reference of a node in a <strong><a href="https://en.wikipedia.org/wiki/Connectivity_(graph_theory)#Connected_graph" target="_blank" rel="noopener noreferrer">connected</a></strong> undirected graph.</p>
+<p>Return a <a href="https://en.wikipedia.org/wiki/Object_copying#Deep_copy" target="_blank" rel="noopener noreferrer"><strong>deep copy</strong></a> (clone) of the graph.</p>
+<p>Each node in the graph contains a value (<code>int</code>) and a list (<code>List[Node]</code>) of its neighbors.</p>
+<pre><code>class Node {
+   public int val;
+   public List&lt;Node&gt; neighbors;
+}
+</code></pre>
+</blockquote>
+<p>The description also indicates that the nodes are 1-indexed, and the graph is represented as an <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-11-graphs#adjacency-list" target="_blank" rel="noopener noreferrer">adjacency list</a>. Also, we should return the copy of the given node. </p>
+<p>For example:</p>
+<p><img src="https://assets.leetcode.com/uploads/2019/11/04/133_clone_graph_question.png" alt="Clone graph description image"></p>
+<pre><code>Input: adjList = [[2, 4], [1, 3], [2, 4], [1, 3]]
+
+Output: [[2, 4], [1, 3], [2, 4], [1, 3]]
+
+Explanation: There are 4 nodes in the graph.
+1st node (val = 1)&#39;s neighbors are 2nd node (val = 2) and 4th node (val = 4).
+2nd node (val = 2)&#39;s neighbors are 1st node (val = 1) and 3rd node (val = 3).
+3rd node (val = 3)&#39;s neighbors are 2nd node (val = 2) and 4th node (val = 4).
+4th node (val = 4)&#39;s neighbors are 1st node (val = 1) and 3rd node (val = 3).
+</code></pre>
+<p>Our constraints are:</p>
+<ul>
+<li>The number of nodes in the graph is in the range <code>[0, 100]</code>.</li>
+<li><code>1 &lt;= Node.val &lt;= 100</code></li>
+<li><code>Node.val</code> is unique for each node.</li>
+<li>There are no repeated edges and no self-loops in the graph.</li>
+<li>The Graph is connected and all nodes can be visited starting from the given node.</li>
+</ul>
+<hr>
+<p>This problem is, in a sense, just a graph traversal problem that happens to have the additional requirement of cloning the graph.</p>
+<p>There are two essential ways to traverse a graph as <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-11-graphs" target="_blank" rel="noopener noreferrer">we&#39;ve seen before</a>: with a <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-11-graphs#dfs" target="_blank" rel="noopener noreferrer">depth-first search</a> and a <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-11-graphs#bfs" target="_blank" rel="noopener noreferrer">breadth-first search</a>.</p>
+<p>Since we shouldn&#39;t mess up the connections between the nodes, we can make use of a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map" target="_blank" rel="noopener noreferrer"><code>Map</code></a> to map the nodes in the original graph to their clones.</p>
+<p>Let&#39;s first tackle it by using breadth-first search, after taking a deep breath.</p>
+<h3>With breadth-first search</h3>
+<p>The first thing to do is initialize our map:</p>
+<pre><code class="language-ts">const nodesMap = new Map&lt;_Node, _Node&gt;();
+</code></pre>
+<p>Now, we can create the clone of the node we&#39;re given, and map it to its clone:</p>
+<pre><code class="language-ts">let cloneNode = new _Node(node.val);
+nodesMap.set(node, cloneNode);
+</code></pre>
+<p>As with many breadth-first search implementations, we can create a queue, which will initially hold the node we&#39;re given:</p>
+<pre><code class="language-ts">const queue = [node];
+</code></pre>
+<p>Now we can do the actual breadth-first search.</p>
+<p><em>While our queue is not empty</em>, we can iterate over the neighbors of the current node that we&#39;ve dequeued (by using <code>queue.shift()</code>), mapping each one to its clone, and adding it to the queue for further processing. And, the beautiful thing is, we don&#39;t have to create a whole new clone and add it to our <code>queue</code> if that node is already in our map (because we have already &quot;visited&quot; it). We only want to do it if it&#39;s not in the map:</p>
+<pre><code class="language-ts">if (!nodesMap.has(neighbor)) {
+  nodesMap.set(neighbor, new _Node(neighbor.val));
+  queue.push(neighbor);
+}
+</code></pre>
+<p>Once we map the neighbor to its clone and add it to <code>queue</code>, we can now add the newly cloned neighbor to the neighbors of the clone node we&#39;re handling:</p>
+<pre><code class="language-ts">let cloneNode = nodesMap.get(currentNode!);
+let cloneNeighbor = nodesMap.get(neighbor);
+cloneNode!.neighbors.push(cloneNeighbor!);
+</code></pre>
+<p>The whole process looks like this:</p>
+<pre><code class="language-ts">while (queue.length &gt; 0) {
+  let currentNode = queue.shift();
+  for (const neighbor of currentNode!.neighbors) {
+    if (!nodesMap.has(neighbor)) {
+      nodesMap.set(neighbor, new _Node(neighbor.val));
+      queue.push(neighbor);
+    }
+    let cloneNode = nodesMap.get(currentNode!);
+    let cloneNeighbor = nodesMap.get(neighbor);
+    cloneNode!.neighbors.push(cloneNeighbor!);
+  }
+}
+</code></pre>
+<Note>
+We're using TypeScript's [non-null assertion operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-0.html#non-null-assertion-operator) in these examples to handle cases where the TS compiler will warn us about possible `null` or `undefined` variables.
+</Note>
+
+<p>At the end of the function, we can just return the mapped clone of the node that we were given in the first place:</p>
+<pre><code class="language-ts">return nodesMap.get(node) as _Node;
+</code></pre>
+<p><em>Note that <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/get#return_value" target="_blank" rel="noopener noreferrer">the return value of a <code>Map</code> object</a> can possibly be <code>undefined</code>, so the TS compiler will warn us with <code>nodesMap.get(node)</code>. The return value of our function can be a <code>_Node</code> or <code>null</code>, and we only want to return <code>null</code> when the node we&#39;re given is <code>null</code>:</em></p>
+<pre><code class="language-ts">if (node === null) {
+  return null;
+}
+</code></pre>
+<p><em>So, we&#39;re already handling the case where <code>node</code> can be null, and when we retrieve its mapped value from <code>nodesMap</code>, we&#39;re confident that it will be a <code>_Node</code>, so we&#39;re using a <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions" target="_blank" rel="noopener noreferrer">type assertion</a>.</em></p>
+<p>Finally, the <code>cloneGraph</code> function looks like this:</p>
+<pre><code class="language-ts">/**
+ * Definition for _Node.
+ * class _Node {
+ *   val: number
+ *   neighbors: _Node[]
+ * 
+ *   constructor(val?: number, neighbors?: _Node[]) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.neighbors = (neighbors === undefined ? [] : neighbors)
+ *   }
+ * }
+ * 
+ */
+
+function cloneGraph(node: _Node | null): _Node | null {
+  if (node === null) {
+    return null;
+  }
+
+  const nodesMap = new Map&lt;_Node, _Node&gt;();
+  let cloneNode = new _Node(node.val);
+  nodesMap.set(node, cloneNode);
+
+  const queue = [node];
+
+  while (queue.length &gt; 0) {
+    let currentNode = queue.shift();
+    for (const neighbor of currentNode!.neighbors) {
+      if (!nodesMap.has(neighbor)) {
+        nodesMap.set(neighbor, new _Node(neighbor.val));
+        queue.push(neighbor);
+      }
+      let cloneNode = nodesMap.get(currentNode!);
+      let cloneNeighbor = nodesMap.get(neighbor);
+      cloneNode!.neighbors.push(cloneNeighbor!);
+    }
+  }
+
+  return nodesMap.get(node) as _Node;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity with this breadth-first search implementation is $O(V+E)$ where $V$ is the number of vertices (nodes), and $E$ is the number of edges, as we&#39;re traversing the whole graph. </p>
+<p>The storage needs for the cloned nodes and <code>nodesMap</code> will grow linearly as the number of nodes in the graph increases, so the space complexity is $O(n)$ where $n$ is the total number of nodes in the graph.</p>
+<h3>With depth-first search</h3>
+<p>We can also use depth-first search to solve this problem, as also shown by <a href="https://www.youtube.com/watch?v=mQeF6bN8hMk" target="_blank" rel="noopener noreferrer">NeetCode</a>.</p>
+<p>Our <code>nodesMap</code> will also be here to map the nodes to their clones:</p>
+<pre><code class="language-ts">const nodesMap = new Map&lt;_Node, _Node&gt;();
+</code></pre>
+<p>The <code>dfs</code> function will be recursive, and as with all recursive functions, the first thing that we should be thinking about is the base case(s).<br>A perhaps obvious one is when the given current node is <code>null</code> — in that case, we can return <code>null</code>:</p>
+<pre><code class="language-ts">if (currentNode === null) {
+  return null;
+}
+</code></pre>
+<p>The whole <code>dfs</code> function will eventually return the cloned graph itself (it will return the cloned node of the node we&#39;re given).</p>
+<p>So, if the node we&#39;re looking at is in our map (that we have &quot;visited&quot; it), we can simply return the cloned version of it:</p>
+<pre><code class="language-ts">if (nodesMap.has(currentNode)) {
+  return nodesMap.get(currentNode);
+}
+</code></pre>
+<p>Otherwise, we can create the clone node and set it in our map accordingly:</p>
+<pre><code class="language-ts">let cloneNode = new _Node(currentNode.val);
+nodesMap.set(currentNode, cloneNode);
+</code></pre>
+<p>The only thing left is to add the neighbors of <code>currentNode</code> to the neighbors of <code>cloneNode</code>.</p>
+<p>Since <code>dfs</code> will be returning the cloned node of a given node, for each neighbor, we can just get its clone with <code>dfs</code> and add it to <code>cloneNode.neighbors</code>:</p>
+<pre><code class="language-ts">for (const neighbor of currentNode.neighbors) {
+  cloneNode.neighbors.push(dfs(neighbor)!);
+}
+</code></pre>
+<p>The final solution with DFS looks like this:</p>
+<pre><code class="language-ts">/**
+ * Definition for _Node.
+ * class _Node {
+ *   val: number
+ *   neighbors: _Node[]
+ * 
+ *   constructor(val?: number, neighbors?: _Node[]) {
+ *     this.val = (val === undefined ? 0 : val)
+ *     this.neighbors = (neighbors === undefined ? [] : neighbors)
+ *   }
+ * }
+ * 
+ */
+
+function dfs(currentNode: _Node | null, nodesMap: Map&lt;_Node, _Node&gt;) {
+  if (currentNode === null) {
+    return null;
+  }
+
+  if (nodesMap.has(currentNode)) {
+    return nodesMap.get(currentNode);
+  }
+
+  let cloneNode = new _Node(currentNode.val);
+  nodesMap.set(currentNode, cloneNode);
+
+  for (const neighbor of currentNode.neighbors) {
+    cloneNode.neighbors.push(dfs(neighbor, nodesMap)!);
+  }
+
+  return cloneNode;
+}
+
+function cloneGraph(node: _Node | null): _Node | null {
+  const nodesMap = new Map&lt;_Node, _Node&gt;();
+
+  return dfs(node, nodesMap) as _Node;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>Similar to the BFS version, the time complexity is $O(V + E)$ where $V$ is the number of vertices (nodes), and $E$ is the number of edges.<br>The space complexity will be $O(n)$ as well, where $n$ is the number of nodes as we&#39;re keeping <code>nodesMap</code> to store all the nodes.</p>
+<hr>
+<p>Next up is the problem called <a href="https://leetcode.com/problems/pacific-atlantic-water-flow" target="_blank" rel="noopener noreferrer">Pacific Atlantic Water Flow</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-clone-graph</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-clone-graph</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Thu, 13 Jun 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Number of Islands]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-11/53-lm.png" alt="Cover image"></p>
