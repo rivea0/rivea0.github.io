@@ -4,9 +4,225 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 13 Jun 2024 09:42:21 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 17 Jun 2024 14:38:20 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Pacific Atlantic Water Flow]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-17/55-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/pacific-atlantic-water-flow" target="_blank" rel="noopener noreferrer">this problem</a> states:</p>
+<blockquote>
+<p>There is an <code>m x n</code> rectangular island that borders both the <strong>Pacific Ocean</strong> and <strong>Atlantic Ocean</strong>. The <strong>Pacific Ocean</strong> touches the island&#39;s left and top edges, and the <strong>Atlantic Ocean</strong> touches the island&#39;s right and bottom edges.</p>
+<p>The island is partitioned into a grid of square cells. You are given an <code>m x n</code> integer matrix <code>heights</code> where <code>heights[r][c]</code> represents the <strong>height above sea level</strong> of the cell at coordinate <code>(r, c)</code>.</p>
+<p>The island receives a lot of rain, and the rain water can flow to neighboring cells directly north, south, east, and west if the neighboring cell&#39;s height is <strong>less than or equal to</strong> the current cell&#39;s height. Water can flow from any cell adjacent to an ocean into the ocean.</p>
+<p>Return <em>a <strong>2D list</strong> of grid coordinates</em> <code>result</code> <em>where</em> <code>result[i] = [ri, ci]</code> <em>denotes that rain water can flow from cell</em> <code>(ri, ci)</code> <em>to <strong>both</strong> the Pacific and Atlantic oceans</em>.</p>
+</blockquote>
+<p>For example:</p>
+<img src="https://assets.leetcode.com/uploads/2021/06/08/waterflow-grid.jpg" alt="Example image" />
+
+<pre><code>Input: heights = [
+    [1, 2, 2, 3, 5],
+    [3, 2, 3, 4, 4],
+    [2, 4, 5, 3, 1],
+    [6, 7, 1, 4, 5],
+    [5, 1, 1, 2, 4]
+]
+
+Output: [[0, 4], [1, 3], [1, 4], [2, 2], [3, 0], [3, 1], [4, 0]]
+
+Explanation: The following cells can flow to the Pacific and Atlantic oceans, as shown below:
+[0, 4]: [0, 4] -&gt; Pacific Ocean 
+        [0, 4] -&gt; Atlantic Ocean
+[1, 3]: [1, 3] -&gt; [0, 3] -&gt; Pacific Ocean 
+        [1, 3] -&gt; [1, 4] -&gt; Atlantic Ocean
+[1, 4]: [1, 4] -&gt; [1, 3] -&gt; [0, 3] -&gt; Pacific Ocean 
+        [1, 4] -&gt; Atlantic Ocean
+[2, 2]: [2, 2] -&gt; [1, 2] -&gt; [0, 2] -&gt; Pacific Ocean 
+        [2, 2] -&gt; [2, 3] -&gt; [2, 4] -&gt; Atlantic Ocean
+[3, 0]: [3, 0] -&gt; Pacific Ocean 
+        [3, 0] -&gt; [4, 0] -&gt; Atlantic Ocean
+[3, 1]: [3, 1] -&gt; [3, 0] -&gt; Pacific Ocean 
+        [3, 1] -&gt; [4, 1] -&gt; Atlantic Ocean
+[4, 0]: [4 ,0] -&gt; Pacific Ocean 
+        [4, 0] -&gt; Atlantic Ocean
+Note that there are other possible paths for these cells to flow to the Pacific and Atlantic oceans.
+</code></pre>
+<hr>
+<p>Although the description can be a challenge in itself to understand at first glance, what we need to do is essentially simple (at least, in theory). We want a cell whose neighbors are less than or equal to it, all the way to the north, south, east, and west until we reach both &quot;oceans.&quot; </p>
+<p>First, we can initialize two sets to store the cells that can reach &quot;Pacific&quot; and &quot;Atlantic&quot;:</p>
+<pre><code class="language-ts">const reachableToPacific: Set&lt;string&gt; = new Set();
+const reachableToAtlantic: Set&lt;string&gt; = new Set();
+</code></pre>
+<Note>
+We're initializing them as sets of strings, similarly as we did in the [Number of Islands solution](https://rivea0.github.io/blog/leetcode-meditations-number-of-islands). We're going to represent the row and column pair like `` `${row},${col}` ``, 
+</Note>
+
+<p>Instead of going cell by cell and checking if it can reach the oceans, we can first start by the cells that are adjacent to the oceans, and see which cells can reach <em>us</em>.</p>
+<p>Since we&#39;re getting the cells that are reachable to oceans in different sets, we can return those that are in both sets (because we need to get those that are reachable to both oceans).</p>
+<p>So, <strong>at the end</strong>, what we&#39;ll do is this:</p>
+<pre><code class="language-ts">for (const cell of reachableToPacific.values()) {
+  if (reachableToAtlantic.has(cell)) {
+    const [r, c] = cell.split(&#39;,&#39;);
+    result.push([+r, +c]);
+  }
+}
+</code></pre>
+<Note>
+We're converting string values to numbers with the handy [unary plus operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Unary_plus).
+</Note>
+
+<p>We can use a <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-11-graphs#bfs" target="_blank" rel="noopener noreferrer">breadth-first search</a> to visit and mark the cells.</p>
+<p>For the top and bottom edges of the grid, we&#39;ll mark the cells that can reach to Pacific and Atlantic:</p>
+<pre><code class="language-ts">for (let col = 0; col &lt; colsLength; col++) {
+  bfs(0, col, reachableToPacific);
+  bfs(rowsLength - 1, col, reachableToAtlantic);
+}
+</code></pre>
+<p>We can do the similar thing for left and right edges of the grid as well:</p>
+<pre><code class="language-ts">for (let row = 0; row &lt; rowsLength; row++) {
+  bfs(row, 0, reachableToPacific);
+  bfs(row, colsLength - 1, reachableToAtlantic);
+}
+</code></pre>
+<p>Now, on to the implementation of <code>bfs</code>.</p>
+<p>The purpose of our <code>bfs</code> function is to mark the cells that can reach to an &quot;ocean.&quot; So, it&#39;ll take three parameters: <code>r</code> for row, <code>c</code> for column, and <code>reachableToOcean</code> for the set that stores the cells that are reachable.</p>
+<p>As usual with BFS, we&#39;ll keep a queue that has arrays consisting of a row, a column, and the corresponding value in the grid:</p>
+<pre><code class="language-ts">let queue = [[r, c, heights[r][c]]];
+</code></pre>
+<p>As we go over the elements of <code>queue</code>, we&#39;ll mark a row-column pair as reachable <mark>as long as that pair is not out of bounds, <em>or</em> we haven&#39;t already added it as reachable, <em>or</em> the value it has is <strong>greater than or equal</strong> to the previous &quot;height&quot; we&#39;ve looked at.</mark></p>
+<Note>
+<mark>Since we're starting from the edge cells, we're interested in values _greater than or equal_.</mark> In other words, we're not interested in "heights" that are shorter. 
+</Note>
+
+<p>While <code>queue</code> is not empty, we&#39;ll first pop the current row, current column and previous height from <code>queue</code>:</p>
+<pre><code class="language-ts">const [currentRow, currentCol, prevHeight] = queue.pop() as number[];
+</code></pre>
+<Note>
+It's "previous height," because as we'll see below, the new values we push to `queue` will be updated row and column values (like `currentRow + rowToGo` and `currentCol + colToGo`) while the cell will be the "previous" one (`heights[currentRow][currentCol]`).
+</Note>
+
+<p>If one of the conditions we mentioned above is true, we want to continue with the next element in the queue. Otherwise, we&#39;ll add it to our set:</p>
+<pre><code class="language-ts">if (
+  isOutOfBounds(currentRow, currentCol) || 
+  reachableToOcean.has(`${currentRow},${currentCol}`) || 
+  heights[currentRow][currentCol] &lt; prevHeight
+) {
+  continue;
+}
+
+reachableToOcean.add(`${currentRow},${currentCol}`);
+</code></pre>
+<p>Then, we&#39;ll add the neighbors to the queue, as well as <code>heights[currentRow][currentCol]</code>, which is going to be the &quot;previous height&quot; for the next element:</p>
+<pre><code class="language-ts">// up, down, left, right
+const coords = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+for (const [rowToGo, colToGo] of coords) {
+  queue.push([
+    currentRow + rowToGo, 
+    currentCol + colToGo, 
+    heights[currentRow][currentCol]
+  ]);
+}
+</code></pre>
+<p>And, that&#39;s it for the <code>bfs</code> function:</p>
+<pre><code class="language-ts">function bfs(r: number, c: number, reachableToOcean: Set&lt;string&gt;) {
+  let queue = [[r, c, heights[r][c]]];
+
+  while (queue.length &gt; 0) {
+    const [currentRow, currentCol, prevHeight] = queue.pop() as number[];
+
+    if (
+      isOutOfBounds(currentRow, currentCol) || 
+      reachableToOcean.has(`${currentRow},${currentCol}`) || 
+      heights[currentRow][currentCol] &lt; prevHeight
+    ) {
+      continue;
+    }
+
+    reachableToOcean.add(`${currentRow},${currentCol}`);
+
+    // up, down, left, right
+    const coords = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for (const [rowToGo, colToGo] of coords) {
+      queue.push([
+        currentRow + rowToGo, 
+        currentCol + colToGo, 
+        heights[currentRow][currentCol]
+      ]);
+    }
+  }
+}
+</code></pre>
+<p>Putting everything together, here is what our final solution looks like in TypeScript:</p>
+<pre><code class="language-ts">function pacificAtlantic(heights: number[][]): number[][] {
+  let result = [];
+  const rowsLength = heights.length;
+  const colsLength = heights[0].length;
+  const reachableToPacific: Set&lt;string&gt; = new Set();
+  const reachableToAtlantic: Set&lt;string&gt; = new Set();
+
+  function isOutOfBounds(r: number, c: number) {
+    return r &lt; 0 || c &lt; 0 || r &gt;= rowsLength || c &gt;= colsLength;
+  }
+
+  function bfs(r: number, c: number, reachableToOcean: Set&lt;string&gt;) {
+    let queue = [[r, c, heights[r][c]]];
+
+    while (queue.length &gt; 0) {
+      const [currentRow, currentCol, prevHeight] = queue.pop() as number[];
+
+      if (
+        isOutOfBounds(currentRow, currentCol) || 
+        reachableToOcean.has(`${currentRow},${currentCol}`) || 
+        heights[currentRow][currentCol] &lt; prevHeight
+      ) {
+        continue;
+      }
+
+      reachableToOcean.add(`${currentRow},${currentCol}`);
+
+      // up, down, left, right
+      const coords = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+      for (const [rowToGo, colToGo] of coords) {
+        queue.push([
+            currentRow + rowToGo, 
+            currentCol + colToGo, 
+            heights[currentRow][currentCol]
+        ]);
+      }
+    }
+  }
+
+  for (let col = 0; col &lt; colsLength; col++) {
+    bfs(0, col, reachableToPacific);
+    bfs(rowsLength - 1, col, reachableToAtlantic);
+  }
+
+  for (let row = 0; row &lt; rowsLength; row++) {
+    bfs(row, 0, reachableToPacific);
+    bfs(row, colsLength - 1, reachableToAtlantic);
+  }
+
+  for (const cell of reachableToPacific.values()) {
+    if (reachableToAtlantic.has(cell)) {
+      const [r, c] = cell.split(&#39;,&#39;);
+      result.push([+r, +c]);
+    }
+  }
+
+  return result;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(n * m)$ — where $n$ is the number of rows, and $m$ is the number of columns, as we&#39;re traversing the whole grid but making use of the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set" target="_blank" rel="noopener noreferrer">Set data structure</a> to avoid visiting the same cell.</p>
+<p>The space complexity is—I think—also $O(n * m)$, again, where $n$ is the number of rows, and $m$ is the number of columns.<br>The size of our queue will grow proportionately to the size of the grid, and we also keep two sets, their sizes can also grow proportionately to the grid we&#39;re given.</p>
+<hr>
+<p>The next and final problem we&#39;re going to look at in this chapter is <a href="https://leetcode.com/problems/course-schedule" target="_blank" rel="noopener noreferrer">Course Schedule</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-pacific-atlantic-water-flow</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-pacific-atlantic-water-flow</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Mon, 17 Jun 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Clone Graph]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-13/54-lm.png" alt="Cover image"></p>
@@ -516,8 +732,8 @@ queue.push([currentRow, currentCol]);
 </ul>
 </li>
 <li><a href="#traversals" target="_blank" rel="noopener noreferrer">Traversals</a><ul>
-<li><a href="#bfs" target="_blank" rel="noopener noreferrer">Breadth-First Search (DFS)</a></li>
-<li><a href="#dfs" target="_blank" rel="noopener noreferrer">Depth-First Search (BFS)</a></li>
+<li><a href="#bfs" target="_blank" rel="noopener noreferrer">Breadth-First Search (BFS)</a></li>
+<li><a href="#dfs" target="_blank" rel="noopener noreferrer">Depth-First Search (DFS)</a></li>
 </ul>
 </li>
 <li><a href="#resources" target="_blank" rel="noopener noreferrer">Resources</a></li>
