@@ -64,7 +64,7 @@ const reachableToAtlantic: Set<string> = new Set();
 ```
 
 <Note>
-We're initializing them as sets of strings, similarly as we did in the [Number of Islands solution](https://rivea0.github.io/blog/leetcode-meditations-number-of-islands). We're going to represent the row and column pair like `` `${row},${col}` ``, 
+We're initializing them as sets of strings, similarly as we did in the [Number of Islands solution](https://rivea0.github.io/blog/leetcode-meditations-number-of-islands). We're going to represent the row and column pair like `` `${row},${col}` ``.
 </Note>
 
 Instead of going cell by cell and checking if it can reach the oceans, we can first start by the cells that are adjacent to the oceans, and see which cells can reach _us_.
