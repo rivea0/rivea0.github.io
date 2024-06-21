@@ -4,9 +4,193 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 17 Jun 2024 14:38:20 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 21 Jun 2024 00:17:32 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Course Schedule]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-20/56-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/course-schedule" target="_blank" rel="noopener noreferrer">this problem</a>:</p>
+<blockquote>
+<p>There are a total of <code>numCourses</code> courses you have to take, labeled from <code>0</code> to <code>numCourses - 1</code>. You are given an array <code>prerequisites</code> where <code>prerequisites[i] = [a_i, b_i]</code> indicates that you <strong>must</strong> take course $b_i$ first if you want to take course $a_i$.</p>
+<ul>
+<li>For example, the pair <code>[0, 1]</code>, indicates that to take course <code>0</code> you have to first take course <code>1</code>.</li>
+</ul>
+<p>Return <code>true</code> if you can finish all courses. Otherwise, return <code>false</code>.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: numCourses = 2, prerequisites = [ [1, 0] ]
+
+Output: true
+
+Explanation: There are a total of 2 courses to take. 
+To take course 1 you should have finished course 0. So it is possible.
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: numCourses = 2, prerequisites = [ [1, 0], [0, 1] ]
+
+Output: false
+
+Explanation: There are a total of 2 courses to take. 
+To take course 1 you should have finished course 0, and to take course 0 you should also have finished course 1. So it is impossible.
+</code></pre>
+<p>Also, we know from the constraints that <em>all the pairs <code>prerequisites[i]</code> are <strong>unique</strong></em>, and each $a_i$ and $b_i$ is in the range of <code>numCourses</code>.</p>
+<hr>
+<p>One thing that&#39;s clear is that each course is <em>mapped</em> to some number of prerequisite courses. If we can think of a course as a graph vertex (node), then it should have edges to all the courses that are its prerequisites. So, in a sense, it&#39;s a dependency graph.</p>
+<p>We have seen ways to represent a graph, and one of the ideal choices is using an <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-11-graphs#adjacency-list" target="_blank" rel="noopener noreferrer">adjacency list</a>. So, let&#39;s use it to map the courses to their prerequisites.</p>
+<p>We&#39;re already given the number of courses, and we can use a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map" target="_blank" rel="noopener noreferrer">Map</a> which is perfect for the job. We&#39;ll first map each course to an empty array that will hold the prerequisites:</p>
+<pre><code class="language-ts">let adjList = new Map&lt;number, number[]&gt;();
+
+// Each index corresponds to a course, and each course has an array of prerequisites
+for (let i = 0; i &lt; numCourses; i++) {
+  adjList.set(i, []);
+}
+</code></pre>
+<Note>
+Each index points to a "course," so, for example, the course `1` will be the second index, etc.
+
+<p>Note that each course and prerequisite is in the range of <code>numCourses</code>:</p>
+<p>$$0 \leq a_i, b_i \lt numCourses$$<br></Note></p>
+<p>After we&#39;re done with initializing our adjacency list, we can add each prerequisite to its corresponding course: </p>
+<pre><code class="language-ts">for (const [course, prereq] of prerequisites) {
+  adjList.get(course)!.push(prereq);
+}
+</code></pre>
+<Note>
+We'll be using the [non-null assertion operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-0.html#non-null-assertion-operator) for the values that the TS compiler will warn us as possibly `null` or `undefined`.
+</Note>
+
+<p>Now, what we need to do is just go through each course, and see if each one of them can be completed. If so, we can return <code>true</code>. But, if any of them can&#39;t be completed, we need to return <code>false</code>. </p>
+<p>So, we can do exactly that:</p>
+<pre><code class="language-ts">function canFinish(numCourses: number, prerequisites: number[][]): boolean {
+  ...
+
+  for (let i = 0; i &lt; numCourses; i++) {
+    if (!canBeCompleted(i)) {
+      return false;
+    }
+  }
+    
+  return true;
+}
+</code></pre>
+<p>It&#39;s fine so far, but how can we check if a course can be completed?</p>
+<p>Since we&#39;re dealing with a graph, we need to do a graph traversal somehow, so it&#39;s time where we can use a <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-11-graphs#dfs" target="_blank" rel="noopener noreferrer">depth-first search</a> to help us with that.</p>
+<p>Now, since DFS is going to be a recursive function, the first thing we need to consider is the base case(s).</p>
+<p>Let&#39;s catch our breaths and think. When can a course be completed? </p>
+<p>The answer is perhaps obvious: when there are no prerequisites to complete.</p>
+<p>So, this is one base case for our DFS function <code>canBeCompleted</code>:</p>
+<pre><code class="language-ts">// No prerequisites to complete (or, all prerequisites can be completed)
+if (adjList.get(course)!.length === 0) {
+  return true;
+}
+</code></pre>
+<p>This is nice, but from the examples given in the description, we also know that we should beware of cycles. So, we don&#39;t want to visit a node (a &quot;course&quot;) that we have already visited. So, we can keep a <code>visited</code> set, and if the course we&#39;re currently looking at is in it, we can to return <code>false</code> because it means that the course can&#39;t be completed:</p>
+<pre><code class="language-ts">if (visited.has(course)) {
+  return false;
+}
+</code></pre>
+<p>Once we&#39;ve done that, we can mark the course as visited:</p>
+<pre><code class="language-ts">visited.add(course);
+</code></pre>
+<p>Now, we said that a course can be completed when there are no prerequisites to complete (or, <em>all prerequisites can be completed</em>). </p>
+<p>So, if any prerequisite can&#39;t be completed, then the course itself can&#39;t be completed as well:</p>
+<pre><code class="language-ts">for (const prereq of adjList.get(course)!) {
+  if (!canBeCompleted(prereq)) {
+    return false;
+  }
+}
+</code></pre>
+<p>Otherwise, once we&#39;re finished with the loop and have seen that the course can be completed, we can mark it as such by emptying the array in our map.<br>(<em>This brilliant idea is thanks to <a href="https://www.youtube.com/watch?v=EgI5nU9etnU" target="_blank" rel="noopener noreferrer">NeetCode&#39;s video</a>, which uses a slightly different version than this one</em>):</p>
+<pre><code class="language-ts">// All prerequisites can be completed
+adjList.set(course, []);
+</code></pre>
+<p>We can just return <code>true</code> at this point.<br>Here&#39;s what the <code>canBeCompleted</code> function looks like now:</p>
+<pre><code class="language-ts">function canBeCompleted(course: number) {
+  // No prerequisites to complete (or, all prerequisites can be completed)
+  if (adjList.get(course)!.length === 0) {
+    return true;
+  }
+    
+  // Has cycle
+  if (visited.has(course)) {
+    return false;
+  }
+
+  visited.add(course);
+
+  for (const prereq of adjList.get(course)!) {
+    if (!canBeCompleted(prereq)) {
+      return false;
+    }
+  }
+
+  // All prerequisites can be completed
+  adjList.set(course, []);
+
+  return true;
+}
+</code></pre>
+<p>Finally, here is the final solution in TypeScript:</p>
+<pre><code class="language-ts">function canFinish(numCourses: number, prerequisites: number[][]): boolean {
+  // Course: prerequisites to complete
+  let adjList = new Map&lt;number, number[]&gt;();
+  
+  let visited = new Set&lt;number&gt;();
+
+  // Each index corresponds to a course, and each course has an array of prerequisites
+  for (let course = 0; course &lt; numCourses; course++) {
+    adjList.set(course, []);
+  }
+
+  for (const [course, prereq] of prerequisites) {
+    adjList.get(course)!.push(prereq);
+  }
+
+  function canBeCompleted(course: number) {
+    // No prerequisites to complete (or, all prerequisites can be completed)
+    if (adjList.get(course)!.length === 0) {
+      return true;
+    }
+    
+    // Has cycle
+    if (visited.has(course)) {
+      return false;
+    }
+
+    visited.add(course);
+
+    for (const prereq of adjList.get(course)!) {
+      if (!canBeCompleted(prereq)) {
+        return false;
+      }
+    }
+
+    // All prerequisites can be completed
+    adjList.set(course, []);
+
+    return true;
+  }
+
+  for (let i = 0; i &lt; numCourses; i++) {
+    if (!canBeCompleted(i)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>We&#39;re using a DFS function, visiting each vertex (node) and edge in the graph once, so the time complexity is $O(V + E)$ where $V$ is the number of vertices and $E$ is the number of edges.<br>The space complexity is also $O(V + E)$, as we keep an adjacency list. The storage requirement of it (also the <code>visited</code> set) can grow as the size of our graph increases.</p>
+<hr>
+<p>This was the last problem in this chapter. Next up, we&#39;ll take a look at dynamic programming. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-course-schedule</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-course-schedule</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Thu, 20 Jun 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Pacific Atlantic Water Flow]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-17/55-lm.png" alt="Cover image"></p>
@@ -54,7 +238,7 @@ Note that there are other possible paths for these cells to flow to the Pacific 
 const reachableToAtlantic: Set&lt;string&gt; = new Set();
 </code></pre>
 <Note>
-We're initializing them as sets of strings, similarly as we did in the [Number of Islands solution](https://rivea0.github.io/blog/leetcode-meditations-number-of-islands). We're going to represent the row and column pair like `` `${row},${col}` ``, 
+We're initializing them as sets of strings, similarly as we did in the [Number of Islands solution](https://rivea0.github.io/blog/leetcode-meditations-number-of-islands). We're going to represent the row and column pair like `` `${row},${col}` ``.
 </Note>
 
 <p>Instead of going cell by cell and checking if it can reach the oceans, we can first start by the cells that are adjacent to the oceans, and see which cells can reach <em>us</em>.</p>

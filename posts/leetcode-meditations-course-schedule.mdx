@@ -1,0 +1,241 @@
+---
+title: "LeetCode Meditations: Course Schedule"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Course Schedule problem.
+slug: leetcode-meditations-course-schedule
+date: 2024-06-20
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-20/56-lm.png)
+
+Let's start with the description for [this problem](https://leetcode.com/problems/course-schedule):
+
+> There are a total of `numCourses` courses you have to take, labeled from `0` to `numCourses - 1`. You are given an array `prerequisites` where `prerequisites[i] = [a_i, b_i]` indicates that you **must** take course $b_i$ first if you want to take course $a_i$.
+>
+> - For example, the pair `[0, 1]`, indicates that to take course `0` you have to first take course `1`.
+>
+> Return `true` if you can finish all courses. Otherwise, return `false`.
+
+For example:
+
+```
+Input: numCourses = 2, prerequisites = [ [1, 0] ]
+
+Output: true
+
+Explanation: There are a total of 2 courses to take. 
+To take course 1 you should have finished course 0. So it is possible.
+```
+
+Or:
+
+```
+Input: numCourses = 2, prerequisites = [ [1, 0], [0, 1] ]
+
+Output: false
+
+Explanation: There are a total of 2 courses to take. 
+To take course 1 you should have finished course 0, and to take course 0 you should also have finished course 1. So it is impossible.
+```
+
+Also, we know from the constraints that _all the pairs `prerequisites[i]` are **unique**_, and each $a_i$ and $b_i$ is in the range of `numCourses`.
+
+---
+
+One thing that's clear is that each course is _mapped_ to some number of prerequisite courses. If we can think of a course as a graph vertex (node), then it should have edges to all the courses that are its prerequisites. So, in a sense, it's a dependency graph.
+
+We have seen ways to represent a graph, and one of the ideal choices is using an [adjacency list](https://rivea0.github.io/blog/leetcode-meditations-chapter-11-graphs#adjacency-list). So, let's use it to map the courses to their prerequisites.
+
+We're already given the number of courses, and we can use a [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) which is perfect for the job. We'll first map each course to an empty array that will hold the prerequisites:
+
+```ts
+let adjList = new Map<number, number[]>();
+
+// Each index corresponds to a course, and each course has an array of prerequisites
+for (let i = 0; i < numCourses; i++) {
+  adjList.set(i, []);
+}
+```
+
+<Note>
+Each index points to a "course," so, for example, the course `1` will be the second index, etc.
+
+Note that each course and prerequisite is in the range of `numCourses`:
+
+$$0 \leq a_i, b_i \lt numCourses$$
+</Note>
+
+After we're done with initializing our adjacency list, we can add each prerequisite to its corresponding course: 
+
+```ts
+for (const [course, prereq] of prerequisites) {
+  adjList.get(course)!.push(prereq);
+}
+```
+
+<Note>
+We'll be using the [non-null assertion operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-0.html#non-null-assertion-operator) for the values that the TS compiler will warn us as possibly `null` or `undefined`.
+</Note>
+
+Now, what we need to do is just go through each course, and see if each one of them can be completed. If so, we can return `true`. But, if any of them can't be completed, we need to return `false`. 
+
+So, we can do exactly that:
+
+```ts
+function canFinish(numCourses: number, prerequisites: number[][]): boolean {
+  ...
+
+  for (let i = 0; i < numCourses; i++) {
+    if (!canBeCompleted(i)) {
+      return false;
+    }
+  }
+    
+  return true;
+}
+```
+
+It's fine so far, but how can we check if a course can be completed?
+
+Since we're dealing with a graph, we need to do a graph traversal somehow, so it's time where we can use a [depth-first search](https://rivea0.github.io/blog/leetcode-meditations-chapter-11-graphs#dfs) to help us with that.
+
+Now, since DFS is going to be a recursive function, the first thing we need to consider is the base case(s).
+
+Let's catch our breaths and think. When can a course be completed? 
+
+The answer is perhaps obvious: when there are no prerequisites to complete.
+
+So, this is one base case for our DFS function `canBeCompleted`:
+
+```ts
+// No prerequisites to complete (or, all prerequisites can be completed)
+if (adjList.get(course)!.length === 0) {
+  return true;
+}
+```
+
+This is nice, but from the examples given in the description, we also know that we should beware of cycles. So, we don't want to visit a node (a "course") that we have already visited. So, we can keep a `visited` set, and if the course we're currently looking at is in it, we can to return `false` because it means that the course can't be completed:
+
+```ts
+if (visited.has(course)) {
+  return false;
+}
+```
+
+Once we've done that, we can mark the course as visited:
+
+```ts
+visited.add(course);
+```
+
+Now, we said that a course can be completed when there are no prerequisites to complete (or, _all prerequisites can be completed_). 
+
+So, if any prerequisite can't be completed, then the course itself can't be completed as well:
+
+```ts
+for (const prereq of adjList.get(course)!) {
+  if (!canBeCompleted(prereq)) {
+    return false;
+  }
+}
+```
+
+Otherwise, once we're finished with the loop and have seen that the course can be completed, we can mark it as such by emptying the array in our map.
+(_This brilliant idea is thanks to [NeetCode's video](https://www.youtube.com/watch?v=EgI5nU9etnU), which uses a slightly different version than this one_):
+
+```ts
+// All prerequisites can be completed
+adjList.set(course, []);
+```
+
+We can just return `true` at this point. 
+Here's what the `canBeCompleted` function looks like now:
+
+```ts
+function canBeCompleted(course: number) {
+  // No prerequisites to complete (or, all prerequisites can be completed)
+  if (adjList.get(course)!.length === 0) {
+    return true;
+  }
+    
+  // Has cycle
+  if (visited.has(course)) {
+    return false;
+  }
+
+  visited.add(course);
+
+  for (const prereq of adjList.get(course)!) {
+    if (!canBeCompleted(prereq)) {
+      return false;
+    }
+  }
+
+  // All prerequisites can be completed
+  adjList.set(course, []);
+
+  return true;
+}
+```
+
+Finally, here is the final solution in TypeScript:
+
+```ts
+function canFinish(numCourses: number, prerequisites: number[][]): boolean {
+  // Course: prerequisites to complete
+  let adjList = new Map<number, number[]>();
+  
+  let visited = new Set<number>();
+
+  // Each index corresponds to a course, and each course has an array of prerequisites
+  for (let course = 0; course < numCourses; course++) {
+    adjList.set(course, []);
+  }
+
+  for (const [course, prereq] of prerequisites) {
+    adjList.get(course)!.push(prereq);
+  }
+
+  function canBeCompleted(course: number) {
+    // No prerequisites to complete (or, all prerequisites can be completed)
+    if (adjList.get(course)!.length === 0) {
+      return true;
+    }
+    
+    // Has cycle
+    if (visited.has(course)) {
+      return false;
+    }
+
+    visited.add(course);
+
+    for (const prereq of adjList.get(course)!) {
+      if (!canBeCompleted(prereq)) {
+        return false;
+      }
+    }
+
+    // All prerequisites can be completed
+    adjList.set(course, []);
+
+    return true;
+  }
+
+  for (let i = 0; i < numCourses; i++) {
+    if (!canBeCompleted(i)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+```
+
+#### Time and space complexity
+
+We're using a DFS function, visiting each vertex (node) and edge in the graph once, so the time complexity is $O(V + E)$ where $V$ is the number of vertices and $E$ is the number of edges.
+The space complexity is also $O(V + E)$, as we keep an adjacency list. The storage requirement of it (also the `visited` set) can grow as the size of our graph increases.
+
+---
+
+This was the last problem in this chapter. Next up, we'll take a look at dynamic programming. Until then, happy coding.
