@@ -1,0 +1,157 @@
+---
+title: "LeetCode Meditations — Chapter 12: Dynamic Programming"
+tags: [Computer Science, TypeScript, JavaScript]
+description: The twelfth chapter of LeetCode Meditation series.
+slug: leetcode-meditations-chapter-12-dynamic-programming
+date: 2024-06-26
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-26/57-lm-ch12.png)
+
+Dynamic programming (DP) is one of those concepts that is a bit intimidating when you hear it for the first time, but the crux of it is simply <mark>breaking problems down into smaller parts and solving them, also storing those solutions so that we don't have to compute them again.</mark> 
+
+Breaking problems down into subproblems is nothing new, that's pretty much what _problem-solving_ is all about. What dynamic programming is also specifically concerned with are **overlapping subproblems** that are repeating — we want to calculate solutions to those subproblems so that we won't be calculating them again each time. Put another way, *we want to remember the past so that we won't be condemned to repeat it*.
+
+For example, calculating 1 + 1 + 1 + 1 + 1 is very easy, if we have already calculated 1 + 1 + 1 + 1. We can just remember the previous solution, and use it:
+
+![Using the solution to a subproblem](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-26/dp.gif)
+
+---
+
+Calculating the Fibonacci sequence is one of the well-known examples when it comes to dynamic programming. Because we have to calculate the same functions each time for a new number, it lends itself to DP very well.
+
+For example, to calculate `fib(4)` we need to calculate `fib(3)` and `fib(2)`.
+However, calculating `fib(3)` also involves calculating `fib(2)`, so we'll be doing the same calculation, *again*.
+
+A classic, good old recursive Fibonacci function might look like this:
+
+```ts
+function fib(n: number): number {
+  if (n === 0 || n === 1) {
+    return n;
+  }
+
+  return fib(n - 1) + fib(n - 2);
+}
+```
+
+Though the issue we have just mentioned remains: we'll keep calculating the same values:
+
+![Fibonacci repeating calls](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-26/fib-repeat.gif)
+
+Then, how can we do better?
+
+---
+
+**Memoization** is remembering the problems we have solved before so that we don't have to solve them again and waste our time. We can *reuse* the solution to the subproblem we've already memoized.
+So, we can keep a *cache* to store those solutions and use them:
+
+```ts
+function fib(n: number, cache: Map<number, number>): number {
+  if (cache.has(n)) {
+    return cache.get(n)!;
+  }
+
+  if (n === 0 || n === 1) {
+    return n;
+  }
+
+  const result = fib(n - 1, cache) + fib(n - 2, cache);
+  cache.set(n, result);
+
+  return result;
+}
+```
+
+For example, we can initially pass an empty `Map` as the argument for `cache`, and print the first 15 Fibonacci numbers:
+
+```ts
+let m = new Map<number, number>();
+
+for (let i = 0; i < 15; i++) {
+  console.log(fib(i, m));
+}
+
+/*
+  0
+  1
+  1
+  2
+  3
+  5
+  8
+  13
+  21
+  34
+  55 
+  89
+  144
+  233
+  377 
+ */
+```
+
+---
+
+There are two different approaches with dynamic programming: **top-down** and **bottom-up**.
+
+Top-down is like what it sounds: starting with a large problem, breaking it down to smaller components, memoizing them. It's what we just did with the `fib` example.
+
+Bottom-up is also like what it sounds: starting with the smallest subproblem, finding out a solution, and working our way up to the larger problem itself.
+It also has an advantage: <mark>with the bottom-up approach, we don't need to store every previous value, we can only keep the two elements</mark> at the bottom so that we can use them to build up to our target.
+
+With the bottom-up approach, our `fib` function can look like this:
+
+```ts
+function fib(n: number) {
+  let dp = [0, 1];
+  for (let i = 2; i <= n; i++) {
+    dp[i] = dp[i - 1] + dp[i - 2];
+  }
+
+  return dp[n];
+}
+```
+
+However, note that we are keeping an array whose size will grow linearly as the input increases. So, we can do better with constant space complexity, not using an array at all:
+
+```ts
+function fib(n: number) {
+  if (n === 0 || n === 1) {
+    return n;
+  }
+
+  let a = 0;
+  let b = 1;
+
+  for (let i = 2; i <= n; i++) {
+    let tmp = a + b;
+    a = b;
+    b = tmp;
+  }
+
+  return b;
+}
+```
+
+---
+
+#### Time and space complexity
+
+The time complexities for both the top-down and bottom-up approaches in the Fibonacci example are $O(n)$ as we solve each subproblem, each of which are of constant time. 
+
+<Note>
+The time complexity of the recursive Fibonacci function that doesn't use DP is exponential (in fact, $O(\phi^{n})$ — yes [the golden ratio](https://en.wikipedia.org/wiki/Golden_ratio) as its base). 
+</Note>
+
+However, when it comes to space complexity, the bottom-up approach (the second version) is $O(1)$. 
+
+<Note>
+The first version we've used for the bottom-up approach has $O(n)$ time complexity as we store the values in an array.
+</Note>
+
+The top-down approach has $O(n)$ space complexity because we store a `Map` whose size will grow linearly as `n` increases.
+
+---
+
+The first problem we're going to look at in this chapter is [Climbing Stairs](https://leetcode.com/problems/climbing-stairs). Until then, happy coding.

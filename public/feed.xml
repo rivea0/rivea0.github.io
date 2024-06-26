@@ -4,9 +4,126 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 21 Jun 2024 00:17:32 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 26 Jun 2024 20:06:13 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations — Chapter 12: Dynamic Programming]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-26/57-lm-ch12.png" alt="Cover image"></p>
+<p>Dynamic programming (DP) is one of those concepts that is a bit intimidating when you hear it for the first time, but the crux of it is simply <mark>breaking problems down into smaller parts and solving them, also storing those solutions so that we don&#39;t have to compute them again.</mark> </p>
+<p>Breaking problems down into subproblems is nothing new, that&#39;s pretty much what <em>problem-solving</em> is all about. What dynamic programming is also specifically concerned with are <strong>overlapping subproblems</strong> that are repeating — we want to calculate solutions to those subproblems so that we won&#39;t be calculating them again each time. Put another way, <em>we want to remember the past so that we won&#39;t be condemned to repeat it</em>.</p>
+<p>For example, calculating 1 + 1 + 1 + 1 + 1 is very easy, if we have already calculated 1 + 1 + 1 + 1. We can just remember the previous solution, and use it:</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-26/dp.gif" alt="Using the solution to a subproblem"></p>
+<hr>
+<p>Calculating the Fibonacci sequence is one of the well-known examples when it comes to dynamic programming. Because we have to calculate the same functions each time for a new number, it lends itself to DP very well.</p>
+<p>For example, to calculate <code>fib(4)</code> we need to calculate <code>fib(3)</code> and <code>fib(2)</code>.<br>However, calculating <code>fib(3)</code> also involves calculating <code>fib(2)</code>, so we&#39;ll be doing the same calculation, <em>again</em>.</p>
+<p>A classic, good old recursive Fibonacci function might look like this:</p>
+<pre><code class="language-ts">function fib(n: number): number {
+  if (n === 0 || n === 1) {
+    return n;
+  }
+
+  return fib(n - 1) + fib(n - 2);
+}
+</code></pre>
+<p>Though the issue we have just mentioned remains: we&#39;ll keep calculating the same values:</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-26/fib-repeat.gif" alt="Fibonacci repeating calls"></p>
+<p>Then, how can we do better?</p>
+<hr>
+<p><strong>Memoization</strong> is remembering the problems we have solved before so that we don&#39;t have to solve them again and waste our time. We can <em>reuse</em> the solution to the subproblem we&#39;ve already memoized.<br>So, we can keep a <em>cache</em> to store those solutions and use them:</p>
+<pre><code class="language-ts">function fib(n: number, cache: Map&lt;number, number&gt;): number {
+  if (cache.has(n)) {
+    return cache.get(n)!;
+  }
+
+  if (n === 0 || n === 1) {
+    return n;
+  }
+
+  const result = fib(n - 1, cache) + fib(n - 2, cache);
+  cache.set(n, result);
+
+  return result;
+}
+</code></pre>
+<p>For example, we can initially pass an empty <code>Map</code> as the argument for <code>cache</code>, and print the first 15 Fibonacci numbers:</p>
+<pre><code class="language-ts">let m = new Map&lt;number, number&gt;();
+
+for (let i = 0; i &lt; 15; i++) {
+  console.log(fib(i, m));
+}
+
+/*
+  0
+  1
+  1
+  2
+  3
+  5
+  8
+  13
+  21
+  34
+  55 
+  89
+  144
+  233
+  377 
+ */
+</code></pre>
+<hr>
+<p>There are two different approaches with dynamic programming: <strong>top-down</strong> and <strong>bottom-up</strong>.</p>
+<p>Top-down is like what it sounds: starting with a large problem, breaking it down to smaller components, memoizing them. It&#39;s what we just did with the <code>fib</code> example.</p>
+<p>Bottom-up is also like what it sounds: starting with the smallest subproblem, finding out a solution, and working our way up to the larger problem itself.<br>It also has an advantage: <mark>with the bottom-up approach, we don&#39;t need to store every previous value, we can only keep the two elements</mark> at the bottom so that we can use them to build up to our target.</p>
+<p>With the bottom-up approach, our <code>fib</code> function can look like this:</p>
+<pre><code class="language-ts">function fib(n: number) {
+  let dp = [0, 1];
+  for (let i = 2; i &lt;= n; i++) {
+    dp[i] = dp[i - 1] + dp[i - 2];
+  }
+
+  return dp[n];
+}
+</code></pre>
+<p>However, note that we are keeping an array whose size will grow linearly as the input increases. So, we can do better with constant space complexity, not using an array at all:</p>
+<pre><code class="language-ts">function fib(n: number) {
+  if (n === 0 || n === 1) {
+    return n;
+  }
+
+  let a = 0;
+  let b = 1;
+
+  for (let i = 2; i &lt;= n; i++) {
+    let tmp = a + b;
+    a = b;
+    b = tmp;
+  }
+
+  return b;
+}
+</code></pre>
+<hr>
+<h4>Time and space complexity</h4>
+<p>The time complexities for both the top-down and bottom-up approaches in the Fibonacci example are $O(n)$ as we solve each subproblem, each of which are of constant time. </p>
+<Note>
+The time complexity of the recursive Fibonacci function that doesn't use DP is exponential (in fact, $O(\phi^{n})$ — yes [the golden ratio](https://en.wikipedia.org/wiki/Golden_ratio) as its base). 
+</Note>
+
+<p>However, when it comes to space complexity, the bottom-up approach (the second version) is $O(1)$. </p>
+<Note>
+The first version we've used for the bottom-up approach has $O(n)$ time complexity as we store the values in an array.
+</Note>
+
+<p>The top-down approach has $O(n)$ space complexity because we store a <code>Map</code> whose size will grow linearly as <code>n</code> increases.</p>
+<hr>
+<p>The first problem we&#39;re going to look at in this chapter is <a href="https://leetcode.com/problems/climbing-stairs" target="_blank" rel="noopener noreferrer">Climbing Stairs</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-12-dynamic-programming</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-12-dynamic-programming</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Wed, 26 Jun 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Course Schedule]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-20/56-lm.png" alt="Cover image"></p>
