@@ -4,9 +4,201 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 26 Jun 2024 20:06:13 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 28 Jun 2024 21:21:56 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Climbing Stairs]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-28/58-lm.png" alt="Cover image"></p>
+<h2>Table of contents</h2>
+<ul>
+<li><a href="#intro" target="_blank" rel="noopener noreferrer">Introduction</a></li>
+<li><a href="#top-down" target="_blank" rel="noopener noreferrer">Top-down approach</a><ul>
+<li><a href="#top-down-ts" target="_blank" rel="noopener noreferrer">Time and space complexity</a></li>
+</ul>
+</li>
+<li><a href="#bottom-up-1" target="_blank" rel="noopener noreferrer">Bottom-up approach (the first version)</a><ul>
+<li><a href="#bottom-up-1-ts" target="_blank" rel="noopener noreferrer">Time and space complexity</a></li>
+</ul>
+</li>
+<li><a href="#bottom-up-2" target="_blank" rel="noopener noreferrer">Bottom-up approach (the second version)</a><ul>
+<li><a href="#bottom-up-2-ts" target="_blank" rel="noopener noreferrer">Time and space complexity</a></li>
+</ul>
+</li>
+</ul>
+<p><a name="intro"></a><br>The description for <a href="https://leetcode.com/problems/climbing-stairs" target="_blank" rel="noopener noreferrer">this problem</a> is:</p>
+<blockquote>
+<p>You are climbing a staircase. It takes <code>n</code> steps to reach the top.</p>
+<p>Each time you can either climb <code>1</code> or <code>2</code> steps. In how many distinct ways can you climb to the top?</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: n = 2
+Output: 2
+
+Explanation: There are two ways to climb to the top.
+1. 1 step + 1 step
+2. 2 steps
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: n = 3
+Output: 3
+
+Explanation: There are three ways to climb to the top.
+1. 1 step + 1 step + 1 step
+2. 1 step + 2 steps
+3. 2 steps + 1 step
+</code></pre>
+<p>And, the constraints indicate that <code>n</code> is between <code>1</code> and <code>45</code>, inclusive: <code>1 &lt;= n &lt;= 45</code>.</p>
+<hr>
+<p><a name="top-down"></a></p>
+<h3>Top-down approach</h3>
+<p>For the top-down approach, <em>we need to look from above</em>, so to speak, so let&#39;s imagine that we&#39;re on the $n^{\text{th}}$ step. There are two ways for us to be where we are: <mark>we&#39;re either coming from the $(n - 1)^{\text{th}}$ step</mark> which means that we took 1 step to reach where we are, <mark>or we&#39;re coming from the $(n - 2)^{\text{th}}$ step</mark> which means that we took 2 steps.</p>
+<p>Using <a href="https://en.wikipedia.org/wiki/Memoization" target="_blank" rel="noopener noreferrer">memoization</a>, we&#39;ll keep a cache to store the number of ways a step can be reached, so that we don&#39;t have to recalculate the same values we&#39;ve already calculated.</p>
+<p>We can create a recursive function that does just that. Of course, we need to think about the base case(s) first.</p>
+<p>An obvious one is when our cache has the value, in that case, we&#39;ll return that value:</p>
+<pre><code class="language-ts">function climb(nthStep: number, cache: Map&lt;number, number&gt;): number {
+  if (cache.has(nthStep)) {
+    return cache.get(nthStep)!;
+  }
+  /* ... */
+}
+</code></pre>
+<p>Now, there are two other base cases: when we take our first step and when we haven&#39;t taken any steps at all.<br>In both cases, we can say that there is only <em>one</em> way to be where we are—when we don&#39;t take any steps, we can be there just by not going anywhere. And if we take our first step, there is only one way to do it as well: by taking only 1 step.</p>
+<p>So, we can write it as such:</p>
+<pre><code class="language-ts">function climb(nthStep: number, cache: Map&lt;number, number&gt;): number {
+  /* ... */
+  if (nthStep === 0 || nthStep === 1) {
+    return 1;
+  }
+}
+</code></pre>
+<p>The only thing left is to do our calculation, and put it in cache:</p>
+<pre><code class="language-ts">const result = climb(nthStep - 1, cache) + climb(nthStep - 2, cache);
+
+cache.set(nthStep, result);
+</code></pre>
+<p>Overall, <code>climbStairs</code> will use this function to calculate the number of distinct ways to reach step <code>n</code>. It finally looks like this:</p>
+<pre><code class="language-ts">function climbStairs(n: number): number {
+  function climb(nthStep: number, cache: Map&lt;number, number&gt;): number {
+    if (cache.has(nthStep)) {
+      return cache.get(nthStep)!;
+    }
+
+    if (nthStep === 0 || nthStep === 1) {
+      return 1;
+    }
+
+    const result = climb(nthStep - 1, cache) + climb(nthStep - 2, cache);
+    cache.set(nthStep, result);
+
+    return result;
+  }
+
+  return climb(n, new Map());
+}
+</code></pre>
+<p><a name="top-down-ts"></a></p>
+<h4>Time and space complexity</h4>
+<p>The time and space complexity are both $O(n)$ for this version as we keep a cache, so we end up eliminating repetitive calculations, but the requirement for additional space grows as our input increases.</p>
+<p><a name="bottom-up-1"></a></p>
+<h3>Bottom-up approach (the first version)</h3>
+<p>We can try a bottom-up approach to solving this problem. We can initialize an array that will keep the number of distinct ways to reach a step, each index corresponding to a step on the stairs. </p>
+<p>However, we have to remember that we haven&#39;t taken any steps yet, so we&#39;re on the ground, which corresponds to step 0. It means that our array is of length <code>n + 1</code>. Let&#39;s initialize it with all 0s for the time being:</p>
+<pre><code class="language-ts">let steps = Array.from({ length: n + 1 }, () =&gt; 0);
+</code></pre>
+<p>Since we&#39;re on the ground and haven&#39;t taken any steps yet, there is only <em>one</em> way to be there: not moving at all.<br>So, we&#39;ll initialize step 0 as <code>1</code>, as it is our &quot;base case&quot;: </p>
+<pre><code class="language-ts">steps[0] = 1;
+</code></pre>
+<p>To reach step 1, we can only do <em>one</em> thing: take a step (if we take 2 steps, we&#39;ll go beyond our target). So, we can initialize it as <code>1</code> too:</p>
+<pre><code class="language-ts">steps[1] = 1;
+</code></pre>
+<p>Now we know how many ways there are to reach our first two cases. Reaching the next step will be the sum of the two steps below it, because we know that we can only go 1 or 2 steps at a time. Therefore, for step <code>n</code>, it means that we either arrived from the $n - 1^{\text{th}}$ or $n - 2^{\text{th}}$ step. So, continuing with where we left off—the second step—we can fill in the corresponding values for each step:</p>
+<pre><code class="language-ts">for (let i = 2; i &lt; n + 1; i++) {
+  steps.push(steps[i - 1] + steps[i - 2]);
+}
+</code></pre>
+<p>And, that&#39;s pretty much it. The only thing left to do is to return <code>steps[n]</code>.</p>
+<p>This is how the final solution looks like:</p>
+<pre><code class="language-ts">function climbStairs(n: number): number {
+  let steps = [1, 1];
+
+  for (let i = 2; i &lt; n + 1; i++) {
+    steps.push(steps[i - 1] + steps[i - 2]);
+  }
+
+  return steps[n];
+}
+</code></pre>
+<Note>
+If we like to imagine being on the top step first, we can visualize going "down" in our mind's eye. In that case, we'll first initialize the $n^{\text{th}}$ step as `1` (the only way to be there is not moving at all), and the $n - 1^{\text{th}}$ step as `1` too, as we can only take 1 step to reach our goal:
+
+<pre><code class="language-ts">steps[n] = 1; // The final step
+steps[n - 1] = 1; // Only 1 way to reach the final step from here
+</code></pre>
+<p>For example, if <code>n</code> is <code>4</code>, <code>steps</code> now looks like this: </p>
+<pre><code class="language-ts">[ 0, 0, 0, 1, 1 ]
+</code></pre>
+<p>We can start from the $n - 2^{\text{th}}$ step and go until we reach the floor (where <code>n</code> equals <code>0</code>). Each step will be the sum of one step and two steps after it: </p>
+<pre><code class="language-ts">for (let i = n - 2; i &gt;= 0; i--) {
+  steps[i] = steps[i + 1] + steps[i + 2];
+}
+</code></pre>
+<p>Now we know how many distinct ways there are to reach the $n^{\text{th}}$ step from the ground, so the return value will be <code>steps[0]</code>:</p>
+<pre><code class="language-ts">return steps[0];
+</code></pre>
+</Note>
+
+<p><a name="bottom-up-1-ts"></a></p>
+<h4>Time and space complexity</h4>
+<p>The time and space complexity will both be $O(n)$ as we do a constant amount of calculation for each step in $n$ steps; we also have an array, and its storage needs grow as our input increases.</p>
+<p><a name="bottom-up-2"></a></p>
+<h3>Bottom-up approach (the second version)</h3>
+<p>As we have seen in <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-12-dynamic-programming" target="_blank" rel="noopener noreferrer">the previous article</a>, there is a way to make the space complexity constant with our bottom-up approach.</p>
+<p>We can keep two separate variables for our &quot;bottom two values,&quot; and do the same calculation we did in the first version. </p>
+<p>It looks like this:</p>
+<pre><code class="language-ts">function climbStairs(n: number): number {
+  let one = 1; // No steps yet
+  let two = 1; // The first step
+  
+  for (let i = 2; i &lt; n + 1; i++) {
+    let tmp = one;
+    one = one + two;
+    two = tmp;
+  }
+
+  return one;
+}
+</code></pre>
+<Note>
+If we want to imagine being at our destination first, we can do it similarly as we mentioned in the first version as well:
+
+<pre><code class="language-ts">function climbStairs(n: number): number {
+  let one = 1; // At our destination
+  let two = 1; // One step below our destination
+  
+  for (let i = n - 2; i &gt;= 0; i--) {
+    let tmp = one;
+    one = one + two;
+    two = tmp;
+  }
+
+  return one;
+}
+</code></pre>
+</Note>
+
+
+<p><a name="bottom-up-2-ts"></a></p>
+<h4>Time and space complexity</h4>
+<p>The time complexity is still $O(n)$ since we&#39;re doing a constant amount of calculation for each step, but the space complexity is $O(1)$ as we don&#39;t need to use a data structure that will grow in size as $n$ increases.</p>
+<hr>
+<p>We have seen three different ways for a solution, so it&#39;s time to take a breath. Next up, we&#39;ll look at one of the most popular problems, called <a href="https://leetcode.com/problems/house-robber/" target="_blank" rel="noopener noreferrer">House Robber</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-climbing-stairs</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-climbing-stairs</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Fri, 28 Jun 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 12: Dynamic Programming]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-26/57-lm-ch12.png" alt="Cover image"></p>
