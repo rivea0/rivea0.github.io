@@ -4,9 +4,139 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 28 Jun 2024 21:21:56 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 01 Jul 2024 14:20:42 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: House Robber]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-07-01/59-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/house-robber" target="_blank" rel="noopener noreferrer">House Robber</a>:</p>
+<blockquote>
+<p>You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, the only constraint stopping you from robbing each of them is that adjacent houses have security systems connected and <strong>it will automatically contact the police if two adjacent houses were broken into on the same night</strong>.</p>
+<p>Given an integer array <code>nums</code> representing the amount of money of each house, return <em>the maximum amount of money you can rob tonight <strong>without alerting the police</strong></em>.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: nums = [1, 2, 3, 1]
+Output: 4
+
+Explanation: Rob house 1 (money = 1) and then rob house 3 (money = 3).
+Total amount you can rob = 1 + 3 = 4.
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: nums = [2, 7, 9, 3, 1]
+Output: 12
+
+Explanation: Rob house 1 (money = 2), rob house 3 (money = 9) and rob house 5 (money = 1).
+Total amount you can rob = 2 + 9 + 1 = 12.
+</code></pre>
+<hr>
+<p>Let&#39;s start with the easiest options. What&#39;s the maximum amount of money we can have if we have no houses to rob? </p>
+<p>Exactly. So, we can handle that case:</p>
+<pre><code class="language-ts">function rob(nums: number[]): number {
+  if (nums.length === 0) {
+    return 0;
+  }
+  /* ... */
+}
+</code></pre>
+<p>What&#39;s the maximum amount of money we can have if we have only one house to rob?</p>
+<p>That&#39;s also easy:</p>
+<pre><code class="language-ts">function rob(nums: number[]): number {
+  /* ... */
+
+  if (nums.length === 1) {
+    return nums[0];
+  }
+}
+</code></pre>
+<p>Since this is a dynamic programming problem, we know that it contains subproblems, and if we can solve them, we&#39;ll eventually reach a solution for the problem itself.</p>
+<p>At each house that we can possibly be in, we&#39;ll have <em>a maximum amount</em> that we can have so far.<br>So, we can first create a <code>maxPossibles</code> array to hold the values that represent the maximum amount of money we can have up until the $i^\text{th}$ house, and initialize all values as <code>0</code> for now:</p>
+<pre><code class="language-ts">let maxPossibles = Array.from({ length: nums.length }, () =&gt; 0);
+</code></pre>
+<p>Now we can initialize the first item.<br>The maximum amount of money we can have up until the first house is just that amount in the house itself:</p>
+<pre><code class="language-ts">maxPossibles[0] = nums[0];
+</code></pre>
+<p>Up until the second house, the maximum amount is either the value in there or the value in the first house:</p>
+<pre><code class="language-ts">maxPossibles[1] = Math.max(nums[0], nums[1]);
+</code></pre>
+<p>Now that we&#39;re done with the two base cases, we can continue, starting with the third house.</p>
+<p>Whatever house we&#39;re in, we have two options for the possible maximum we can have there:</p>
+<ul>
+<li>We can take the maximum amount of money that we can have up until the previous house (<code>maxPossibles[i - 1]</code>)</li>
+<li>We can rob the current house, taking the money there and adding it to the maximum that we can have up to the house that is two before us (<code>nums[i] + maxPossibles[i - 2]</code>)</li>
+</ul>
+<p>So, <mark>the maximum amount of money we can have up until the house that we&#39;re currently in is the maximum of those two choices</mark>:</p>
+<pre><code class="language-ts">for (let i = 2; i &lt; nums.length; i++) {
+  maxPossibles[i] = Math.max(maxPossibles[i - 1], nums[i] + maxPossibles[i - 2]);
+}
+</code></pre>
+<p>Now, finally, we can return <em>the maximum</em> of all those maximum amounts:</p>
+<pre><code class="language-ts">function rob(nums: number[]): number {
+  /* ... */
+  return Math.max(...maxPossibles);
+}
+</code></pre>
+<p>The final solution looks like this in TypeScript:</p>
+<pre><code class="language-ts">function rob(nums: number[]): number {
+  if (nums.length === 0) {
+    return 0;
+  }
+
+  if (nums.length === 1) {
+    return nums[0];
+  }
+
+  let maxPossibles = Array.from({ length: nums.length }, () =&gt; 0);
+  maxPossibles[0] = nums[0];
+  maxPossibles[1] = Math.max(nums[0], nums[1]);
+
+  for (let i = 2; i &lt; nums.length; i++) {
+    maxPossibles[i] = Math.max(maxPossibles[i - 1], nums[i] + maxPossibles[i - 2]);
+  }
+
+  return Math.max(...maxPossibles);
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time and space complexities are both $O(n)$ since we&#39;re iterating over each house doing a constant operation, and keeping an array whose size will grow as $n$ increases.</p>
+<hr>
+<p>We don&#39;t even have to keep an array to hold all the maximum values for each house. Since we&#39;re using a bottom-up approach, we can keep the bottom two values.<br>We can initialize two variables to do just that:</p>
+<pre><code class="language-ts">let twoPrevMax = 0; 
+let prevMax = 0; 
+</code></pre>
+<p><code>twoPrevMark</code> will keep the maximum amount of money we can have up until two houses prior. <code>prevMax</code> is the maximum until the previous house.</p>
+<p>Then, for each house, we can get the maximum so far, like this:</p>
+<pre><code class="language-ts">for (const n of nums) {
+  let maxUpToN = Math.max(prevMax, n + twoPrevMax);
+  twoPrevMax = prevMax;
+  prevMax = maxUpToN;
+}
+</code></pre>
+<p>At the end, we can return <code>prevMax</code> as it&#39;ll hold the last value, the maximum that we can have of all the houses.</p>
+<p>This is how this version looks like:</p>
+<pre><code class="language-ts">function rob(nums: number[]): number {
+  let twoPrevMax = 0;
+  let prevMax = 0;
+
+  for (const n of nums) {
+    let maxUpToN = Math.max(prevMax, n + twoPrevMax);
+    twoPrevMax = prevMax;
+    prevMax = maxUpToN;
+  }
+
+  return prevMax;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity is still $O(n)$ as we iterate over the houses, but the space complexity is $O(1)$ as we don&#39;t need additional storage whose size will grow as our input increases.</p>
+<hr>
+<p>This was, in my opinion, a quite challenging problem, so it&#39;s now time to take a deep breath. Next up, we&#39;ll take a look at <a href="https://leetcode.com/problems/house-robber-ii" target="_blank" rel="noopener noreferrer">House Robber II</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-house-robber</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-house-robber</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Mon, 01 Jul 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Climbing Stairs]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-06-28/58-lm.png" alt="Cover image"></p>
