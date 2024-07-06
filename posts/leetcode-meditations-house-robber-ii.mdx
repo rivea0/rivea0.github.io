@@ -1,0 +1,151 @@
+---
+title: "LeetCode Meditations: House Robber II"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode House Robber II problem.
+slug: leetcode-meditations-house-robber-ii
+date: 2024-07-06
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-07-06/60-lm.png)
+
+The description for [House Robber II](https://leetcode.com/problems/house-robber-ii) is:
+
+> You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed. All houses at this place are **arranged in a circle.** That means the first house is the neighbor of the last one. Meanwhile, adjacent houses have a security system connected, and **it will automatically contact the police if two adjacent houses were broken into on the same night**.
+>
+> Given an integer array `nums` representing the amount of money of each house, return _the maximum amount of money you can rob tonight **without alerting the police**_.
+
+For example:
+
+```
+Input: nums = [2, 3, 2]
+Output: 3
+
+Explanation: You cannot rob house 1 (money = 2) and then rob house 3 (money = 2), because they are adjacent houses.
+```
+
+Or:
+
+```
+Input: nums = [1, 2, 3, 1]
+Output: 4
+
+Explanation: Rob house 1 (money = 1) and then rob house 3 (money = 3).
+Total amount you can rob = 1 + 3 = 4.
+```
+
+Or: 
+
+```
+Input: nums = [1, 2, 3]
+Output: 3
+```
+
+---
+
+We've seen [the previous problem](https://rivea0.github.io/blog/leetcode-meditations-house-robber) that was very similar, except that the first and last houses weren't counted as adjacent.
+
+In fact, for the previous problem, our final solution looked like this:
+
+```ts
+function rob(nums: number[]): number {
+  let twoPrevMax = 0;
+  let prevMax = 0;
+
+  for (const n of nums) {
+    let maxUpToN = Math.max(prevMax, n + twoPrevMax);
+    twoPrevMax = prevMax;
+    prevMax = maxUpToN;
+  }
+
+  return prevMax;
+}
+```
+
+We're using a bottom-up approach where we keep the "bottom" two values: `twoPrevMark` keeps the maximum amount of money we can have up until two houses prior. `prevMax` is the maximum until the previous house.
+
+In the `for` loop, we calculate the maximum value for each house. Then, we return `prevMax` as it'll hold the last value, the maximum that we can have of all the houses.
+
+We can reuse this solution, but we can't consider the first and last houses at the same time. In order to do that, we can pass the two versions of `nums` to this function as arguments: one will start from the first house and end at the house previous to the last one:
+
+```ts
+nums.slice(0, nums.length - 1)
+```
+
+The other will start from the second house and end at the last house:
+
+```ts
+nums.slice(1)
+```
+
+Then, we can get the maximum of those two values, which will be our return value.
+
+---
+
+First, we can start by renaming the above function to `robHelper`.
+
+Our base cases will stay the same as the previous problem:
+
+```ts
+function rob(nums: number[]): number {
+  if (nums.length === 0) {
+    return 0;
+  }
+  
+  if (nums.length === 1) {
+    return nums[0];
+  }
+  /* ... */
+}
+```
+
+Then, we can consider those slices separately and get the maximum value from either of them:
+
+```ts
+function rob(nums: number[]): number {
+  /* ... */
+  return Math.max(
+    robHelper(nums.slice(0, nums.length - 1)),
+    robHelper(nums.slice(1)),
+  );
+}
+```
+
+And, that's pretty much it. The final version looks like this:
+
+```ts
+function rob(nums: number[]): number {
+  if (nums.length === 0) {
+    return 0;
+  }
+
+  if (nums.length === 1) {
+    return nums[0];
+  }
+  
+  return Math.max(
+    robHelper(nums.slice(0, nums.length - 1)),
+    robHelper(nums.slice(1)),
+  );
+}
+
+function robHelper(houses: number[]): number {
+  let twoPrevMax = 0;
+  let prevMax = 0;
+
+  for (const n of houses) {
+    let maxUpToN = Math.max(prevMax, n + twoPrevMax);
+    twoPrevMax = prevMax;
+    prevMax = maxUpToN;
+  }
+
+  return prevMax;
+}
+```
+
+#### Time and space complexity
+
+The time complexity is $O(n)$ as we're iterating over each house twice. The space complexity is $O(1)$ because we don't require additional storage whose size will grow as the input size grows.
+
+---
+
+Next up is [Longest Palindromic Substring](https://leetcode.com/problems/longest-palindromic-substring). Until then, happy coding.
