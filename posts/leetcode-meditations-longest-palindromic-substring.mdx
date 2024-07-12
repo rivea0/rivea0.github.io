@@ -1,0 +1,151 @@
+---
+title: "LeetCode Meditations: Longest Palindromic Substring"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Longest Palindromic Substring problem.
+slug: leetcode-meditations-longest-palindromic-substring
+date: 2024-07-12
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-07-12/61-lm.png)
+
+Let's start with the description for [Longest Palindromic Substring](https://leetcode.com/problems/longest-palindromic-substring):
+
+> Given a string `s`, return _the longest palindromic substring_ in `s`.
+
+For example:
+
+```
+Input: s = "babad"
+Output: "bab"
+Explanation: "aba" is also a valid answer.
+```
+
+Or:
+
+```
+Input: s = "cbbd"
+Output: "bb"
+```
+
+Also, the constraints indicate that *`s` consists of only digits and English letters.*
+
+---
+
+In this series, we've checked before [if a string is a palindrome](https://rivea0.github.io/blog/leetcode-meditations-valid-palindrome) using the [two pointers](https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers) approach. 
+
+With two pointers, *checking if a string is a palindrome* is not too hard: we can initialize a `left` pointer that starts off from the left and a `right` pointer that starts off from the right. While they're pointing at the same character, we can keep updating them, going until the middle character in the string. If at some point they differ, the string itself is not a palindrome, so we return `false`.
+
+But, our aim in this problem is **not** to check for the validity of a palindromic string, it's entirely different. We need to get the result of the longest possible palindrome in the string — which doesn't have to be a palindrome itself.
+
+---
+
+We can start with initializing a `maxLength` variable with the value `1` (remember that our constraints say that the minimum length of `s` is `1`):
+
+```ts
+let maxLength = 1; 
+```
+
+Then, we can initialize our starting index, which will slice our string from the starting point of the maximum length palindrome:
+
+```ts
+let start = 0;
+```
+
+So that at the end we can return that "window":
+
+```ts
+function longestPalindrome(s: string): string {
+  /* ... */
+
+  return s.slice(start, start + maxLength);
+}
+```
+
+To find a palindrome in the string, we can use an "expand over center" approach. For each character, we'll assume that it is the middle character and expand our two pointers `left` and `right` accordingly. 
+
+We'll first start with getting the `right` pointer to the right place: the first position that it differs from the current character:
+
+```ts
+for (let i = 0; i < s.length; i++) {
+  let right = i;
+  while (right < s.length && s[i] === s[right]) {
+    right++;
+  }
+ 
+ /* ... */
+}
+```
+
+Then, we'll initialize our `left` pointer to point on the left side of our current character:
+
+```ts
+for (let i = 0; i < s.length; i++) {
+  /* ... */
+
+  let left = i - 1;
+}
+```
+
+After that, while we're within bounds and still looking at a palindrome, we can continue expanding:
+
+```ts
+for (let i = 0; i < s.length; i++) {
+  /* ... */
+
+  while (left >= 0 && right < s.length && s[left] === s[right]) {
+    left--;
+    right++;
+  }
+}
+```
+
+However, the crucial part is that we need to update the maximum length if we find a longer palindrome:
+
+```ts
+for (let i = 0; i < s.length; i++) {
+  /* ... */
+  let currentLength = right - left - 1;
+  if (currentLength > maxLength) {
+    maxLength = currentLength;
+    start = left + 1;
+  }
+}
+```
+
+And, that's it for the whole function. Here's how it looks like:
+
+```ts
+function longestPalindrome(s: string): string {
+  let maxLength = 1; // Constraint: 1 <= s.length <= 1000
+  let start = 0;
+
+  for (let i = 0; i < s.length; i++) {
+    let right = i;
+    while (right < s.length && s[i] === s[right]) {
+      right++;
+    }
+
+    let left = i - 1;
+    while (left >= 0 && right < s.length && s[left] === s[right]) {
+      left--;
+      right++;
+    }
+
+    let currentLength = right - left - 1;
+    if (currentLength > maxLength) {
+      maxLength = currentLength;
+      start = left + 1;
+    }
+  }
+
+  return s.slice(start, start + maxLength);
+}
+```
+
+#### Time and space complexity
+
+The time complexity for this solution is $O(n^2)$ as in the worst case we'll be iterating over the whole string for each character. The space complexity is $O(1)$ because we don't require additional storage that will grow proportionately to the input size.
+
+---
+
+Next up is another problem related to palindromes: [Palindromic Substrings](https://leetcode.com/problems/palindromic-substrings). Until then, happy coding.

@@ -4,9 +4,119 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 06 Jul 2024 12:56:56 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 12 Jul 2024 15:07:07 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Longest Palindromic Substring]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-07-12/61-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/longest-palindromic-substring" target="_blank" rel="noopener noreferrer">Longest Palindromic Substring</a>:</p>
+<blockquote>
+<p>Given a string <code>s</code>, return <em>the longest palindromic substring</em> in <code>s</code>.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: s = &quot;babad&quot;
+Output: &quot;bab&quot;
+Explanation: &quot;aba&quot; is also a valid answer.
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: s = &quot;cbbd&quot;
+Output: &quot;bb&quot;
+</code></pre>
+<p>Also, the constraints indicate that <em><code>s</code> consists of only digits and English letters.</em></p>
+<hr>
+<p>In this series, we&#39;ve checked before <a href="https://rivea0.github.io/blog/leetcode-meditations-valid-palindrome" target="_blank" rel="noopener noreferrer">if a string is a palindrome</a> using the <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers" target="_blank" rel="noopener noreferrer">two pointers</a> approach. </p>
+<p>With two pointers, <em>checking if a string is a palindrome</em> is not too hard: we can initialize a <code>left</code> pointer that starts off from the left and a <code>right</code> pointer that starts off from the right. While they&#39;re pointing at the same character, we can keep updating them, going until the middle character in the string. If at some point they differ, the string itself is not a palindrome, so we return <code>false</code>.</p>
+<p>But, our aim in this problem is <strong>not</strong> to check for the validity of a palindromic string, it&#39;s entirely different. We need to get the result of the longest possible palindrome in the string — which doesn&#39;t have to be a palindrome itself.</p>
+<hr>
+<p>We can start with initializing a <code>maxLength</code> variable with the value <code>1</code> (remember that our constraints say that the minimum length of <code>s</code> is <code>1</code>):</p>
+<pre><code class="language-ts">let maxLength = 1; 
+</code></pre>
+<p>Then, we can initialize our starting index, which will slice our string from the starting point of the maximum length palindrome:</p>
+<pre><code class="language-ts">let start = 0;
+</code></pre>
+<p>So that at the end we can return that &quot;window&quot;:</p>
+<pre><code class="language-ts">function longestPalindrome(s: string): string {
+  /* ... */
+
+  return s.slice(start, start + maxLength);
+}
+</code></pre>
+<p>To find a palindrome in the string, we can use an &quot;expand over center&quot; approach. For each character, we&#39;ll assume that it is the middle character and expand our two pointers <code>left</code> and <code>right</code> accordingly. </p>
+<p>We&#39;ll first start with getting the <code>right</code> pointer to the right place: the first position that it differs from the current character:</p>
+<pre><code class="language-ts">for (let i = 0; i &lt; s.length; i++) {
+  let right = i;
+  while (right &lt; s.length &amp;&amp; s[i] === s[right]) {
+    right++;
+  }
+ 
+ /* ... */
+}
+</code></pre>
+<p>Then, we&#39;ll initialize our <code>left</code> pointer to point on the left side of our current character:</p>
+<pre><code class="language-ts">for (let i = 0; i &lt; s.length; i++) {
+  /* ... */
+
+  let left = i - 1;
+}
+</code></pre>
+<p>After that, while we&#39;re within bounds and still looking at a palindrome, we can continue expanding:</p>
+<pre><code class="language-ts">for (let i = 0; i &lt; s.length; i++) {
+  /* ... */
+
+  while (left &gt;= 0 &amp;&amp; right &lt; s.length &amp;&amp; s[left] === s[right]) {
+    left--;
+    right++;
+  }
+}
+</code></pre>
+<p>However, the crucial part is that we need to update the maximum length if we find a longer palindrome:</p>
+<pre><code class="language-ts">for (let i = 0; i &lt; s.length; i++) {
+  /* ... */
+  let currentLength = right - left - 1;
+  if (currentLength &gt; maxLength) {
+    maxLength = currentLength;
+    start = left + 1;
+  }
+}
+</code></pre>
+<p>And, that&#39;s it for the whole function. Here&#39;s how it looks like:</p>
+<pre><code class="language-ts">function longestPalindrome(s: string): string {
+  let maxLength = 1; // Constraint: 1 &lt;= s.length &lt;= 1000
+  let start = 0;
+
+  for (let i = 0; i &lt; s.length; i++) {
+    let right = i;
+    while (right &lt; s.length &amp;&amp; s[i] === s[right]) {
+      right++;
+    }
+
+    let left = i - 1;
+    while (left &gt;= 0 &amp;&amp; right &lt; s.length &amp;&amp; s[left] === s[right]) {
+      left--;
+      right++;
+    }
+
+    let currentLength = right - left - 1;
+    if (currentLength &gt; maxLength) {
+      maxLength = currentLength;
+      start = left + 1;
+    }
+  }
+
+  return s.slice(start, start + maxLength);
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity for this solution is $O(n^2)$ as in the worst case we&#39;ll be iterating over the whole string for each character. The space complexity is $O(1)$ because we don&#39;t require additional storage that will grow proportionately to the input size.</p>
+<hr>
+<p>Next up is another problem related to palindromes: <a href="https://leetcode.com/problems/palindromic-substrings" target="_blank" rel="noopener noreferrer">Palindromic Substrings</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-longest-palindromic-substring</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-longest-palindromic-substring</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Fri, 12 Jul 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: House Robber II]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-07-06/60-lm.png" alt="Cover image"></p>
