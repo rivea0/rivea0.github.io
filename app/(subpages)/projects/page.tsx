@@ -28,7 +28,6 @@ export default function Page() {
               language={project.language}
               framework={project.framework}
               more={project.more}
-              imageSrc={project.imageSrc}
             />
             </li>
           )

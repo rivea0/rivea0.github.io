@@ -10,10 +10,6 @@
   margin-top: 45px;
 }
 
-.projects > li > div {
-  min-height: 100%;
-}
-
 @media screen and (max-width: 768px) {
   .projects {
     grid-template-columns: 1fr;

@@ -2,7 +2,7 @@
   background-color: var(--project-bg);
   padding: 4px 12px;
   display: grid;
-  grid-template-rows: 95px 168px 100px 1fr 1fr;
+  grid-template-rows: 95px 95px 1fr 1fr;
   border-radius: 8px;
 }
 
@@ -54,6 +54,9 @@
 }
 
 @media screen and (max-width: 768px) {
+  .project {
+    grid-template-rows: auto;
+  }
   .writingProject {
     grid-template-rows: .5fr 1fr;
   }
