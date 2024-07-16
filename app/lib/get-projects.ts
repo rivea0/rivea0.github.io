@@ -21,6 +21,14 @@ type ProjectProps = {
 
 const projects: ProjectProps[] = [
   {
+    title: 'QuestionMark',
+    description: ' A question-answering application using a lightweight pretrained machine learning model that runs in the browser, with Transformers.js ✨',
+    demoHref: 'https://thequestionmark.netlify.app',
+    codeHref: 'https://github.com/rivea0/questionmark',
+    language: ['TypeScript'],
+    framework: ['React'],
+  },
+  {
     title: 'Lemon: 30-Day Challenge Tracker',
     description: LemonDescription(),
     demoHref: '',
