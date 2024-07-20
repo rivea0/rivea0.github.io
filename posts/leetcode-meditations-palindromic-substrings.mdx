@@ -1,0 +1,294 @@
+---
+title: "LeetCode Meditations: Palindromic Substrings"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Palindromic Substrings problem.
+slug: leetcode-meditations-palindromic-substrings
+date: 2024-07-20
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-07-20/62-lm.png)
+
+The description for [Palindromic Substrings](https://leetcode.com/problems/palindromic-substrings) is:
+
+> Given a string `s`, return _the number of **palindromic substrings** in it_.
+>
+> A string is a **palindrome** when it reads the same backward as forward.
+>
+> A **substring** is a contiguous sequence of characters within the string.
+
+For example:
+
+```
+Input: s = "abc"
+Output: 3
+Explanation: Three palindromic strings: "a", "b", "c".
+```
+
+Or:
+
+```
+Input: s = "aaa"
+Output: 6
+Explanation: Six palindromic strings: "a", "a", "a", "aa", "aa", "aaa".
+```
+
+Also, the constraints indicate that *`s` consists of lowercase English letters.*
+
+---
+
+In [the previous problem](https://rivea0.github.io/blog/leetcode-meditations-longest-palindromic-substring), we found a solution to find the longest palindromic substring in a given string. To find a palindrome, we used an "expand over center" approach, where we assumed each character as the middle character of a substring. And, accordingly, we shifted the left and right pointers.
+
+<Note>
+Checking a palindrome is easy with [two pointers approach](https://rivea0.github.io/blog/leetcode-meditations-chapter-2-two-pointers), which we've seen before with [Valid Palindrome](https://rivea0.github.io/blog/leetcode-meditations-valid-palindrome).
+</Note>
+
+Counting the palindromes in one substring may look like this:
+
+```ts
+function countPalindromesInSubstr(s: string, left: number, right: number): number {
+  let result = 0;
+  while (left >= 0 && right < s.length && s[left] === s[right]) {
+    result++;
+    left--;
+    right++;
+  }
+
+  return result;
+}
+```
+
+As long as we're within bounds (`left >= 0 && right < s.length`), we check if two characters on the left and right are the same — if so, we update our `result` and shift our pointers.
+
+However, once you think about it, it matters which indices the pointers are initialized at. For example, if we pass the string `"abc"` to `countPalindromesInSubstr`, and the `left` pointer is at `0` while the `right` pointer is at the last index (`2`), then our result is simply `0`.
+
+Remember that we are assuming each character as the middle character of a substring, and since each single character is also a substring as well, we'll initialize our left and right pointers to point to the character itself.
+
+<Note>
+A character by itself is considered palindromic, i.e., `"abc"` has three palindromic substrings: `'a'`, `'b'` and `'c'`.
+</Note>
+
+---
+
+Let's see how this process might look like.
+
+If we have the string `"abc"`, we'll first assume that `'a'` is the middle of a substring:
+
+```
+"abc"
+
+left = 0
+right = 0
+currentSubstr = 'a'
+
+totalPalindromes = 1 // A single character is a palindrome
+```
+
+Then, we'll try to expand the substring to see if `'a'` can be the middle character of another substring:
+
+```
+"abc"
+
+left = -1
+right = 1
+currentSubstr = undefined
+
+totalPalindromes = 1
+```
+
+Now that our `left` pointer is out of bounds, we can jump to the next character:
+
+```
+"abc"
+
+left = 1
+right = 1
+currentSubstr = 'b'
+
+totalPalindromes = 2
+```
+
+Now, we'll update our pointers, and indeed, `'b'` can be the middle character of another substring:
+
+```
+s = "abc"
+
+left = 0
+right = 2
+currentSubstr = 'abc'
+
+totalPalindromes = 2
+```
+
+Well, `currentSubstr` is not a palindrome. Now we update our pointers again:
+
+```
+s = "abc"
+
+left = -1
+right = 3
+currentSubstr = undefined
+
+totalPalindromes = 2
+```
+
+And, we're out of bounds again. Time to move on to the next character:
+
+```
+s = "abc"
+
+left = 2
+right = 2
+currentSubstr = 'c'
+
+totalPalindromes = 3
+```
+
+Shifting our pointers, we'll be out of bounds again:
+
+```
+s = "abc"
+
+left = 1
+right = 3
+currentSubstr = undefined
+
+totalPalindromes = 3
+```
+
+Now that we've gone through each character, our final result of `totalPalindromes` is, in this case, `3`. Meaning that there are `3` palindromic substrings in `"abc"`. 
+
+However, **there is an important caveat**: each time we assume a character as the middle and initialize two pointers to the left and right of it, we're trying to find only odd-length palindromes. In order to mitigate that, instead of considering a single character as the middle, we can consider two characters as the middle and expand as we did before.
+
+In this case, the process of finding the even-length substring palindromes will look like this — initially, our `right` pointer is `left + 1`:
+
+```
+s = "abc"
+
+left = 0
+right = 1
+currentSubstr = 'ab'
+
+totalPalindromes = 0
+```
+
+Then, we'll update our pointers:
+
+```
+s = "abc"
+
+left = -1
+right = 2
+currentSubstr = undefined
+
+totalPalindromes = 0
+```
+
+Out of bounds. On to the next character:
+
+```
+s = "abc"
+
+left = 1
+right = 2
+currentSubstr = 'bc'
+
+totalPalindromes = 0
+```
+
+Updating our pointers:
+
+```
+s = "abc"
+
+left = 0
+right = 3
+currentSubstr = undefined
+
+totalPalindromes = 0
+```
+
+The `right` pointer is out of bounds, so we go on to the next character:
+
+```
+s = "abc"
+
+left = 2
+right = 3
+currentSubstr = undefined
+
+totalPalindromes = 0
+```
+
+Once again we're out of bounds, and we're done going through each character. There are no palindromes for even-length substrings in this example.
+
+---
+
+We can write a function that does the work of counting the palindromes in each substring:
+
+```ts
+function countPalindromes(s: string, isOddLength: boolean): number {
+  let result = 0;
+  for (let i = 0; i < s.length; i++) {
+    let left = i;
+    let right = isOddLength ? i : i + 1;
+    result += countPalindromesInSubstr(s, left, right);
+  }
+
+  return result;
+}
+```
+
+In our main function, we can call `countPalindromes` twice for both odd and even length substrings, and return the `result`:
+
+```ts
+function countSubstrings(s: string): number {
+  let result = 0;
+  result += countPalindromes(s, true); // Odd-length palindromes
+  result += countPalindromes(s, false); // Even-length palindromes
+
+  return result;
+}
+```
+
+Overall, our solution looks like this:
+
+```ts
+function countSubstrings(s: string): number {
+  let result = 0;
+  result += countPalindromes(s, true); // Odd-length palindromes
+  result += countPalindromes(s, false); // Even-length palindromes
+
+  return result;
+}
+
+function countPalindromes(s: string, isOddLength: boolean): number {
+  let result = 0;
+  for (let i = 0; i < s.length; i++) {
+    let left = i;
+    let right = isOddLength ? i : i + 1;
+    result += countPalindromesInSubstr(s, left, right);
+  }
+
+  return result;
+}
+
+function countPalindromesInSubstr(s: string, left: number, right: number): number {
+  let result = 0;
+  while (left >= 0 && right < s.length && s[left] === s[right]) {
+    result++;
+    left--;
+    right++;
+  }
+
+  return result;
+}
+```
+
+#### Time and space complexity
+
+The time complexity is $O(n^2)$ as we go through each substring for each character (`countPalindromes` is doing an $O(n^2)$ operation, we call it twice *separately*.)
+The space complexity is $O(1)$ as we don't have an additional data structure whose size will grow with the input size.
+
+---
+
+Next up is the problem called [Decode Ways](https://leetcode.com/problems/decode-ways). Until then, happy coding.
