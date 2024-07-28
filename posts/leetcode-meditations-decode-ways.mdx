@@ -1,0 +1,162 @@
+---
+title: "LeetCode Meditations: Decode Ways"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Decode Ways problem.
+slug: leetcode-meditations-decode-ways
+date: 2024-07-28
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-07-28/63-lm.png)
+
+Let's start with the description for [this problem](https://leetcode.com/problems/decode-ways):
+
+> You have intercepted a secret message encoded as a string of numbers. The message is **decoded** via the following mapping:
+>
+> `"1" -> 'A'   "2" -> 'B'   ...   "25" -> 'Y'   "26" -> 'Z'`
+> 
+> However, while decoding the message, you realize that there are many different ways you can decode the message because some codes are contained in other codes (`"2"` and `"5"` vs `"25"`).
+> 
+> For example, `"11106"` can be decoded into:
+> - `"AAJF"` with the grouping `(1, 1, 10, 6)`
+> - `"KJF"` with the grouping `(11, 10, 6)`
+> - The grouping `(1, 11, 06)` is invalid because `"06"` is not a valid code (only `"6"` is valid).
+> 
+> Note: there may be strings that are impossible to decode.  
+> 
+> Given a string s containing only digits, return the **number of ways** to **decode** it. If the entire string cannot be decoded in any valid way, return `0`.
+> 
+> The test cases are generated so that the answer fits in a **32-bit** integer.
+
+For example:
+
+```
+Input: s = "12"
+
+Output: 2
+
+Explanation: "12" could be decoded as "AB" (1 2) or "L" (12).
+```
+
+Or:
+
+```
+Input: s = "226"
+
+Output: 3
+
+Explanation: "226" could be decoded as "BZ" (2 26), "VF" (22 6), or "BBF" (2 2 6).
+```
+
+Or:
+
+```
+Input: s = "06"
+
+Output: 0
+
+Explanation: "06" cannot be mapped to "F" because of the leading zero ("6" is different from "06"). In this case, the string is not a valid encoding, so return 0.
+```
+
+The constraints are:
+
+- `1 <= s.length <= 100`
+- `s` contains only digits and may contain leading zero(s).
+
+---
+
+I think this is one of those problems that you think is not so difficult at first glance until you attempt to solve it.
+
+First, let's start with the simplest insight: a character can be decoded as either itself (as only one character) or the part of a two-digit number. 
+If it's the first option, we can only have digits from `1` to `9`, as `0` by itself is not mapped to anything.
+However, a two-digit number can be from `10` up to `26`.
+
+As with the previous problems in this chapter, we can start by creating a `dp` array to hold the number of ways to decode up to each character as we iterate through the string. 
+Very similar to [Climbing Stairs](https://rivea0.github.io/blog/leetcode-meditations-climbing-stairs#bottom-up-1), we have to initialize our array with the length `s.length + 1` as we need to consider the fact that we haven't decoded anything yet. 
+In other words, when there are no characters, there's only **one** way to "decode": not decoding at all.
+
+So, we can initialize all the values as `0`s, except for the first index which is going to be `1`.
+
+```ts
+let dp = Array.from({ length: s.length + 1 }, () => 0);
+
+dp[0] = 1;
+```
+
+Again, similar to the previous problems, we have to keep the bottom two values, so we have to initialize the second slot of our array which corresponds to the number of ways to decode the first character in the string.
+
+We know that we can't decode it if it's `'0'`, so the number of ways to decode it will be `0` in this case.
+Note that *not being able to decode* is different from *not doing any decoding at all*: in the first case, the number of ways to decode is `0`, but in the second case (as we just did with `dp[0]`), it can be said that the number of ways to decode is `1`.
+
+In all the other cases, there is only **one** way to decode it because it's just a single character. So, we'll initialize `dp[1]` accordingly:
+
+```ts
+dp[1] = (s[0] === '0') ? 0 : 1;
+```
+
+Now we can start iterating from the third index. We'll look at both the previous digit and the previous two digits at the same time.
+
+As long as the previous digit is not the number `0`, we can add whatever that's in the previous slot of our array.
+
+And, as long as the previous two digits constitute a number that's between `10` and `26`, we can add that corresponding solution as well. All in all, it can look like this:
+
+```ts
+for (let i = 2; i <= s.length; i++) {
+  const prevDigit = s[i - 1];
+  const twoPrevDigits = s.slice(i - 2, i);
+  if (+prevDigit !== 0) {
+    dp[i] += dp[i - 1];
+  }
+
+  if (10 <= +twoPrevDigits && +twoPrevDigits <= 26) {
+    dp[i] += dp[i - 2];
+  }
+}
+```
+
+<Note>
+We're converting the string characters to numbers with the handy [unary plus operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Unary_plus). 
+We know from the problem constraints that the string `s` only contains digits.
+</Note>
+
+At this point, we have the result in the last index (which corresponds to `s.length`) so we can just return it:
+
+```ts
+function numDecodings(s: string): number {
+  /* ... */
+  
+  return dp[s.length]; 
+}
+```
+
+Overall, this is how our solution looks like:
+
+```ts
+function numDecodings(s: string): number {
+  let dp = Array.from({ length: s.length + 1 }, () => 0);
+
+  dp[0] = 1;
+  dp[1] = (s[0] === '0') ? 0 : 1;
+
+  for (let i = 2; i <= s.length; i++) {
+    const prevDigit = s[i - 1];
+    const twoPrevDigits = s.slice(i - 2, i);
+    if (+prevDigit !== 0) {
+      dp[i] += dp[i - 1];
+    }
+
+    if (10 <= +twoPrevDigits && +twoPrevDigits <= 26) {
+      dp[i] += dp[i - 2];
+    }
+  }
+
+  return dp[s.length];
+}
+```
+
+#### Time and space complexity
+
+Both the time and space complexity for this solution are $O(n)$ as we iterate through all the characters doing a constant operation, and we have to keep an array whose size will grow as our input size increases.
+
+---
+
+Next up is the problem called [Coin Change](https://leetcode.com/problems/coin-change). Until then, happy coding.

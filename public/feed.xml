@@ -4,9 +4,126 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 20 Jul 2024 22:05:11 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 28 Jul 2024 13:51:10 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Decode Ways]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-07-28/63-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/decode-ways" target="_blank" rel="noopener noreferrer">this problem</a>:</p>
+<blockquote>
+<p>You have intercepted a secret message encoded as a string of numbers. The message is <strong>decoded</strong> via the following mapping:</p>
+<p><code>&quot;1&quot; -&gt; &#39;A&#39;   &quot;2&quot; -&gt; &#39;B&#39;   ...   &quot;25&quot; -&gt; &#39;Y&#39;   &quot;26&quot; -&gt; &#39;Z&#39;</code></p>
+<p>However, while decoding the message, you realize that there are many different ways you can decode the message because some codes are contained in other codes (<code>&quot;2&quot;</code> and <code>&quot;5&quot;</code> vs <code>&quot;25&quot;</code>).</p>
+<p>For example, <code>&quot;11106&quot;</code> can be decoded into:</p>
+<ul>
+<li><code>&quot;AAJF&quot;</code> with the grouping <code>(1, 1, 10, 6)</code></li>
+<li><code>&quot;KJF&quot;</code> with the grouping <code>(11, 10, 6)</code></li>
+<li>The grouping <code>(1, 11, 06)</code> is invalid because <code>&quot;06&quot;</code> is not a valid code (only <code>&quot;6&quot;</code> is valid).</li>
+</ul>
+<p>Note: there may be strings that are impossible to decode.  </p>
+<p>Given a string s containing only digits, return the <strong>number of ways</strong> to <strong>decode</strong> it. If the entire string cannot be decoded in any valid way, return <code>0</code>.</p>
+<p>The test cases are generated so that the answer fits in a <strong>32-bit</strong> integer.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: s = &quot;12&quot;
+
+Output: 2
+
+Explanation: &quot;12&quot; could be decoded as &quot;AB&quot; (1 2) or &quot;L&quot; (12).
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: s = &quot;226&quot;
+
+Output: 3
+
+Explanation: &quot;226&quot; could be decoded as &quot;BZ&quot; (2 26), &quot;VF&quot; (22 6), or &quot;BBF&quot; (2 2 6).
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: s = &quot;06&quot;
+
+Output: 0
+
+Explanation: &quot;06&quot; cannot be mapped to &quot;F&quot; because of the leading zero (&quot;6&quot; is different from &quot;06&quot;). In this case, the string is not a valid encoding, so return 0.
+</code></pre>
+<p>The constraints are:</p>
+<ul>
+<li><code>1 &lt;= s.length &lt;= 100</code></li>
+<li><code>s</code> contains only digits and may contain leading zero(s).</li>
+</ul>
+<hr>
+<p>I think this is one of those problems that you think is not so difficult at first glance until you attempt to solve it.</p>
+<p>First, let&#39;s start with the simplest insight: a character can be decoded as either itself (as only one character) or the part of a two-digit number.<br>If it&#39;s the first option, we can only have digits from <code>1</code> to <code>9</code>, as <code>0</code> by itself is not mapped to anything.<br>However, a two-digit number can be from <code>10</code> up to <code>26</code>.</p>
+<p>As with the previous problems in this chapter, we can start by creating a <code>dp</code> array to hold the number of ways to decode up to each character as we iterate through the string.<br>Very similar to <a href="https://rivea0.github.io/blog/leetcode-meditations-climbing-stairs#bottom-up-1" target="_blank" rel="noopener noreferrer">Climbing Stairs</a>, we have to initialize our array with the length <code>s.length + 1</code> as we need to consider the fact that we haven&#39;t decoded anything yet.<br>In other words, when there are no characters, there&#39;s only <strong>one</strong> way to &quot;decode&quot;: not decoding at all.</p>
+<p>So, we can initialize all the values as <code>0</code>s, except for the first index which is going to be <code>1</code>.</p>
+<pre><code class="language-ts">let dp = Array.from({ length: s.length + 1 }, () =&gt; 0);
+
+dp[0] = 1;
+</code></pre>
+<p>Again, similar to the previous problems, we have to keep the bottom two values, so we have to initialize the second slot of our array which corresponds to the number of ways to decode the first character in the string.</p>
+<p>We know that we can&#39;t decode it if it&#39;s <code>&#39;0&#39;</code>, so the number of ways to decode it will be <code>0</code> in this case.<br>Note that <em>not being able to decode</em> is different from <em>not doing any decoding at all</em>: in the first case, the number of ways to decode is <code>0</code>, but in the second case (as we just did with <code>dp[0]</code>), it can be said that the number of ways to decode is <code>1</code>.</p>
+<p>In all the other cases, there is only <strong>one</strong> way to decode it because it&#39;s just a single character. So, we&#39;ll initialize <code>dp[1]</code> accordingly:</p>
+<pre><code class="language-ts">dp[1] = (s[0] === &#39;0&#39;) ? 0 : 1;
+</code></pre>
+<p>Now we can start iterating from the third index. We&#39;ll look at both the previous digit and the previous two digits at the same time.</p>
+<p>As long as the previous digit is not the number <code>0</code>, we can add whatever that&#39;s in the previous slot of our array.</p>
+<p>And, as long as the previous two digits constitute a number that&#39;s between <code>10</code> and <code>26</code>, we can add that corresponding solution as well. All in all, it can look like this:</p>
+<pre><code class="language-ts">for (let i = 2; i &lt;= s.length; i++) {
+  const prevDigit = s[i - 1];
+  const twoPrevDigits = s.slice(i - 2, i);
+  if (+prevDigit !== 0) {
+    dp[i] += dp[i - 1];
+  }
+
+  if (10 &lt;= +twoPrevDigits &amp;&amp; +twoPrevDigits &lt;= 26) {
+    dp[i] += dp[i - 2];
+  }
+}
+</code></pre>
+<Note>
+We're converting the string characters to numbers with the handy [unary plus operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Unary_plus). 
+We know from the problem constraints that the string `s` only contains digits.
+</Note>
+
+<p>At this point, we have the result in the last index (which corresponds to <code>s.length</code>) so we can just return it:</p>
+<pre><code class="language-ts">function numDecodings(s: string): number {
+  /* ... */
+  
+  return dp[s.length]; 
+}
+</code></pre>
+<p>Overall, this is how our solution looks like:</p>
+<pre><code class="language-ts">function numDecodings(s: string): number {
+  let dp = Array.from({ length: s.length + 1 }, () =&gt; 0);
+
+  dp[0] = 1;
+  dp[1] = (s[0] === &#39;0&#39;) ? 0 : 1;
+
+  for (let i = 2; i &lt;= s.length; i++) {
+    const prevDigit = s[i - 1];
+    const twoPrevDigits = s.slice(i - 2, i);
+    if (+prevDigit !== 0) {
+      dp[i] += dp[i - 1];
+    }
+
+    if (10 &lt;= +twoPrevDigits &amp;&amp; +twoPrevDigits &lt;= 26) {
+      dp[i] += dp[i - 2];
+    }
+  }
+
+  return dp[s.length];
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>Both the time and space complexity for this solution are $O(n)$ as we iterate through all the characters doing a constant operation, and we have to keep an array whose size will grow as our input size increases.</p>
+<hr>
+<p>Next up is the problem called <a href="https://leetcode.com/problems/coin-change" target="_blank" rel="noopener noreferrer">Coin Change</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-decode-ways</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-decode-ways</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 28 Jul 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Palindromic Substrings]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-07-20/62-lm.png" alt="Cover image"></p>
