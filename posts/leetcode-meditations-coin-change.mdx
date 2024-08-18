@@ -1,0 +1,142 @@
+---
+title: "LeetCode Meditations: Coin Change"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Coin Change problem.
+slug: leetcode-meditations-coin-change
+date: 2024-08-18
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-08-18/64-lm.png)
+
+Let's start with the description for [this problem](https://leetcode.com/problems/coin-change):
+
+> You are given an integer array `coins` representing coins of different denominations and an integer `amount` representing a total amount of money.
+>
+> Return _the fewest number of coins that you need to make up that amount_. If that amount of money cannot be made up by any combination of the coins, return `-1`.
+> 
+> You may assume that you have an infinite number of each kind of coin.
+
+For example:
+
+```
+Input: coins = [1, 2, 5], amount = 11
+Output: 3
+Explanation: 11 = 5 + 5 + 1
+```
+
+Or:
+
+```
+Input: coins = [2], amount = 3
+Output: -1
+```
+
+Or:
+
+```
+Input: coins = [1], amount = 0
+Output: 0
+```
+
+Also, one of our constraints indicates that `1 <= coins.length <= 12`.
+
+---
+
+This problem is actually a familiar one, and you might've seen it in the context of a [greedy](https://leetcodethehardway.com/tutorials/basic-topics/greedy) problem. However, this version requires us to find **the fewest** number of coins, and a greedy approach wouldn't work.
+Why that is true is neatly shown in a [NeetCode video](https://youtu.be/H9bfqozjoqs?si=Pq1JuRaoUqJhSfn_&t=91): for example, if our coins are `[1, 3, 4, 5]` and the amount is `7`, the greedy approach will get `5` first, then it'll try all the *maximum* amounts until it has to be content with two `1`s, making it total `5`, `1`, and `1`. However, we can use fewer coins than that: `4` and `3`. So, let's see how we might go about doing that.
+
+We have to build up to the `amount` somehow, for the minimum number of coins we can use. For that, let's start with initializing an array:
+
+```ts
+let dp = Array.from({ length: amount + 1 }, () => amount + 1);
+```
+
+We have this array of length `amount + 1` as <mark>each index will hold the minimum number of coins we can use for each amount.</mark> For example, index 0 of our `dp` array will hold the value of the minimum number of coins we can use for the amount of `0`; similarly, index 7 will hold the value of the minimum number of coins we can use for the amount of `7`.
+
+We initialize each index with the placeholder value of `amount + 1`, as the maximum number of coins can't exceed `amount` (for example, the maximum number of coins we can use for `7` is 7: 1 + 1 + 1 + 1 + 1 + 1 + 1).
+
+<Note>
+The minimum valued coin is `1` in this problem, as one of the constraints indicates.
+</Note>
+
+For the amount of `0`, the minimum number of coins we can use is obvious: `0`:
+
+```ts
+dp[0] = 0;
+```
+
+Then, we'll loop through this array, starting from index `1`, and for each index, we'll iterate through the coins:
+
+```ts
+for (let amountIdx = 1; amountIdx < dp.length; amountIdx++) {
+  for (const coin of coins) {
+    /* ... */
+  }
+}
+```
+
+If the coin we're looking at can be used for that amount (that is, `amountIdx - coin >= 0`), then we'll update the value for that amount in our `dp` array. It will be the minimum of either the value we already have, or `1 + dp[amountIdx - coin]`: 
+
+```ts
+for (let amountIdx = 1; amountIdx < dp.length; amountIdx++) {
+  for (const coin of coins) {
+    if (amountIdx - coin >= 0) {
+      dp[amountIdx] = Math.min(dp[amountIdx], 1 + dp[amountIdx - coin]);
+    }
+  }
+}
+```
+
+<Note>
+The reason for `1 + dp[amountIdx - coin]` is that we use the solution to an already calculated value, reusing the subproblem. So, `1` is the coin we're currently considering.
+</Note>
+
+If, at the end, we can't match the total amount with any combination of coins, we have to return `-1`. 
+The way to check for that is to check the condition where the last element equals `amount + 1`. In that case, we can return `-1`. Otherwise, we'll just return the last element which holds the minimum number of coins that make up the amount:
+
+```ts
+function coinChange(coins: number[], amount: number): number {
+  /* ... */
+
+  if (dp[dp.length - 1] === amount + 1) {
+    return -1;
+  }
+
+  return dp[dp.length - 1];
+}
+```
+
+And, here is the final solution:
+
+```ts
+function coinChange(coins: number[], amount: number): number {
+  let dp = Array.from({ length: amount + 1 }, () => amount + 1);
+  dp[0] = 0; 
+
+  for (let amountIdx = 1; amountIdx < dp.length; amountIdx++) {
+    for (const coin of coins) {
+      if (amountIdx - coin >= 0) {
+        dp[amountIdx] = Math.min(dp[amountIdx], 1 + dp[amountIdx - coin]);
+      }
+    }
+  }
+
+  if (dp[dp.length - 1] === amount + 1) {
+    return -1;
+  }
+
+  return dp[dp.length - 1];
+}
+```
+
+#### Time and space complexity
+
+The time complexity is $O(n * m)$ where $n$ is the `amount + 1` and $m$ is the number of coins we have. We iterate through each value up to `amount + 1`, and for each of those values, iterate again through each coin, doing a constant operation.
+
+The space complexity depends on the `amount` we're given as the size of our `dp` array will grow as the amount increases, so we can say that it's $O(n)$ where $n$ is the amount.
+
+---
+
+It's time for a deep breath. Even though we usually make peace with the solutions to dynamic programming problems, it's tough getting them in the first place — not only coming up with the solutions, but also understanding the already existing ones.
+
+Next, we'll take a look at the problem [Maximum Product Subarray](https://leetcode.com/problems/maximum-product-subarray). Until then, happy coding.
