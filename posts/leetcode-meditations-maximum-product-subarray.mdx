@@ -1,0 +1,191 @@
+---
+title: "LeetCode Meditations: Maximum Product Subarray"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Maximum Product Subarray problem.
+slug: leetcode-meditations-maximum-product-subarray
+date: 2024-08-27
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-08-27/65-lm.png)
+
+The description for [Maximum Product Subarray](https://leetcode.com/problems/maximum-product-subarray) is:
+
+> Given an integer array `nums`, find a subarray that has the largest product, and return _the product_.
+> 
+> The test cases are generated so that the answer will fit in a **32-bit** integer.
+
+For example:
+
+```
+Input: nums = [2, 3, -2, 4]
+Output: 6
+Explanation: [2, 3] has the largest product 6.
+```
+
+```
+Input: nums = [-2, 0, -1]
+Output: 0
+Explanation: The result cannot be 2, because [-2, -1] is not a subarray.
+```
+
+---
+
+Now, using a brute force approach, we can solve it with a nested loop.
+
+Since we eventually have to get the maximum product, let's first find out the maximum value in the array:
+
+```ts
+let max = Math.max(...nums);
+```
+
+Then, as we go through each number, we can continually multiply them with the other remaining numbers, building up a *total*. Once this total is more than `max`, we can update `max` to point to this new value:
+
+```ts
+for (let i = 0; i < nums.length; i++) {
+  let total = nums[i];
+  for (let j = i + 1; j < nums.length; j++) {
+    total *= nums[j];
+    if (total > max) {
+      max = total;
+    }
+  }
+}
+```
+
+At the end, we can just return `max`. So, the first attempt of our final solution looks like this:
+
+
+```ts
+function maxProduct(nums: number[]): number {
+  let max = Math.max(...nums);
+  for (let i = 0; i < nums.length; i++) {
+    let total = nums[i];
+    for (let j = i + 1; j < nums.length; j++) {
+      total *= nums[j];
+      if (total > max) {
+        max = total;
+      }
+    }
+  }
+
+  return max;
+}
+```
+
+#### Time and space complexity
+The time complexity is $O(n^2)$ as we have a nested loop, doing a constant operation for each of the numbers for *each one we iterate over*.
+The space complexity is $O(1)$ because we don't need additional storage.
+
+Again, this is only a brute force attempt. So, let's take one deep breath, and take a look at another solution.
+
+---
+
+The idea with this new solution is to keep two different values for the maximum and minimum as we go through each number in the array. The reason for that is handling negative values, as we'll see shortly.
+
+First, let's start with initializing these values: we'll have a `currentMax`, a `currentMin`, and a `result`, all of which are initially pointing to the first value in the array:
+
+```ts
+let currentMax = nums[0];
+let currentMin = nums[0];
+let result = nums[0];
+```
+
+Now, starting with the second number, we'll loop through each value, updating the current maximum number and the current minimum number as well as the result (which will be the final maximum) as we go:
+
+```ts
+currentMax = Math.max(nums[i], nums[i] * currentMax);
+currentMin = Math.min(nums[i], nums[i] * currentMin);
+
+result = Math.max(result, currentMax);
+```
+
+However, before that, let's see an example of what can happen if we just do that.
+
+Let's say our array is `[-2, 3, -4]`. Initially, `currentMax` and `currentMin` are both `-2`. Now, to update `currentMax`, we have two options: it's either the current number or the current number multiplied by `currentMax`:
+
+```ts
+Math.max(3, 3 * -2)
+```
+
+Obviously, it's the first option, so our `currentMax` is now `3`. 
+To update `currentMin`, we also have two options:
+
+```ts
+Math.min(3, 3 * -2)
+```
+
+It's again obvious, `-6`. For now, our values look like this:
+
+```ts
+currentMax // 3
+currentMin // -6
+```
+
+On to the next number. We have two options for `currentMax`:
+
+```ts
+Math.max(-4, -4 * 3)
+```
+
+By itself, it has to be `-4`, but looking at our array, we see that this is not the case. Since multiplying two negative values results in a positive value, our `currentMax` should be `24` (`-2 * 3 * -4`).
+
+<Note>
+If we were to multiply it with `currentMin`, we reach this value: `-4 * -6 = 24`.
+</Note>
+
+Also, let's look at our `currentMin` options:
+
+```ts
+Math.min(-4, -4 * -6)
+```
+
+This has to be `-4` again, but something feels off. 
+
+The catch is that when we have negative numbers consecutively, our sign alternates, which affects the maximum result we need. That's why we're keeping track of the minimum value in the first case: to keep track of the sign.
+
+Since the issue is just alternating signs, we can simply swap the maximum and minimum values when we're looking at a negative number before updating those values:
+
+```ts
+if (nums[i] < 0) {
+  [currentMax, currentMin] = [currentMin, currentMax];
+}
+```
+
+Also, note that we're taking the product of each previous subarray as we go, essentially solving a smaller portion of the problem.
+
+And that's it, our final solution looks like this:
+
+```ts
+function maxProduct(nums: number[]): number {
+  let currentMax = nums[0];
+  let currentMin = nums[0];
+  let result = nums[0];
+
+  for (let i = 1; i < nums.length; i++) {
+    if (nums[i] < 0) {
+      [currentMax, currentMin] = [currentMin, currentMax];
+    }
+
+    currentMax = Math.max(nums[i], nums[i] * currentMax);
+    currentMin = Math.min(nums[i], nums[i] * currentMin);
+
+    result = Math.max(result, currentMax);
+  }
+
+  return result;
+}
+```
+
+#### Time and space complexity
+
+The time complexity for this solution is $O(n)$ because we go through each number once doing a constant operation. 
+
+<Note>
+`Math.max()` and `Math.min()` are constant operations here, since we're comparing two values only. However, if we were to find max or min of a whole array, it would be $O(n)$ as the time complexity of the operation would increase proportionately to the size of the array.
+</Note>
+
+The space complexity is $O(1)$ since we don't need any additional storage.
+
+---
+
+The next problem on the list is called [Word Break](https://leetcode.com/problems/word-break). Until then, happy coding.
