@@ -93,10 +93,12 @@ let result = nums[0];
 Now, starting with the second number, we'll loop through each value, updating the current maximum number and the current minimum number as well as the result (which will be the final maximum) as we go:
 
 ```ts
-currentMax = Math.max(nums[i], nums[i] * currentMax);
-currentMin = Math.min(nums[i], nums[i] * currentMin);
+for (let i = 1; i < nums.length; i++) {
+  currentMax = Math.max(nums[i], nums[i] * currentMax);
+  currentMin = Math.min(nums[i], nums[i] * currentMin);
 
-result = Math.max(result, currentMax);
+  result = Math.max(result, currentMax);
+}
 ```
 
 However, before that, let's see an example of what can happen if we just do that.
