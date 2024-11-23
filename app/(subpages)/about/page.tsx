@@ -17,7 +17,7 @@ export default function Page() {
       <div className={styles.container}>
         <div className={styles.paragraphDiv}>
           <p>Hi, I'm Eda.</p>
-          <p >I hold a B.A. in English Literature, currently preparing for a degree in Computer Programming.</p>
+          <p >I hold a B.A. in English Literature, currently in a software developer role.</p>
           <p >I have many kinds of interests, and I try to write helpful guides, usually to my future self to retain information better — as writing is the best learning strategy.</p>
           <p >Here are <em>some</em> of the things that I love the most (at this time of writing):</p>
           <ul className={styles.ul}>
