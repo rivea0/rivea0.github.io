@@ -4,9 +4,119 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 27 Aug 2024 14:38:37 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 30 Nov 2024 21:03:02 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Word Break]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-11-30/66-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/word-break" target="_blank" rel="noopener noreferrer">this problem</a> is:</p>
+<blockquote>
+<p>Given a string <code>s</code> and a dictionary of strings <code>wordDict</code>, return <code>true</code> if <code>s</code> can be segmented into a space-separated sequence of one or more dictionary words.</p>
+<p><strong>Note</strong> that the same word in the dictionary may be reused multiple times in the segmentation.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: s = &quot;leetcode&quot;, wordDict = [&quot;leet&quot;, &quot;code&quot;]
+Output: true
+
+Explanation: Return true because &quot;leetcode&quot; can be segmented as &quot;leet code&quot;.
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: s = &quot;applepenapple&quot;, wordDict = [&quot;apple&quot;, &quot;pen&quot;]
+Output: true
+
+Explanation: Return true because &quot;applepenapple&quot; can be segmented as &quot;apple pen apple&quot;.
+Note that you are allowed to reuse a dictionary word.
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: s = &quot;catsandog&quot;, wordDict = [&quot;cats&quot;, &quot;dog&quot;, &quot;sand&quot;, &quot;and&quot;, &quot;cat&quot;]
+Output: false
+</code></pre>
+<p>Also, our constraints indicate that <em>all the strings of <code>wordDict</code> are <strong>unique</strong></em>, and:</p>
+<ul>
+<li><code>1 &lt;= s.length &lt;= 300</code></li>
+<li><code>1 &lt;= wordDict.length &lt;= 1000</code></li>
+<li><code>1 &lt;= wordDict[i].length &lt;= 20</code></li>
+<li><code>s</code> and <code>wordDict[i]</code> consist of only lowercase English letters.</li>
+</ul>
+<hr>
+<p>Continuing with dynamic programming solutions, we can look at <a href="https://neetcode.io/solutions/word-break" target="_blank" rel="noopener noreferrer">a popular bottom-up approach</a> where we build a <code>dp</code> array to track whether it is possible to break <code>s</code> into words in <code>wordDict</code> at each index.</p>
+<p>Each index $i$ in the <code>dp</code> array will indicate <mark>whether it is possible to break the entire string into words starting at index $i$</mark>.</p>
+<Note>
+`dp` needs to be of size `s.length + 1` to hold the edge case of an empty string, in other words, when we're out of bounds. 
+</Note>
+
+<p>Let&#39;s create it with initially <code>false</code> values:</p>
+<pre><code class="language-ts">let dp = Array.from({ length: s.length + 1 }, () =&gt; false); // +1 for the base case, out of bounds
+</code></pre>
+<p>The last index is the empty string, which can be considered breakable, or in other words, valid:</p>
+<pre><code class="language-ts">dp[s.length] = true; // base case
+</code></pre>
+<p>Going backwards, for each index of <code>s</code>, we can check if any word in <code>wordDict</code> can be reached from that index onwards: </p>
+<pre><code class="language-ts">for (let i = s.length - 1; i &gt;= 0; i--) {
+  for (const word of wordDict) {
+    /* ... */
+  }
+}
+</code></pre>
+<p>If we&#39;re still within bounds of <code>s</code> (<code>i + word.length &lt;= s.length</code>) and we find the word (<code>s.slice(i, i + word.length) === word</code>), we&#39;ll mark that slot as the truth value of the &quot;next position&quot; that we can break the string, which will be <code>i + word.length</code>:</p>
+<pre><code class="language-ts">for (let i = s.length - 1; i &gt;= 0; i--) {
+  for (const word of wordDict) {
+    if (i + word.length &lt;= s.length &amp;&amp; s.slice(i, i + word.length) === word) {
+      dp[i] = dp[i + word.length];
+    }
+    /* ... */
+  }
+}
+</code></pre>
+<p>If we can break it into <em>any</em> word in <code>wordDict</code>, we don&#39;t have to keep looking at other words, so we can just break out of the loop:</p>
+<pre><code class="language-ts">for (let i = s.length - 1; i &gt;= 0; i--) {
+  for (const word of wordDict) {
+    if (i + word.length &lt;= s.length &amp;&amp; s.slice(i, i + word.length) === word) {
+      dp[i] = dp[i + word.length];
+    }
+    if (dp[i]) {
+      break;
+    }
+  }
+}
+</code></pre>
+<p>Finally, we return <code>dp[0]</code> — if the whole string is breakable into words in <code>wordDict</code>, its value will store <code>true</code>, otherwise <code>false</code>:</p>
+<pre><code class="language-ts">function wordBreak(s: string, wordDict: string[]): boolean {
+  /* ... */
+  return dp[0];
+}
+</code></pre>
+<p>And, here is the final solution:</p>
+<pre><code class="language-ts">function wordBreak(s: string, wordDict: string[]): boolean {
+  let dp = Array.from({ length: s.length + 1 }, () =&gt; false); // +1 for the base case, out of bounds
+  dp[s.length] = true; // base case
+
+  for (let i = s.length - 1; i &gt;= 0; i--) {
+    for (const word of wordDict) {
+      if (i + word.length &lt;= s.length &amp;&amp; s.slice(i, i + word.length) === word) {
+        dp[i] = dp[i + word.length];
+      }
+      if (dp[i]) {
+        break;
+      }
+    }
+  }
+
+  return dp[0];
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(n * m * t)$ where $n$ is the string <code>s</code>, $m$ is the number of words in <code>wordDict</code>, and $t$ is the maximum length word in <code>wordDict</code> — as we have a nested loop that runs through each word in <code>wordDict</code> with a <code>slice</code> operation that uses <code>word.length</code> for each character in <code>s</code>.</p>
+<p>The space complexity is $O(n)$ because of the <code>dp</code> array we store for each index of <code>s</code>.</p>
+<hr>
+<p>The last dynamic programming problem in the series will be <a href="https://leetcode.com/problems/longest-increasing-subsequence" target="_blank" rel="noopener noreferrer">Longest Increasing Subsequence</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-word-break</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-word-break</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 30 Nov 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Maximum Product Subarray]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-08-27/65-lm.png" alt="Cover image"></p>
@@ -67,10 +177,12 @@ let currentMin = nums[0];
 let result = nums[0];
 </code></pre>
 <p>Now, starting with the second number, we&#39;ll loop through each value, updating the current maximum number and the current minimum number as well as the result (which will be the final maximum) as we go:</p>
-<pre><code class="language-ts">currentMax = Math.max(nums[i], nums[i] * currentMax);
-currentMin = Math.min(nums[i], nums[i] * currentMin);
+<pre><code class="language-ts">for (let i = 1; i &lt; nums.length; i++) {
+  currentMax = Math.max(nums[i], nums[i] * currentMax);
+  currentMin = Math.min(nums[i], nums[i] * currentMin);
 
-result = Math.max(result, currentMax);
+  result = Math.max(result, currentMax);
+}
 </code></pre>
 <p>However, before that, let&#39;s see an example of what can happen if we just do that.</p>
 <p>Let&#39;s say our array is <code>[-2, 3, -4]</code>. Initially, <code>currentMax</code> and <code>currentMin</code> are both <code>-2</code>. Now, to update <code>currentMax</code>, we have two options: it&#39;s either the current number or the current number multiplied by <code>currentMax</code>:</p>

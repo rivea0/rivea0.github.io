@@ -1,0 +1,150 @@
+---
+title: "LeetCode Meditations: Word Break"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Word Break problem.
+slug: leetcode-meditations-word-break
+date: 2024-11-30
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-11-30/66-lm.png)
+
+The description for [this problem](https://leetcode.com/problems/word-break) is:
+
+> Given a string `s` and a dictionary of strings `wordDict`, return `true` if `s` can be segmented into a space-separated sequence of one or more dictionary words.
+> 
+> **Note** that the same word in the dictionary may be reused multiple times in the segmentation.
+
+For example:
+
+```
+Input: s = "leetcode", wordDict = ["leet", "code"]
+Output: true
+
+Explanation: Return true because "leetcode" can be segmented as "leet code".
+```
+
+Or:
+
+```
+Input: s = "applepenapple", wordDict = ["apple", "pen"]
+Output: true
+
+Explanation: Return true because "applepenapple" can be segmented as "apple pen apple".
+Note that you are allowed to reuse a dictionary word.
+```
+
+Or:
+
+```
+Input: s = "catsandog", wordDict = ["cats", "dog", "sand", "and", "cat"]
+Output: false
+```
+
+Also, our constraints indicate that *all the strings of `wordDict` are **unique***, and:
+
+- `1 <= s.length <= 300`
+- `1 <= wordDict.length <= 1000`
+- `1 <= wordDict[i].length <= 20`
+- `s` and `wordDict[i]` consist of only lowercase English letters.
+
+---
+
+Continuing with dynamic programming solutions, we can look at [a popular bottom-up approach](https://neetcode.io/solutions/word-break) where we build a `dp` array to track whether it is possible to break `s` into words in `wordDict` at each index.
+
+Each index $i$ in the `dp` array will indicate <mark>whether it is possible to break the entire string into words starting at index $i$</mark>.
+
+<Note>
+`dp` needs to be of size `s.length + 1` to hold the edge case of an empty string, in other words, when we're out of bounds. 
+</Note>
+
+Let's create it with initially `false` values:
+
+```ts
+let dp = Array.from({ length: s.length + 1 }, () => false); // +1 for the base case, out of bounds
+```
+
+The last index is the empty string, which can be considered breakable, or in other words, valid:
+
+```ts
+dp[s.length] = true; // base case
+```
+
+Going backwards, for each index of `s`, we can check if any word in `wordDict` can be reached from that index onwards: 
+
+```ts
+for (let i = s.length - 1; i >= 0; i--) {
+  for (const word of wordDict) {
+    /* ... */
+  }
+}
+```
+
+If we're still within bounds of `s` (`i + word.length <= s.length`) and we find the word (`s.slice(i, i + word.length) === word`), we'll mark that slot as the truth value of the "next position" that we can break the string, which will be `i + word.length`:
+
+```ts
+for (let i = s.length - 1; i >= 0; i--) {
+  for (const word of wordDict) {
+    if (i + word.length <= s.length && s.slice(i, i + word.length) === word) {
+      dp[i] = dp[i + word.length];
+    }
+    /* ... */
+  }
+}
+```
+
+
+If we can break it into *any* word in `wordDict`, we don't have to keep looking at other words, so we can just break out of the loop:
+
+```ts
+for (let i = s.length - 1; i >= 0; i--) {
+  for (const word of wordDict) {
+    if (i + word.length <= s.length && s.slice(i, i + word.length) === word) {
+      dp[i] = dp[i + word.length];
+    }
+    if (dp[i]) {
+      break;
+    }
+  }
+}
+```
+
+Finally, we return `dp[0]` — if the whole string is breakable into words in `wordDict`, its value will store `true`, otherwise `false`:
+
+```ts
+function wordBreak(s: string, wordDict: string[]): boolean {
+  /* ... */
+  return dp[0];
+}
+```
+
+And, here is the final solution:
+
+```ts
+function wordBreak(s: string, wordDict: string[]): boolean {
+  let dp = Array.from({ length: s.length + 1 }, () => false); // +1 for the base case, out of bounds
+  dp[s.length] = true; // base case
+
+  for (let i = s.length - 1; i >= 0; i--) {
+    for (const word of wordDict) {
+      if (i + word.length <= s.length && s.slice(i, i + word.length) === word) {
+        dp[i] = dp[i + word.length];
+      }
+      if (dp[i]) {
+        break;
+      }
+    }
+  }
+
+  return dp[0];
+}
+```
+
+#### Time and space complexity
+
+The time complexity is $O(n * m * t)$ where $n$ is the string `s`, $m$ is the number of words in `wordDict`, and $t$ is the maximum length word in `wordDict` — as we have a nested loop that runs through each word in `wordDict` with a `slice` operation that uses `word.length` for each character in `s`.
+
+The space complexity is $O(n)$ because of the `dp` array we store for each index of `s`.
+
+---
+
+The last dynamic programming problem in the series will be [Longest Increasing Subsequence](https://leetcode.com/problems/longest-increasing-subsequence). Until then, happy coding.
