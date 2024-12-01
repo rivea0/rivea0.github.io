@@ -4,9 +4,88 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 30 Nov 2024 21:03:02 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 01 Dec 2024 14:34:45 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Longest Increasing Subsequence]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-01/67-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/longest-increasing-subsequence" target="_blank" rel="noopener noreferrer">this problem</a> simply states:</p>
+<blockquote>
+<p>Given an integer array <code>nums</code>, return the length of the longest <strong>strictly increasing subsequence</strong>.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: nums = [10, 9, 2, 5, 3, 7, 101, 18]
+Output: 4
+Explanation: The longest increasing subsequence is [2, 3, 7, 101], therefore the length is 4.
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: nums = [0, 1, 0, 3, 2, 3]
+Output: 4
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: nums = [7, 7, 7, 7, 7, 7, 7]
+Output: 1
+</code></pre>
+<hr>
+<p>Similar to the <a href="https://rivea0.github.io/blog/leetcode-meditations-word-break" target="_blank" rel="noopener noreferrer">previous problem in this series</a>, we can look at a bottom-up dynamic programming approach here as well.</p>
+<p>For each value in the <code>nums</code> array, the length of the largest subsequence we can have starting from index $i$ is either:</p>
+<ul>
+<li><em>1</em> (that value itself)</li>
+</ul>
+<p>or</p>
+<ul>
+<li><em>1 + the number of the largest subsequence we can have starting from index $i + 1$</em>.</li>
+</ul>
+<p>However, we can&#39;t include the second option if <code>nums[i + 1]</code> is less than <code>nums[i]</code>.</p>
+<p>First, we can start out by creating a <code>dp</code> array to hold the length of the subsequences we can have from each index of <code>nums</code> onwards. That is, <code>dp[0]</code> will have the length of the largest subsequence that we can have from <code>nums[0]</code> onwards, <code>dp[1]</code> has the length of the largest subsequence that we can have from <code>nums[1]</code> onwards, and so on:</p>
+<pre><code class="language-ts">let dp = Array.from({ length: nums.length }, () =&gt; 1);
+</code></pre>
+<p>Then, we can start iterating from the last index of <code>nums</code> backwards (as it is the simplest position where there is only one way to form a subsequence onwards, just taking the value itself):</p>
+<pre><code class="language-ts">for (let i = nums.length - 1; i &gt;= 0; i--) {
+ /* ... */
+}
+</code></pre>
+<p>For each option, we can iterate from the next index to see if we can include the largest subsequence that can be formed from that index onwards, if so, we can get the maximum value between <code>dp[i]</code> and <code>1 + dp[j]</code>:</p>
+<pre><code class="language-ts">for (let i = nums.length - 1; i &gt;= 0; i--) {
+  for (let j = i + 1; j &lt; nums.length; j++) {
+    if (nums[i] &lt; nums[j]) {
+      dp[i] = Math.max(dp[i], 1 + dp[j]);
+    }
+  }
+}
+</code></pre>
+<p>Finally, we can return the largest value in <code>dp</code>:</p>
+<pre><code class="language-ts">function lengthOfLIS(nums: number[]): number {
+  /* ... */
+  return Math.max(...dp); 
+}
+</code></pre>
+<p>And, the final solution looks like this:</p>
+<pre><code class="language-ts">function lengthOfLIS(nums: number[]): number {
+  let dp = Array.from({ length: nums.length }, () =&gt; 1);
+
+  for (let i = nums.length - 1; i &gt;= 0; i--) {
+    for (let j = i + 1; j &lt; nums.length; j++) {
+      if (nums[i] &lt; nums[j]) {
+        dp[i] = Math.max(dp[i], 1 + dp[j]);
+      }
+    }
+  }
+
+  return Math.max(...dp);
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity is $O(n ^ 2)$ as we iterate through each item in <code>nums</code> <em>for each item in <code>nums</code></em>.<br>The space complexity is $O(n)$ as we keep a <code>dp</code> array and its size will increase as the length of <code>nums</code> increases.</p>
+<hr>
+<p>This was the last dynamic programming problem in this series. Next up, we will start a new chapter on intervals. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-longest-increasing-subsequence</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-longest-increasing-subsequence</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 01 Dec 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Word Break]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-11-30/66-lm.png" alt="Cover image"></p>

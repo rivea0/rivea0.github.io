@@ -1,0 +1,110 @@
+---
+title: "LeetCode Meditations: Longest Increasing Subsequence"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Longest Increasing Subsequence problem.
+slug: leetcode-meditations-longest-increasing-subsequence
+date: 2024-12-01
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-01/67-lm.png)
+
+The description for [this problem](https://leetcode.com/problems/longest-increasing-subsequence) simply states:
+
+> Given an integer array `nums`, return the length of the longest **strictly increasing subsequence**.
+
+For example:
+
+```
+Input: nums = [10, 9, 2, 5, 3, 7, 101, 18]
+Output: 4
+Explanation: The longest increasing subsequence is [2, 3, 7, 101], therefore the length is 4.
+```
+
+Or:
+
+```
+Input: nums = [0, 1, 0, 3, 2, 3]
+Output: 4
+```
+
+Or:
+
+```
+Input: nums = [7, 7, 7, 7, 7, 7, 7]
+Output: 1
+```
+
+---
+
+Similar to the [previous problem in this series](https://rivea0.github.io/blog/leetcode-meditations-word-break), we can look at a bottom-up dynamic programming approach here as well.
+
+For each value in the `nums` array, the length of the largest subsequence we can have starting from index $i$ is either:
+- *1* (that value itself)
+
+or
+
+- *1 + the number of the largest subsequence we can have starting from index $i + 1$*. 
+
+However, we can't include the second option if `nums[i + 1]` is less than `nums[i]`.
+
+First, we can start out by creating a `dp` array to hold the length of the subsequences we can have from each index of `nums` onwards. That is, `dp[0]` will have the length of the largest subsequence that we can have from `nums[0]` onwards, `dp[1]` has the length of the largest subsequence that we can have from `nums[1]` onwards, and so on:
+
+```ts
+let dp = Array.from({ length: nums.length }, () => 1);
+```
+
+Then, we can start iterating from the last index of `nums` backwards (as it is the simplest position where there is only one way to form a subsequence onwards, just taking the value itself):
+
+```ts
+for (let i = nums.length - 1; i >= 0; i--) {
+ /* ... */
+}
+```
+
+For each option, we can iterate from the next index to see if we can include the largest subsequence that can be formed from that index onwards, if so, we can get the maximum value between `dp[i]` and `1 + dp[j]`:
+
+```ts
+for (let i = nums.length - 1; i >= 0; i--) {
+  for (let j = i + 1; j < nums.length; j++) {
+    if (nums[i] < nums[j]) {
+      dp[i] = Math.max(dp[i], 1 + dp[j]);
+    }
+  }
+}
+```
+
+Finally, we can return the largest value in `dp`:
+
+```ts
+function lengthOfLIS(nums: number[]): number {
+  /* ... */
+  return Math.max(...dp); 
+}
+```
+
+And, the final solution looks like this:
+
+```ts
+function lengthOfLIS(nums: number[]): number {
+  let dp = Array.from({ length: nums.length }, () => 1);
+
+  for (let i = nums.length - 1; i >= 0; i--) {
+    for (let j = i + 1; j < nums.length; j++) {
+      if (nums[i] < nums[j]) {
+        dp[i] = Math.max(dp[i], 1 + dp[j]);
+      }
+    }
+  }
+
+  return Math.max(...dp);
+}
+```
+
+#### Time and space complexity
+
+The time complexity is $O(n ^ 2)$ as we iterate through each item in `nums` *for each item in `nums`*.
+The space complexity is $O(n)$ as we keep a `dp` array and its size will increase as the length of `nums` increases.
+
+---
+
+This was the last dynamic programming problem in this series. Next up, we will start a new chapter on intervals. Until then, happy coding.
