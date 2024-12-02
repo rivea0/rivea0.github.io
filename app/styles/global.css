@@ -241,7 +241,6 @@ code {
 summary {
   outline: none;
   cursor: pointer;
-
 }
 
 details {
@@ -277,6 +276,10 @@ mark {
 .footnotes > ol > li {
   list-style: revert;
   font-size: small;
+}
+
+.text-center {
+  text-align: center;
 }
 
 @media print {
