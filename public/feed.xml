@@ -4,9 +4,44 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 01 Dec 2024 14:34:45 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 02 Dec 2024 11:13:46 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations — Chapter 13: Intervals]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-02/68-lm-ch13.png" alt="Cover image"></p>
+<p>In this new chapter, we are going to take a look at three interval problems: <a href="https://leetcode.com/problems/insert-interval" target="_blank" rel="noopener noreferrer">insert interval</a>, <a href="https://leetcode.com/problems/merge-intervals" target="_blank" rel="noopener noreferrer">merge intervals</a>, and <a href="https://leetcode.com/problems/non-overlapping-intervals" target="_blank" rel="noopener noreferrer">non-overlapping intervals</a>.</p>
+<p>An interval simply has a start and an end. The easiest way to think about them is as time frames.</p>
+<p>With intervals, the usual concern is whether they overlap or not.</p>
+<p>For example, if we have an interval <code>[1, 3]</code> and another <code>[2, 5]</code>, they are clearly overlapping, so they can be merged together to create a new interval <code>[1, 5]</code>:</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-02/intervals.gif" alt="Interval merging example"></p>
+<p>In order for two intervals <mark><strong>not to overlap</strong></mark>:</p>
+<ul>
+<li>the <em>start</em> of one should be <em>strictly larger</em> than the <em>end</em> of the other</li>
+</ul>
+<p className="text-center">`newInterval[0] > interval[1]`</p>
+
+<p>or </p>
+<ul>
+<li>the <em>end</em> of the one should be <em>strictly smaller</em> than the <em>start</em> of the other</li>
+</ul>
+<p className="text-center">`newInterval[1] < interval[0]`</p>
+
+<p>If both of these are false, they are overlapping.</p>
+<p>If they are overlapping, the new (<em>merged</em>) interval will have the minimum value from both intervals as its start, and the maximum as its end:</p>
+<pre><code>[
+  min(newInterval[0], interval[0]),
+  max(newInterval[1], interval[1])
+]
+</code></pre>
+<hr>
+<p>Next up is the first problem in this chapter, <a href="https://leetcode.com/problems/insert-interval" target="_blank" rel="noopener noreferrer">Insert Interval</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-13-intervals</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-13-intervals</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Mon, 02 Dec 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Longest Increasing Subsequence]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-01/67-lm.png" alt="Cover image"></p>
