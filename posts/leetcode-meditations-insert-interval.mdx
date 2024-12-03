@@ -1,0 +1,160 @@
+---
+title: "LeetCode Meditations: Insert Interval"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Insert Interval problem.
+slug: leetcode-meditations-insert-interval
+date: 2024-12-03
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-02/69-lm.png)
+
+The description for [Insert Interval](https://leetcode.com/problems/insert-interval) is quite explanatory:
+
+> You are given an array of non-overlapping intervals `intervals` where `intervals[i] = [start_i, end_i]` represent the start and the end of the `ith` interval and `intervals` is sorted in ascending order by `start_i`. You are also given an interval `newInterval = [start, end]` that represents the start and end of another interval.
+>
+> Insert `newInterval` into `intervals` such that `intervals` is still sorted in ascending order by `start_i` and `intervals` still does not have any overlapping intervals (merge overlapping intervals if necessary).
+>
+> Return `intervals` _after the insertion_.
+>
+> **Note** that you don't need to modify `intervals` in-place. You can make a new array and return it.
+
+For example:
+
+```
+Input: intervals = [[1, 3], [6, 9]], newInterval = [2, 5]
+Output: [[1, 5], [6, 9]]
+```
+
+Or:
+
+```
+Input: intervals = [[1, 2], [3, 5], [6, 7], [8, 10], [12, 16]], newInterval = [4, 8]
+Output: [[1, 2], [3, 10], [12, 16]]
+
+Explanation: Because the new interval [4, 8] overlaps with [3, 5], [6, 7], [8, 10].
+```
+
+---
+
+We can start with creating a `result` array to hold, well, the result:
+
+```ts
+let result = [];
+```
+
+Then, going through all the intervals, we need to check if we are to put our new interval before or after the current interval, *or*, if they are overlapping and therefore need to be merged.
+
+As we have seen in [the chapter introduction](https://rivea0.github.io/blog/leetcode-meditations-chapter-13-intervals), <mark>two intervals **don't** overlap if the start of one is strictly larger than the other's end, or, if the end of one is strictly less than the other's start</mark>.
+
+When those both cases are false, they overlap.
+
+First, we can check whether `newInterval` comes before `interval`. In fact, if we first check for this (the "earliest" position we can find to place `newInterval`), we can return immediately with our newly constructed result.
+This is also the *greedy* approach.
+
+```ts
+for (let i = 0; i < intervals.length; i++) {
+  const interval = intervals[i];
+
+  // newInterval is before interval
+  if (newInterval[1] < interval[0]) {
+    result.push(newInterval);
+    return [...result, ...intervals.slice(i)];
+  }
+  /* ... */  
+}
+```
+
+However, if `newInterval` comes after the current interval we are looking at, we can just push the current interval to our result:
+
+```ts
+for (let i = 0; i < intervals.length; i++) {
+  /* ... */
+  // newInterval is after interval
+  else if (newInterval[0] > interval[1]) {
+    result.push(interval);
+  }
+}
+```
+
+The last option is when they overlap, in that case, we need to merge the two intervals. We can create `newInterval` again with the minimum value of the intervals as the *start*, and the maximum value of them as the *end* of the new interval:
+
+```ts
+for (let i = 0; i < intervals.length; i++) {
+  /* ... */
+  // overlapping, create newInterval
+  else {
+    newInterval = [
+      Math.min(newInterval[0], interval[0]),
+      Math.max(newInterval[1], interval[1])
+    ];
+  }
+}
+```
+
+Our loop currently looks like this:
+
+```ts
+for (let i = 0; i < intervals.length; i++) {
+  const interval = intervals[i];
+    
+  // newInterval is before interval
+  if (newInterval[1] < interval[0]) {
+    result.push(newInterval);
+    return [...result, ...intervals.slice(i)] 
+    
+  // newInterval is after interval
+  } else if (newInterval[0] > interval[1]) {
+    result.push(interval);
+
+  // overlapping, create newInterval
+  } else {
+    newInterval = [Math.min(newInterval[0], interval[0]), Math.max(newInterval[1], interval[1])];
+  }
+}
+```
+
+We also need to push the latest `newInterval` that we created. And, at the end, we can just return the result:
+
+```ts
+function insert(intervals: number[][], newInterval: number[]): number[][] {
+  /* ... */
+  result.push(newInterval);
+  return result;
+}
+```
+
+Finally, the solution looks like this:
+
+```ts
+function insert(intervals: number[][], newInterval: number[]): number[][] {
+  let result = [];
+  for (let i = 0; i < intervals.length; i++) {
+    const interval = intervals[i];
+    
+    // newInterval is before interval
+    if (newInterval[1] < interval[0]) {
+      result.push(newInterval);
+      return [...result, ...intervals.slice(i)] 
+    
+    // newInterval is after interval
+    } else if (newInterval[0] > interval[1]) {
+      result.push(interval);
+
+    // overlapping, create newInterval
+    } else {
+      newInterval = [Math.min(newInterval[0], interval[0]), Math.max(newInterval[1], interval[1])];
+    }
+  }
+
+  result.push(newInterval);
+  return result;
+}
+```
+
+#### Time and space complexity
+
+The time complexity will be $O(n)$ as we do constant operations for each item in the `intervals` array. The space complexity will be $O(n)$ as well as we keep a `result` array and its size will increase as the length of `intervals` increases.
+
+---
+
+Next up, we'll take a look at [Merge Intervals](https://leetcode.com/problems/merge-intervals). Until then, happy coding.
