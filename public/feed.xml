@@ -4,9 +4,90 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 03 Dec 2024 09:15:21 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 08 Dec 2024 20:36:31 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Merge Intervals]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-08/70-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/merge-intervals" target="_blank" rel="noopener noreferrer">Merge Intervals</a>:</p>
+<blockquote>
+<p>Given an array of <code>intervals</code> where <code>intervals[i] = [start_i, end_i]</code>, merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: intervals = [[1, 3], [2, 6], [8, 10], [15, 18]]
+Output: [[1, 6], [8, 10], [15, 18]]
+
+Explanation: Since intervals [1, 3] and [2, 6] overlap, merge them into [1, 6].
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: intervals = [[1, 4], [4, 5]]
+Output: [[1, 5]]
+
+Explanation: Intervals [1, 4] and [4, 5] are considered overlapping. 
+</code></pre>
+<hr>
+<p>We can start by sorting the intervals first, so that we can compare them easily later:</p>
+<pre><code class="language-ts">intervals.sort((a, b) =&gt; a[0] - b[0]);
+</code></pre>
+<p>Also, we can initialize a <code>result</code> array which initially holds the first element of the newly sorted <code>intervals</code>:</p>
+<pre><code class="language-ts">let result = [intervals[0]];
+</code></pre>
+<p>We need to track the last merged interval&#39;s <em>end</em> to compare it with the <em>start</em> of the current interval we are looking at to check if they overlap.</p>
+<Note>
+For two intervals **not** to overlap, <mark>the _start_ of one should be _strictly larger_ than the _end_ of the other</mark> or <mark>the _end_ of the one should be _strictly smaller_ than the _start_ of the other</mark>, as mentioned in our [chapter introduction](https://rivea0.github.io/blog/leetcode-meditations-chapter-13-intervals).
+</Note>
+
+<p>If they don&#39;t overlap, we can just add that interval to <code>result</code>. Otherwise, we need to update the &quot;last end,&quot; effectively merging the intervals:</p>
+<pre><code class="language-ts">for (const interval of intervals) {
+  const [currentStart, currentEnd] = [interval[0], interval[1]];
+
+  // non-overlapping
+  if (result[result.length - 1][1] &lt; currentStart) {
+    result.push(interval);
+  // overlapping, update last end
+  } else {
+    result[result.length - 1][1] = Math.max(result[result.length - 1][1], currentEnd);
+  }
+}
+</code></pre>
+<p>And, the only thing left to do is to return the result:</p>
+<pre><code class="language-ts">function merge(intervals: number[][]): number[][] {
+  /* ... */
+  return result;
+}
+</code></pre>
+<p>And, this is how our final solution looks like in TypeScript:</p>
+<pre><code class="language-ts">function merge(intervals: number[][]): number[][] {
+  intervals.sort((a, b) =&gt; a[0] - b[0]);
+  let result = [intervals[0]];
+
+  for (const interval of intervals) {
+    const [currentStart, currentEnd] = [interval[0], interval[1]];
+
+    // non-overlapping
+    if (result[result.length - 1][1] &lt; currentStart) {
+      result.push(interval);
+    // overlapping, update last end
+    } else {
+      result[result.length - 1][1] = Math.max(result[result.length - 1][1], currentEnd);
+    }
+  }
+
+  return result;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>We are sorting <code>intervals</code>, and the built-in <code>sort</code> function has $O(n \ log \ n)$ time complexity. (The looping is $O(n)$, but the overall time complexity is $O(n \ log \ n)$).</p>
+<p>The <code>result</code> array can increase in size as the size of the input array <code>intervals</code> increases, therefore we have $O(n)$ space complexity.</p>
+<hr>
+<p>Next up, we&#39;ll take a look at the last problem in the chapter, <a href="https://leetcode.com/problems/non-overlapping-intervals" target="_blank" rel="noopener noreferrer">Non-overlapping Intervals</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-merge-intervals</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-merge-intervals</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 08 Dec 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Insert Interval]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-02/69-lm.png" alt="Cover image"></p>

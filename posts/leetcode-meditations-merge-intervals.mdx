@@ -1,0 +1,109 @@
+---
+title: "LeetCode Meditations: Merge Intervals"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Merge Intervals problem.
+slug: leetcode-meditations-merge-intervals
+date: 2024-12-08
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-08/70-lm.png)
+
+Let's start with the description for [Merge Intervals](https://leetcode.com/problems/merge-intervals):
+
+> Given an array of `intervals` where `intervals[i] = [start_i, end_i]`, merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.
+
+For example:
+
+```
+Input: intervals = [[1, 3], [2, 6], [8, 10], [15, 18]]
+Output: [[1, 6], [8, 10], [15, 18]]
+
+Explanation: Since intervals [1, 3] and [2, 6] overlap, merge them into [1, 6].
+```
+
+Or:
+
+```
+Input: intervals = [[1, 4], [4, 5]]
+Output: [[1, 5]]
+
+Explanation: Intervals [1, 4] and [4, 5] are considered overlapping. 
+```
+
+---
+
+We can start by sorting the intervals first, so that we can compare them easily later:
+
+```ts
+intervals.sort((a, b) => a[0] - b[0]);
+```
+
+Also, we can initialize a `result` array which initially holds the first element of the newly sorted `intervals`:
+
+```ts
+let result = [intervals[0]];
+```
+
+We need to track the last merged interval's *end* to compare it with the *start* of the current interval we are looking at to check if they overlap.
+
+<Note>
+For two intervals **not** to overlap, <mark>the _start_ of one should be _strictly larger_ than the _end_ of the other</mark> or <mark>the _end_ of the one should be _strictly smaller_ than the _start_ of the other</mark>, as mentioned in our [chapter introduction](https://rivea0.github.io/blog/leetcode-meditations-chapter-13-intervals).
+</Note>
+
+If they don't overlap, we can just add that interval to `result`. Otherwise, we need to update the "last end," effectively merging the intervals:
+
+```ts
+for (const interval of intervals) {
+  const [currentStart, currentEnd] = [interval[0], interval[1]];
+
+  // non-overlapping
+  if (result[result.length - 1][1] < currentStart) {
+    result.push(interval);
+  // overlapping, update last end
+  } else {
+    result[result.length - 1][1] = Math.max(result[result.length - 1][1], currentEnd);
+  }
+}
+```
+
+And, the only thing left to do is to return the result:
+
+```ts
+function merge(intervals: number[][]): number[][] {
+  /* ... */
+  return result;
+}
+```
+
+And, this is how our final solution looks like in TypeScript:
+
+```ts
+function merge(intervals: number[][]): number[][] {
+  intervals.sort((a, b) => a[0] - b[0]);
+  let result = [intervals[0]];
+
+  for (const interval of intervals) {
+    const [currentStart, currentEnd] = [interval[0], interval[1]];
+
+    // non-overlapping
+    if (result[result.length - 1][1] < currentStart) {
+      result.push(interval);
+    // overlapping, update last end
+    } else {
+      result[result.length - 1][1] = Math.max(result[result.length - 1][1], currentEnd);
+    }
+  }
+
+  return result;
+}
+```
+
+#### Time and space complexity
+
+We are sorting `intervals`, and the built-in `sort` function has $O(n \ log \ n)$ time complexity. (The looping is $O(n)$, but the overall time complexity is $O(n \ log \ n)$).
+
+The `result` array can increase in size as the size of the input array `intervals` increases, therefore we have $O(n)$ space complexity.
+
+---
+
+Next up, we'll take a look at the last problem in the chapter, [Non-overlapping Intervals](https://leetcode.com/problems/non-overlapping-intervals). Until then, happy coding.
