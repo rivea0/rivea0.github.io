@@ -4,9 +4,247 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 09 Dec 2024 11:58:58 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 16 Dec 2024 13:37:38 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations — Chapter 14: Bit Manipulation]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-16/72-lm-ch14.png" alt="Cover image"></p>
+<h2>Table of contents</h2>
+<ul>
+<li><a href="#intro" target="_blank" rel="noopener noreferrer">Introduction</a></li>
+<li><a href="#bitwise-operators" target="_blank" rel="noopener noreferrer">Bitwise operators</a><ul>
+<li><a href="#bitwise-and" target="_blank" rel="noopener noreferrer">AND (<code>&amp;</code>)</a></li>
+<li><a href="#bitwise-or" target="_blank" rel="noopener noreferrer">OR (<code>|</code>)</a></li>
+<li><a href="#bitwise-xor" target="_blank" rel="noopener noreferrer">XOR (<code>^</code>)</a></li>
+<li><a href="#bitwise-not" target="_blank" rel="noopener noreferrer">NOT (<code>~</code>)</a></li>
+<li><a href="#bitwise-left-shift-zerofill" target="_blank" rel="noopener noreferrer">Left shift (zero fill) (<code>&lt;&lt;</code>)</a></li>
+<li><a href="#bitwise-right-shift-signed" target="_blank" rel="noopener noreferrer">Right shift (sign preserving) (<code>&gt;&gt;</code>)</a></li>
+<li><a href="#bitwise-right-shift-unsigned" target="_blank" rel="noopener noreferrer">Right shift (unsigned) (<code>&gt;&gt;&gt;</code>)</a></li>
+</ul>
+</li>
+<li><a href="#get-bit" target="_blank" rel="noopener noreferrer">Getting a bit</a></li>
+<li><a href="#set-bit" target="_blank" rel="noopener noreferrer">Setting a bit</a></li>
+<li><a href="#resources" target="_blank" rel="noopener noreferrer">Resources</a></li>
+</ul>
+<p><a name="intro"></a><br>We are in the last chapter of this series, and it&#39;s finally time to take a brief look at bit manipulation.</p>
+<p><a href="https://en.wikipedia.org/wiki/Bitwise_operation" target="_blank" rel="noopener noreferrer">As Wikipedia defines it</a>, a <strong>bitwise operation</strong> operates on a bit string, a bit array or a binary numeral (considered as a bit string) at the level of its individual bits.</p>
+<hr>
+<p>Let&#39;s first represent a number in binary (base 2). We can use <code>toString</code> method on a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank" rel="noopener noreferrer">number</a>, and specify the <em>radix</em>:</p>
+<pre><code class="language-js">const n = 17;
+
+console.log(n.toString(2)); // 10001
+</code></pre>
+<p>We can also parse an integer giving it a base:</p>
+<pre><code class="language-js">console.log(parseInt(10001, 2)); // 17
+</code></pre>
+<Note>
+We can also represent a binary number with the prefix `0b`:
+
+<pre><code class="language-js">console.log(0b10001); // 17
+console.log(0b101); // 5
+</code></pre>
+<p>For example, these are the same number:</p>
+<pre><code class="language-js">0b1 === 0b00000001 // true
+</code></pre>
+</Note>
+
+<p>All bitwise operations are performed on 32-bit binary numbers in JavaScript.<br>That is, <em>before a bitwise operation is performed, JavaScript converts numbers to 32-bit <strong>signed</strong> integers.</em></p>
+<p>So, for example, <code>17</code> won&#39;t be simply <code>10001</code> but <code>00000000 00000000 00000000 00010001</code>.</p>
+<p><em>After the bitwise operation is performed, the result is converted back to 64-bit JavaScript numbers.</em></p>
+<p><a name="bitwise-operators"></a></p>
+<h3>Bitwise operators</h3>
+<p><a name="bitwise-and"></a></p>
+<h4>AND (<code>&amp;</code>)</h4>
+<p>If two bits are <code>1</code>, the result is <code>1</code>, otherwise <code>0</code>.</p>
+<Note>
+The GIFs below show the numbers as 8-bit strings, but when doing bitwise operations, remember they are converted to 32-bit numbers.
+</Note>
+
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-16/bitwise-and.gif" alt="Bitwise AND"></p>
+<pre><code class="language-js">const x1 = 0b10001;
+const x2 = 0b101;
+
+const result = x1 &amp; x2; // 1 (0b1)
+</code></pre>
+<p><a name="bitwise-or"></a></p>
+<h4>OR (<code>|</code>)</h4>
+<p>If either of the bits is <code>1</code>, the result is <code>1</code>, otherwise <code>0</code>.</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-16/bitwise-or.gif" alt="Bitwise OR"></p>
+<pre><code class="language-js">const x1 = 0b10001;
+const x2 = 0b101;
+
+const result = x1 | x2; // 21 (0b10101)
+</code></pre>
+<p><a name="bitwise-xor"></a></p>
+<h4>XOR (<code>^</code>)</h4>
+<p>If the bits are different (one is <code>1</code> and the other is <code>0</code>), the result is <code>1</code>, otherwise <code>0</code>.</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-16/bitwise-xor.gif" alt="Bitwise XOR"></p>
+<pre><code class="language-js">const x1 = 0b10001;
+const x2 = 0b101;
+
+const result = x1 ^ x2; // 20 (0b10100)
+</code></pre>
+<p><a name="bitwise-not"></a></p>
+<h4>NOT (<code>~</code>)</h4>
+<p>Flips the bits (<code>1</code> becomes <code>0</code>, <code>0</code> becomes <code>1</code>).</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-16/bitwise-not.gif" alt="Bitwise NOT"></p>
+<pre><code class="language-js">const n = 17;
+
+const result = ~n; // -18
+</code></pre>
+<Note>
+Bitwise NOTing any 32-bit integer `x` yields `-(x + 1)`.
+</Note>
+
+<p>If we use <a href="https://stackoverflow.com/a/33758875" target="_blank" rel="noopener noreferrer">a helper function</a> to see the binary representations, it is as we expected:</p>
+<pre><code class="language-js">console.log(createBinaryString(n));
+// -&gt; 00000000 00000000 00000000 00010001
+
+console.log(createBinaryString(result));
+// -&gt; 11111111 11111111 11111111 11101110
+</code></pre>
+<p>The leftmost bit indicates the signal — whether the number is negative or positive.</p>
+<p>Remember that we said JavaScript uses 32-bit <strong>signed</strong> integers for bitwise operations.<br><strong>The leftmost bit is <code>1</code> for negative numbers and <code>0</code> for positive numbers</strong>.<br>Also, <em>the operator operates on the operands&#39; bit representations in <a href="https://en.wikipedia.org/wiki/Two's_complement" target="_blank" rel="noopener noreferrer">two&#39;s complement</a>. <mark>The operator is applied to each bit, and the result is constructed bitwise.</mark></em></p>
+<Note>
+Two's complement allows us to get a number with an inverse signal.
+One way to do it is to invert the bits of the number in the positive representation and add 1 to it:
+
+<pre><code class="language-js">function twosComplement(n) {
+  return ~n + 0b1;
+}
+</code></pre>
+</Note>
+
+
+<p><a name="bitwise-left-shift-zerofill"></a></p>
+<h4>Left shift (zero fill) (<code>&lt;&lt;</code>)</h4>
+<p>Shifts the given number of bits to the left, adding zero bits shifted in from the right.</p>
+<pre><code class="language-js">const n = 17;
+const result = n &lt;&lt; 1; // 34
+
+
+console.log(createBinaryString(17));
+// -&gt; 00000000 00000000 00000000 00010001
+
+console.log(createBinaryString(34));
+// -&gt; 00000000 00000000 00000000 00100010
+</code></pre>
+<p><em>Note that the 32nd bit (the leftmost one) is discarded.</em></p>
+<p><a name="bitwise-right-shift-signed"></a></p>
+<h4>Right shift (sign preserving) (<code>&gt;&gt;</code>)</h4>
+<p>Shifts the given number of bits to the right, preserving the sign when adding bits from the left.</p>
+<pre><code class="language-js">const n = 17;
+const result = n &gt;&gt; 1; // 8
+
+
+console.log(createBinaryString(17));
+// -&gt; 00000000 00000000 00000000 00010001
+
+console.log(createBinaryString(8));
+// -&gt; 00000000 00000000 00000000 00001000
+</code></pre>
+<pre><code class="language-js">const n = -17;
+const result = n &gt;&gt; 1; // -9
+
+console.log(createBinaryString(-17));
+// -&gt; 11111111 11111111 11111111 11101111
+
+console.log(createBinaryString(-9));
+// -&gt; 11111111 11111111 11111111 11110111
+</code></pre>
+<p><a name="bitwise-right-shift-unsigned"></a></p>
+<h4>Right shift (unsigned) (<code>&gt;&gt;&gt;</code>)</h4>
+<p>Shifts the given number of bits to the right, adding <code>0</code>s when adding bits in from the left, no matter what the sign is.</p>
+<pre><code class="language-js">const n = 17;
+const result = n &gt;&gt;&gt; 1; // 8
+
+
+console.log(createBinaryString(17));
+// -&gt; 00000000 00000000 00000000 00010001
+
+console.log(createBinaryString(8));
+// -&gt; 00000000 00000000 00000000 00001000
+</code></pre>
+<pre><code class="language-js">const n = -17;
+const result = n &gt;&gt;&gt; 1; // 2147483639
+
+console.log(createBinaryString(-17));
+// -&gt; 11111111 11111111 11111111 11101111
+
+console.log(createBinaryString(2147483639));
+// -&gt; 01111111 11111111 11111111 11110111
+</code></pre>
+<hr>
+<p><a name="get-bit"></a></p>
+<h3>Getting a bit</h3>
+<p>To get a specific bit, we first need to create a <em><strong>bitmask</strong></em>.<br>We can do this by shifting <code>1</code> to the left by the index of the bit we want to get.<br>The result is the <strong>and</strong> of the binary number and the bitmask.</p>
+<p>However, using JavaScript, we can also do an unsigned right shift by the index to put the bit in the first place (so that we don&#39;t get the actual value that is in that position, but whether it is a <code>1</code> or a <code>0</code>):</p>
+<pre><code class="language-js">function getBit(number, idx) {
+  const bitMask = 1 &lt;&lt; idx;
+  const result = number &amp; bitMask;
+
+  return result &gt;&gt;&gt; idx;
+}
+</code></pre>
+<p>For example, let&#39;s try <code>13</code>, which is <code>1101</code> in binary:</p>
+<pre><code class="language-js">const binaryNumber = 0b1101;
+
+console.log(&#39;Bit at position 0:&#39;, getBit(binaryNumber, 0));
+console.log(&#39;Bit at position 1:&#39;, getBit(binaryNumber, 1));
+console.log(&#39;Bit at position 2:&#39;, getBit(binaryNumber, 2));
+console.log(&#39;Bit at position 3:&#39;, getBit(binaryNumber, 3));
+
+/*
+Output:
+
+Bit at position 0: 1
+Bit at position 1: 0
+Bit at position 2: 1
+Bit at position 3: 1
+*/
+</code></pre>
+<p><a name="set-bit"></a></p>
+<h3>Setting a bit</h3>
+<p>If we want to turn a bit to <code>1</code> (in other words, to &quot;<em>set a bit</em>&quot;), we can do a similar thing.</p>
+<p>First, we can create a bitmask again by shifting <code>1</code> to the left by the index of the bit we want to set to <code>1</code>.<br>The result is the <strong>or</strong> of the number and the bitmask:</p>
+<pre><code class="language-js">function setBit(number, idx) {
+  const bitMask = 1 &lt;&lt; idx;
+  return number | bitMask;    
+}
+</code></pre>
+<p>Remember that in our example <code>13</code> was <code>1101</code> in binary, let&#39;s say we want to set the <code>0</code> at index 1:</p>
+<pre><code class="language-js">const binaryNumber = 0b1101;
+const newBinaryNumber = setBit(binaryNumber, 1);
+
+console.log(createBinaryString(newBinaryNumber));
+// -&gt; 00000000 00000000 00000000 00001111
+
+console.log(&#39;Bit at position 1:&#39;, getBit(newBinaryNumber, 1));
+// -&gt; Bit at position 1: 1
+</code></pre>
+<hr>
+<p>We briefly looked at bitwise operations, as well as getting/setting a bit. In this final chapter, we will take a look at five problems, starting with <a href="https://leetcode.com/problems/number-of-1-bits" target="_blank" rel="noopener noreferrer">Number of 1 Bits</a>. Until then, happy coding.</p>
+<p><a name="resources"></a></p>
+<h3>Resources</h3>
+<ul>
+<li><a href="https://lucasfcosta.com/2018/12/25/bitwise-operations.html" target="_blank" rel="noopener noreferrer">&quot;The Absolute Essentials for Bit Manipulation in JavaScript&quot; - Lucas F. Costa</a></li>
+<li><a href="https://www.w3schools.com/js/js_bitwise.asp" target="_blank" rel="noopener noreferrer">JS Bitwise Operators</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" target="_blank" rel="noopener noreferrer">Number (MDN)</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_AND" target="_blank" rel="noopener noreferrer">Bitwise AND (MDN)</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_NOT" target="_blank" rel="noopener noreferrer">Bitwise NOT (MDN)</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_OR" target="_blank" rel="noopener noreferrer">Bitwise OR (MDN)</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_XOR" target="_blank" rel="noopener noreferrer">Bitwise XOR (MDN)</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Left_shift" target="_blank" rel="noopener noreferrer">Left shift (MDN)</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Right_shift" target="_blank" rel="noopener noreferrer">Right shift (MDN)</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Unsigned_right_shift" target="_blank" rel="noopener noreferrer">Unsigned right shift (MDN)</a></li>
+</ul>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Mon, 16 Dec 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Non-overlapping Intervals]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-09/71-lm.png" alt="Cover image"></p>

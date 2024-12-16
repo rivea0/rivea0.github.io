@@ -1,0 +1,315 @@
+---
+title: "LeetCode Meditations — Chapter 14: Bit Manipulation"
+tags: [Computer Science, JavaScript]
+description: The final chapter of LeetCode Meditation series.
+slug: leetcode-meditations-chapter-14-bit-manipulation
+date: 2024-12-16
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-16/72-lm-ch14.png)
+
+## Table of contents
+- [Introduction](#intro)
+- [Bitwise operators](#bitwise-operators)
+    - [AND (`&`)](#bitwise-and)
+    - [OR (`|`)](#bitwise-or)
+    - [XOR (`^`)](#bitwise-xor)
+    - [NOT (`~`)](#bitwise-not)
+    - [Left shift (zero fill) (`<<`)](#bitwise-left-shift-zerofill)
+    - [Right shift (sign preserving) (`>>`)](#bitwise-right-shift-signed)
+    - [Right shift (unsigned) (`>>>`)](#bitwise-right-shift-unsigned)
+- [Getting a bit](#get-bit)
+- [Setting a bit](#set-bit)
+- [Resources](#resources)
+
+<a name="intro"></a>
+We are in the last chapter of this series, and it's finally time to take a brief look at bit manipulation.
+
+[As Wikipedia defines it](https://en.wikipedia.org/wiki/Bitwise_operation), a **bitwise operation** operates on a bit string, a bit array or a binary numeral (considered as a bit string) at the level of its individual bits.
+
+---
+
+Let's first represent a number in binary (base 2). We can use `toString` method on a [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number), and specify the *radix*:
+
+```js
+const n = 17;
+
+console.log(n.toString(2)); // 10001
+```
+
+We can also parse an integer giving it a base:
+
+```js
+console.log(parseInt(10001, 2)); // 17
+```
+
+<Note>
+We can also represent a binary number with the prefix `0b`:
+
+```js
+console.log(0b10001); // 17
+console.log(0b101); // 5
+```
+
+For example, these are the same number:
+
+```js
+0b1 === 0b00000001 // true
+```
+</Note>
+
+All bitwise operations are performed on 32-bit binary numbers in JavaScript.
+That is, *before a bitwise operation is performed, JavaScript converts numbers to 32-bit **signed** integers.*
+
+So, for example, `17` won't be simply `10001` but `00000000 00000000 00000000 00010001`.
+
+*After the bitwise operation is performed, the result is converted back to 64-bit JavaScript numbers.*
+
+<a name="bitwise-operators"></a>
+### Bitwise operators
+
+<a name="bitwise-and"></a>
+#### AND (`&`)
+If two bits are `1`, the result is `1`, otherwise `0`.
+
+<Note>
+The GIFs below show the numbers as 8-bit strings, but when doing bitwise operations, remember they are converted to 32-bit numbers.
+</Note>
+
+![Bitwise AND](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-16/bitwise-and.gif)
+
+```js
+const x1 = 0b10001;
+const x2 = 0b101;
+
+const result = x1 & x2; // 1 (0b1)
+```
+
+<a name="bitwise-or"></a>
+#### OR (`|`)
+If either of the bits is `1`, the result is `1`, otherwise `0`.
+
+![Bitwise OR](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-16/bitwise-or.gif)
+
+```js
+const x1 = 0b10001;
+const x2 = 0b101;
+
+const result = x1 | x2; // 21 (0b10101)
+```
+
+<a name="bitwise-xor"></a>
+#### XOR (`^`)
+If the bits are different (one is `1` and the other is `0`), the result is `1`, otherwise `0`.
+
+![Bitwise XOR](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-16/bitwise-xor.gif)
+
+```js
+const x1 = 0b10001;
+const x2 = 0b101;
+
+const result = x1 ^ x2; // 20 (0b10100)
+```
+
+<a name="bitwise-not"></a>
+#### NOT (`~`)
+Flips the bits (`1` becomes `0`, `0` becomes `1`).
+
+![Bitwise NOT](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-16/bitwise-not.gif)
+
+```js
+const n = 17;
+
+const result = ~n; // -18
+```
+
+<Note>
+Bitwise NOTing any 32-bit integer `x` yields `-(x + 1)`.
+</Note>
+
+If we use [a helper function](https://stackoverflow.com/a/33758875) to see the binary representations, it is as we expected:
+
+```js
+console.log(createBinaryString(n));
+// -> 00000000 00000000 00000000 00010001
+
+console.log(createBinaryString(result));
+// -> 11111111 11111111 11111111 11101110
+```
+
+The leftmost bit indicates the signal — whether the number is negative or positive.
+
+Remember that we said JavaScript uses 32-bit **signed** integers for bitwise operations.
+**The leftmost bit is `1` for negative numbers and `0` for positive numbers**. 
+Also, *the operator operates on the operands' bit representations in [two's complement](https://en.wikipedia.org/wiki/Two's_complement). <mark>The operator is applied to each bit, and the result is constructed bitwise.</mark>*
+
+<Note>
+Two's complement allows us to get a number with an inverse signal.
+One way to do it is to invert the bits of the number in the positive representation and add 1 to it:
+
+```js
+function twosComplement(n) {
+  return ~n + 0b1;
+}
+```
+</Note>
+
+
+<a name="bitwise-left-shift-zerofill"></a>
+#### Left shift (zero fill) (`<<`)
+Shifts the given number of bits to the left, adding zero bits shifted in from the right.
+
+```js
+const n = 17;
+const result = n << 1; // 34
+
+
+console.log(createBinaryString(17));
+// -> 00000000 00000000 00000000 00010001
+
+console.log(createBinaryString(34));
+// -> 00000000 00000000 00000000 00100010
+```
+
+*Note that the 32nd bit (the leftmost one) is discarded.*
+
+<a name="bitwise-right-shift-signed"></a>
+#### Right shift (sign preserving) (`>>`)
+Shifts the given number of bits to the right, preserving the sign when adding bits from the left.
+
+```js
+const n = 17;
+const result = n >> 1; // 8
+
+
+console.log(createBinaryString(17));
+// -> 00000000 00000000 00000000 00010001
+
+console.log(createBinaryString(8));
+// -> 00000000 00000000 00000000 00001000
+```
+
+```js
+const n = -17;
+const result = n >> 1; // -9
+
+console.log(createBinaryString(-17));
+// -> 11111111 11111111 11111111 11101111
+
+console.log(createBinaryString(-9));
+// -> 11111111 11111111 11111111 11110111
+```
+
+<a name="bitwise-right-shift-unsigned"></a>
+#### Right shift (unsigned) (`>>>`)
+Shifts the given number of bits to the right, adding `0`s when adding bits in from the left, no matter what the sign is.
+
+```js
+const n = 17;
+const result = n >>> 1; // 8
+
+
+console.log(createBinaryString(17));
+// -> 00000000 00000000 00000000 00010001
+
+console.log(createBinaryString(8));
+// -> 00000000 00000000 00000000 00001000
+
+```
+
+```js
+const n = -17;
+const result = n >>> 1; // 2147483639
+
+console.log(createBinaryString(-17));
+// -> 11111111 11111111 11111111 11101111
+
+console.log(createBinaryString(2147483639));
+// -> 01111111 11111111 11111111 11110111
+```
+
+---
+
+<a name="get-bit"></a>
+### Getting a bit
+
+To get a specific bit, we first need to create a ***bitmask***.
+We can do this by shifting `1` to the left by the index of the bit we want to get.
+The result is the **and** of the binary number and the bitmask.
+
+However, using JavaScript, we can also do an unsigned right shift by the index to put the bit in the first place (so that we don't get the actual value that is in that position, but whether it is a `1` or a `0`):
+
+```js
+function getBit(number, idx) {
+  const bitMask = 1 << idx;
+  const result = number & bitMask;
+
+  return result >>> idx;
+}
+```
+
+For example, let's try `13`, which is `1101` in binary:
+
+```js
+const binaryNumber = 0b1101;
+
+console.log('Bit at position 0:', getBit(binaryNumber, 0));
+console.log('Bit at position 1:', getBit(binaryNumber, 1));
+console.log('Bit at position 2:', getBit(binaryNumber, 2));
+console.log('Bit at position 3:', getBit(binaryNumber, 3));
+
+/*
+Output:
+
+Bit at position 0: 1
+Bit at position 1: 0
+Bit at position 2: 1
+Bit at position 3: 1
+*/
+```
+
+<a name="set-bit"></a>
+### Setting a bit
+
+If we want to turn a bit to `1` (in other words, to "*set a bit*"), we can do a similar thing.
+
+First, we can create a bitmask again by shifting `1` to the left by the index of the bit we want to set to `1`.
+The result is the **or** of the number and the bitmask:
+
+```js
+function setBit(number, idx) {
+  const bitMask = 1 << idx;
+  return number | bitMask;    
+}
+```
+
+Remember that in our example `13` was `1101` in binary, let's say we want to set the `0` at index 1:
+
+```js
+const binaryNumber = 0b1101;
+const newBinaryNumber = setBit(binaryNumber, 1);
+
+console.log(createBinaryString(newBinaryNumber));
+// -> 00000000 00000000 00000000 00001111
+
+console.log('Bit at position 1:', getBit(newBinaryNumber, 1));
+// -> Bit at position 1: 1
+```
+
+---
+
+We briefly looked at bitwise operations, as well as getting/setting a bit. In this final chapter, we will take a look at five problems, starting with [Number of 1 Bits](https://leetcode.com/problems/number-of-1-bits). Until then, happy coding.
+
+<a name="resources"></a>
+### Resources
+
+- ["The Absolute Essentials for Bit Manipulation in JavaScript" - Lucas F. Costa](https://lucasfcosta.com/2018/12/25/bitwise-operations.html)
+- [JS Bitwise Operators](https://www.w3schools.com/js/js_bitwise.asp)
+- [Number (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)
+- [Bitwise AND (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_AND)
+- [Bitwise NOT (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_NOT)
+- [Bitwise OR (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_OR)
+- [Bitwise XOR (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_XOR)
+- [Left shift (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Left_shift)
+- [Right shift (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Right_shift)
+- [Unsigned right shift (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Unsigned_right_shift)
