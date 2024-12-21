@@ -4,9 +4,74 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 16 Dec 2024 13:37:38 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 21 Dec 2024 21:39:50 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Number of 1 Bits]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-22/73-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/number-of-1-bits" target="_blank" rel="noopener noreferrer">this one</a>:</p>
+<blockquote>
+<p>Given a positive integer <code>n</code>, write a function that returns the number of set bits in its binary representation (also known as the <a href="http://en.wikipedia.org/wiki/Hamming_weight" target="_blank" rel="noopener noreferrer">Hamming weight</a>).</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: n = 11
+Output: 3
+
+Explanation: The input binary string 1011 has a total of three set bits.
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: n = 128
+Output: 1
+
+Explanation: The input binary string 10000000 has a total of one set bit.
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: n = 2147483645
+Output: 30
+
+Explanation: The input binary string 1111111111111111111111111111101 has a total of thirty set bits.
+</code></pre>
+<hr>
+<p>As we mentioned in the chapter introduction in the <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation" target="_blank" rel="noopener noreferrer">previous post</a>, a <strong>set bit</strong> refers to a bit with the value of 1.</p>
+<p>So, what we have to do is to count 1 bits.</p>
+<p>One way to do it is to convert the number to a string, and just count the 1s. Or, we can convert that to an array and filter out the 0s, and get its length. But, there is another approach where we can use bit manipulation.</p>
+<p>We can remove the set bits (bits that have the value 1) until the number becomes 0.</p>
+<p>A good thing to know is that <mark><code>n - 1</code> is <em>the rightmost set removed version</em> of <code>n</code></mark>.</p>
+<p>For example, if <code>n</code> is 00<mark>1</mark>0, <code>n - 1</code> is 00<mark>0</mark>1.</p>
+<p>Or, if <code>n</code> is 01<mark>1</mark>0, <code>n - 1</code> is 01<mark>0</mark>1.</p>
+<Note>
+It does not matter whether `n - 1` introduces other `1`s because we are doing the AND operation to count the set bits. 
+
+<p>For example, if <code>n</code> is <code>0000</code>, then <code>n - 1</code> is <code>0111</code>. Their AND will be <code>0000</code>.</p>
+<p>Or, if <code>n</code> is <code>0010</code>, then <code>n - 1</code> is <code>0001</code>. The rightmost set bit of <code>n</code> is <code>0</code> in <code>n - 1</code>, and that&#39;s all that matters.<br></Note></p>
+<p>We can create a loop that runs as long as there are 1 bits in <code>n</code>, counting each one as we go.<br>Also each time, we can do an <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-and" target="_blank" rel="noopener noreferrer"><strong>AND</strong> operation</a> with <code>n</code> and 1 less of it (<code>n &amp; (n - 1)</code>).</p>
+<p>A simple TypeScript solution looks like this:</p>
+<pre><code class="language-ts">function hammingWeight(n: number): number {
+  let result = 0;
+  while (n &gt; 0) {
+    n &amp;= (n - 1);
+    result++;
+  }
+
+  return result;
+}
+</code></pre>
+<Note>
+We are using the [bitwise AND assignment operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_AND_assignment) to assign the value to `n`.
+</Note>
+
+<h4>Time and space complexity</h4>
+<p>The time complexity is, I think, $O(log \ n)$ — In the worst case when all bits are set, we&#39;ll run through the loop $log \ n$ times (the number of bits in the binary representation of a number $n$ will be $log \ n$).</p>
+<p>The space complexity will be constant ($O(1)$) as there is no additional memory usage that will increase as the input increases.</p>
+<hr>
+<p>The next problem we&#39;ll take a look at is <a href="https://leetcode.com/problems/counting-bits" target="_blank" rel="noopener noreferrer">Counting Bits</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-number-of-1-bits</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-number-of-1-bits</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 22 Dec 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 14: Bit Manipulation]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-16/72-lm-ch14.png" alt="Cover image"></p>

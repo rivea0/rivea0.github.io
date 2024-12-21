@@ -1,0 +1,95 @@
+---
+title: "LeetCode Meditations: Number of 1 Bits"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Number of 1 Bits problem.
+slug: leetcode-meditations-number-of-1-bits
+date: 2024-12-22
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-22/73-lm.png)
+
+Let's start with the description for [this one](https://leetcode.com/problems/number-of-1-bits):
+
+> Given a positive integer `n`, write a function that returns the number of set bits in its binary representation (also known as the [Hamming weight](http://en.wikipedia.org/wiki/Hamming_weight)).
+
+For example:
+
+```
+Input: n = 11
+Output: 3
+
+Explanation: The input binary string 1011 has a total of three set bits.
+```
+
+Or:
+
+```
+Input: n = 128
+Output: 1
+
+Explanation: The input binary string 10000000 has a total of one set bit.
+```
+
+Or:
+
+```
+Input: n = 2147483645
+Output: 30
+
+Explanation: The input binary string 1111111111111111111111111111101 has a total of thirty set bits.
+```
+
+---
+
+As we mentioned in the chapter introduction in the [previous post](https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation), a **set bit** refers to a bit with the value of 1.
+
+So, what we have to do is to count 1 bits.
+
+One way to do it is to convert the number to a string, and just count the 1s. Or, we can convert that to an array and filter out the 0s, and get its length. But, there is another approach where we can use bit manipulation.
+
+We can remove the set bits (bits that have the value 1) until the number becomes 0.
+
+A good thing to know is that <mark>`n - 1` is *the rightmost set removed version* of `n`</mark>.
+
+For example, if `n` is 00<mark>1</mark>0, `n - 1` is 00<mark>0</mark>1.
+
+Or, if `n` is 01<mark>1</mark>0, `n - 1` is 01<mark>0</mark>1.
+
+<Note>
+It does not matter whether `n - 1` introduces other `1`s because we are doing the AND operation to count the set bits. 
+
+For example, if `n` is `0000`, then `n - 1` is `0111`. Their AND will be `0000`.
+
+Or, if `n` is `0010`, then `n - 1` is `0001`. The rightmost set bit of `n` is `0` in `n - 1`, and that's all that matters.
+</Note>
+
+We can create a loop that runs as long as there are 1 bits in `n`, counting each one as we go.
+Also each time, we can do an [**AND** operation](https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-and) with `n` and 1 less of it (`n & (n - 1)`).
+
+A simple TypeScript solution looks like this:
+
+```ts
+function hammingWeight(n: number): number {
+  let result = 0;
+  while (n > 0) {
+    n &= (n - 1);
+    result++;
+  }
+
+  return result;
+}
+```
+
+<Note>
+We are using the [bitwise AND assignment operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_AND_assignment) to assign the value to `n`.
+</Note>
+
+#### Time and space complexity
+
+The time complexity is, I think, $O(log \ n)$ — In the worst case when all bits are set, we'll run through the loop $log \ n$ times (the number of bits in the binary representation of a number $n$ will be $log \ n$).
+
+The space complexity will be constant ($O(1)$) as there is no additional memory usage that will increase as the input increases.
+
+---
+
+The next problem we'll take a look at is [Counting Bits](https://leetcode.com/problems/counting-bits). Until then, happy coding.
