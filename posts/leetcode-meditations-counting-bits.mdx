@@ -1,0 +1,122 @@
+---
+title: "LeetCode Meditations: Counting Bits"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Counting Bits problem.
+slug: leetcode-meditations-counting-bits
+date: 2024-12-22
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-22/74-lm.png)
+
+The description for [Counting Bits](https://leetcode.com/problems/counting-bits) says:
+
+> Given an integer `n`, return _an array_ `ans` _of length_ `n + 1` _such that for each_ `i` (`0 <= i <= n`)_,_ `ans[i]` _is the **number of**_ `1`_**'s** in the binary representation of_ `i`.
+
+For example:
+
+```
+Input: n = 2
+Output: [0, 1, 1]
+
+Explanation:
+0 --> 0
+1 --> 1
+2 --> 10
+```
+
+Or:
+
+```
+Input: n = 5
+Output: [0, 1, 1, 2, 1, 2]
+
+Explanation:
+0 --> 0
+1 --> 1
+2 --> 10
+3 --> 11
+4 --> 100
+5 --> 101
+```
+
+---
+
+The problem wants us to get the number of 1s of the binary representation of each number from `0` up to `n`.
+
+The first solution I came up with was to create an array of length `n + 1`, fill it with values from `0` to `n` in binary...
+
+```ts
+const arr = Array.from({ length: n + 1 }, (_, i) => i.toString(2));
+```
+
+...and map each one to the number of 1 bits it has:
+
+```ts
+arr.map(j => {
+  let result = 0;
+  let binaryNumber = parseInt(j, 2);
+  while (binaryNumber > 0) {
+    binaryNumber &= binaryNumber - 1;
+    result++;
+  }
+  return result;
+});
+```
+
+<Note>
+In the [previous problem](https://rivea0.github.io/blog/leetcode-meditations-number-of-1-bits), we used a technique to count the number of 1 bits (or calculate its **Hamming weight**) — it's simply decreasing one lesser value from the number until it reaches `0`:
+
+```ts
+let numberOf1Bits = 0;
+while (binaryNumber > 0) {
+  binaryNumber &= binaryNumber - 1;
+  numberOf1Bits++;
+}
+```
+</Note>
+
+We can chain the methods, and overall, the solution looks like this:
+
+```ts
+function countBits(n: number): number[] {
+  return Array.from({ length: n + 1 }, (_, i) => i.toString(2)).map(j => {
+    let result = 0;
+    let binaryNumber = parseInt(j, 2);
+    while (binaryNumber > 0) {
+      binaryNumber &= binaryNumber - 1;
+      result++;
+    }
+    return result;
+  });
+}
+```
+
+Or, we can write it more explicitly, pushing each count to the result array:
+
+```ts
+function countBits(n: number): number[] {
+  let result = [];
+  for (let i = 0; i <= n; i++) {
+    let binaryNum = parseInt(i.toString(2), 2);
+    let count = 0;
+    while (binaryNum > 0) {
+      binaryNum &= binaryNum - 1;
+      count++;
+    }
+    result.push(count);
+  }
+
+  return result;
+}
+```
+
+#### Time and space complexity
+
+Counting the set bits has $log \ n$ time complexity (in the worst case when all bits are set, the loop will run the number of bits in `binaryNumber` — the number of bits of the binary representation of number $n$ is $log \ n$).
+However, we also do it $n$ times, so overall, the time complexity will be $O(n \ log \ n)$.
+
+The space complexity is $O(n)$ as the need for space for our result array increases as $n$ increases.
+
+---
+
+Next up, we'll take a look at [Reverse Bits](https://leetcode.com/problems/reverse-bits). Until then, happy coding.

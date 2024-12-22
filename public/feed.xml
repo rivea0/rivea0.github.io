@@ -4,12 +4,107 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 21 Dec 2024 21:39:50 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 22 Dec 2024 12:50:07 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
         <item>
+            <title><![CDATA[LeetCode Meditations: Counting Bits]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-22/74-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/counting-bits" target="_blank" rel="noopener noreferrer">Counting Bits</a> says:</p>
+<blockquote>
+<p>Given an integer <code>n</code>, return <em>an array</em> <code>ans</code> <em>of length</em> <code>n + 1</code> <em>such that for each</em> <code>i</code> (<code>0 &lt;= i &lt;= n</code>)<em>,</em> <code>ans[i]</code> <em>is the <strong>number of</strong></em> <code>1</code><em><strong>&#39;s</strong> in the binary representation of</em> <code>i</code>.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: n = 2
+Output: [0, 1, 1]
+
+Explanation:
+0 --&gt; 0
+1 --&gt; 1
+2 --&gt; 10
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: n = 5
+Output: [0, 1, 1, 2, 1, 2]
+
+Explanation:
+0 --&gt; 0
+1 --&gt; 1
+2 --&gt; 10
+3 --&gt; 11
+4 --&gt; 100
+5 --&gt; 101
+</code></pre>
+<hr>
+<p>The problem wants us to get the number of 1s of the binary representation of each number from <code>0</code> up to <code>n</code>.</p>
+<p>The first solution I came up with was to create an array of length <code>n + 1</code>, fill it with values from <code>0</code> to <code>n</code> in binary...</p>
+<pre><code class="language-ts">const arr = Array.from({ length: n + 1 }, (_, i) =&gt; i.toString(2));
+</code></pre>
+<p>...and map each one to the number of 1 bits it has:</p>
+<pre><code class="language-ts">arr.map(j =&gt; {
+  let result = 0;
+  let binaryNumber = parseInt(j, 2);
+  while (binaryNumber &gt; 0) {
+    binaryNumber &amp;= binaryNumber - 1;
+    result++;
+  }
+  return result;
+});
+</code></pre>
+<Note>
+In the [previous problem](https://rivea0.github.io/blog/leetcode-meditations-number-of-1-bits), we used a technique to count the number of 1 bits (or calculate its **Hamming weight**) — it's simply decreasing one lesser value from the number until it reaches `0`:
+
+<pre><code class="language-ts">let numberOf1Bits = 0;
+while (binaryNumber &gt; 0) {
+  binaryNumber &amp;= binaryNumber - 1;
+  numberOf1Bits++;
+}
+</code></pre>
+</Note>
+
+<p>We can chain the methods, and overall, the solution looks like this:</p>
+<pre><code class="language-ts">function countBits(n: number): number[] {
+  return Array.from({ length: n + 1 }, (_, i) =&gt; i.toString(2)).map(j =&gt; {
+    let result = 0;
+    let binaryNumber = parseInt(j, 2);
+    while (binaryNumber &gt; 0) {
+      binaryNumber &amp;= binaryNumber - 1;
+      result++;
+    }
+    return result;
+  });
+}
+</code></pre>
+<p>Or, we can write it more explicitly, pushing each count to the result array:</p>
+<pre><code class="language-ts">function countBits(n: number): number[] {
+  let result = [];
+  for (let i = 0; i &lt;= n; i++) {
+    let binaryNum = parseInt(i.toString(2), 2);
+    let count = 0;
+    while (binaryNum &gt; 0) {
+      binaryNum &amp;= binaryNum - 1;
+      count++;
+    }
+    result.push(count);
+  }
+
+  return result;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>Counting the set bits has $log \ n$ time complexity (in the worst case when all bits are set, the loop will run the number of bits in <code>binaryNumber</code> — the number of bits of the binary representation of number $n$ is $log \ n$).<br>However, we also do it $n$ times, so overall, the time complexity will be $O(n \ log \ n)$.</p>
+<p>The space complexity is $O(n)$ as the need for space for our result array increases as $n$ increases.</p>
+<hr>
+<p>Next up, we&#39;ll take a look at <a href="https://leetcode.com/problems/reverse-bits" target="_blank" rel="noopener noreferrer">Reverse Bits</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-counting-bits</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-counting-bits</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 22 Dec 2024 00:00:00 GMT</pubDate>
+        </item>
+        <item>
             <title><![CDATA[LeetCode Meditations: Number of 1 Bits]]></title>
-            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-22/73-lm.png" alt="Cover image"></p>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-21/73-lm.png" alt="Cover image"></p>
 <p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/number-of-1-bits" target="_blank" rel="noopener noreferrer">this one</a>:</p>
 <blockquote>
 <p>Given a positive integer <code>n</code>, write a function that returns the number of set bits in its binary representation (also known as the <a href="http://en.wikipedia.org/wiki/Hamming_weight" target="_blank" rel="noopener noreferrer">Hamming weight</a>).</p>
@@ -70,7 +165,7 @@ We are using the [bitwise AND assignment operator](https://developer.mozilla.org
             <link>https://rivea0.github.io/blog/leetcode-meditations-number-of-1-bits</link>
             <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-number-of-1-bits</guid>
             <dc:creator><![CDATA[Eda Eren]]></dc:creator>
-            <pubDate>Sun, 22 Dec 2024 00:00:00 GMT</pubDate>
+            <pubDate>Sat, 21 Dec 2024 00:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[LeetCode Meditations — Chapter 14: Bit Manipulation]]></title>
