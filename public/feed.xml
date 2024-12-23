@@ -4,9 +4,96 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 22 Dec 2024 12:50:07 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 23 Dec 2024 12:16:14 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Reverse Bits]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-23/75-lm.png" alt="Cover image"></p>
+<p>The description for <a href="https://leetcode.com/problems/reverse-bits" target="_blank" rel="noopener noreferrer">Reverse Bits</a> is very brief:</p>
+<blockquote>
+<p>Reverse bits of a given 32 bits unsigned integer.</p>
+</blockquote>
+<p>There is also a note:</p>
+<blockquote>
+<ul>
+<li><p>Note that in some languages, such as Java, there is no unsigned integer type. In this case, both input and output will be given as a signed integer type. They should not affect your implementation, as the integer&#39;s internal binary representation is the same, whether it is signed or unsigned.</p>
+</li>
+<li><p>In Java, the compiler represents the signed integers using <a href="https://en.wikipedia.org/wiki/Two%27s_complement" target="_blank" rel="noopener noreferrer">2&#39;s complement notation</a>. Therefore, in <strong>Example 2</strong>, the input represents the signed integer <code>-3</code> and the output represents the signed integer <code>-1073741825</code>.</p>
+</li>
+</ul>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: n = 00000010100101000001111010011100
+Output:    964176192 (00111001011110000010100101000000)
+
+Explanation: The input binary string 00000010100101000001111010011100 represents the unsigned integer 43261596, so return 964176192 which its binary representation is 00111001011110000010100101000000.
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: n = 11111111111111111111111111111101
+Output:   3221225471 (10111111111111111111111111111111)
+
+Explanation: The input binary string 11111111111111111111111111111101 represents the unsigned integer 4294967293, so return 3221225471 which its binary representation is 10111111111111111111111111111111.
+</code></pre>
+<p>It&#39;s also stated that <em>The input must be a <strong>binary string</strong> of length <code>32</code></em> in the constraints.</p>
+<hr>
+<p>Since we know that the input is a 32-bit integer, we can easily calculate the reversed position of each bit. For example, the 0th one corresponds to the 31st, the 1st to the 30th, and so on.</p>
+<p>But we&#39;re doing bit manipulation, which means we have to deal with each bit one by one.<br>So, we can run a for loop to do just that. Each time, we can shift the bit by the index to the rightmost position, which can look like this:</p>
+<pre><code>n &gt;&gt;&gt; idx
+</code></pre>
+<p>Getting a bit (whether it is 0 or 1) can be easily done with an <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-and" target="_blank" rel="noopener noreferrer">AND operation</a> with 1.<br>If the bit is 0, <code>0 &amp; 1</code> will result in <code>0</code>.<br>If it&#39;s 1, <code>1 &amp; 1</code> will result in <code>1</code>.</p>
+<Note>
+We can think of *ANDing with 1* as the multiplicative identity (for example, $7 \cdot 1 = 7$).
+</Note>
+
+<p>First, we can get the bit:</p>
+<pre><code class="language-ts">for (let i = 0; i &lt; 32; i++) {
+  let bit = (n &gt;&gt;&gt; i) &amp; 1;
+
+  /* ... */
+}
+</code></pre>
+<p>Then, we need to put the bit we have in the reversed position. For that, we can <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-left-shift-zerofill" target="_blank" rel="noopener noreferrer">left shift</a> the bit, adding to the <code>result</code> as we do so:</p>
+<pre><code class="language-ts">let result = 0;
+
+for (let i = 0; i &lt; 32; i++) {
+  /* ... */
+
+  // put the bit to the reversed position
+  let position = 31 - i;
+  result += (bit &lt;&lt; position);
+}
+</code></pre>
+<p>We need to return the <code>result</code> as a 32-bit integer, to do that, we can do a trick using the <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-right-shift-unsigned" target="_blank" rel="noopener noreferrer">unsigned right shift</a> operator:</p>
+<pre><code class="language-ts">function reverseBits(n: number): number {
+  /* ... */
+
+  return result &gt;&gt;&gt; 0;
+}
+</code></pre>
+<p>And, the final solution looks like this:</p>
+<pre><code class="language-ts">function reverseBits(n: number): number {
+  let result = 0;
+  for (let i = 0; i &lt; 32; i++) {
+    let bit = (n &gt;&gt;&gt; i) &amp; 1;
+    // put the bit to the reversed position
+    let position = 31 - i;
+    result += (bit &lt;&lt; position);
+  }
+
+  return result &gt;&gt;&gt; 0; // return as a 32-bit integer
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>We know that the input and our result are always 32-bit integers (and, we don&#39;t have to use any other additional data structure), we run a loop 32 times as well, which is a fixed number, so both the time and space complexities are $O(1)$.</p>
+<hr>
+<p>Up next, we&#39;ll take a look at <a href="https://leetcode.com/problems/missing-number" target="_blank" rel="noopener noreferrer">Missing Number</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-reverse-bits</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-reverse-bits</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Mon, 23 Dec 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Counting Bits]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-22/74-lm.png" alt="Cover image"></p>

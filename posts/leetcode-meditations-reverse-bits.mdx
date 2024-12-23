@@ -1,0 +1,117 @@
+---
+title: "LeetCode Meditations: Reverse Bits"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Reverse Bits problem.
+slug: leetcode-meditations-reverse-bits
+date: 2024-12-23
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-23/75-lm.png)
+
+The description for [Reverse Bits](https://leetcode.com/problems/reverse-bits) is very brief:
+
+> Reverse bits of a given 32 bits unsigned integer.
+
+There is also a note:
+
+> - Note that in some languages, such as Java, there is no unsigned integer type. In this case, both input and output will be given as a signed integer type. They should not affect your implementation, as the integer's internal binary representation is the same, whether it is signed or unsigned.
+> 
+> - In Java, the compiler represents the signed integers using [2's complement notation](https://en.wikipedia.org/wiki/Two%27s_complement). Therefore, in **Example 2**, the input represents the signed integer `-3` and the output represents the signed integer `-1073741825`.
+
+
+For example:
+
+```
+Input: n = 00000010100101000001111010011100
+Output:    964176192 (00111001011110000010100101000000)
+
+Explanation: The input binary string 00000010100101000001111010011100 represents the unsigned integer 43261596, so return 964176192 which its binary representation is 00111001011110000010100101000000.
+```
+
+Or:
+
+```
+Input: n = 11111111111111111111111111111101
+Output:   3221225471 (10111111111111111111111111111111)
+
+Explanation: The input binary string 11111111111111111111111111111101 represents the unsigned integer 4294967293, so return 3221225471 which its binary representation is 10111111111111111111111111111111.
+```
+
+It's also stated that *The input must be a **binary string** of length `32`* in the constraints.
+
+---
+
+Since we know that the input is a 32-bit integer, we can easily calculate the reversed position of each bit. For example, the 0th one corresponds to the 31st, the 1st to the 30th, and so on.
+
+But we're doing bit manipulation, which means we have to deal with each bit one by one. 
+So, we can run a for loop to do just that. Each time, we can shift the bit by the index to the rightmost position, which can look like this:
+
+```
+n >>> idx
+```
+
+Getting a bit (whether it is 0 or 1) can be easily done with an [AND operation](https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-and) with 1.
+If the bit is 0, `0 & 1` will result in `0`.
+If it's 1, `1 & 1` will result in `1`.
+
+<Note>
+We can think of *ANDing with 1* as the multiplicative identity (for example, $7 \cdot 1 = 7$).
+</Note>
+
+First, we can get the bit:
+
+```ts
+for (let i = 0; i < 32; i++) {
+  let bit = (n >>> i) & 1;
+
+  /* ... */
+}
+```
+
+Then, we need to put the bit we have in the reversed position. For that, we can [left shift](https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-left-shift-zerofill) the bit, adding to the `result` as we do so:
+
+```ts
+let result = 0;
+
+for (let i = 0; i < 32; i++) {
+  /* ... */
+
+  // put the bit to the reversed position
+  let position = 31 - i;
+  result += (bit << position);
+}
+```
+
+We need to return the `result` as a 32-bit integer, to do that, we can do a trick using the [unsigned right shift](https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-right-shift-unsigned) operator:
+
+```ts
+function reverseBits(n: number): number {
+  /* ... */
+
+  return result >>> 0;
+}
+```
+
+And, the final solution looks like this:
+
+```ts
+function reverseBits(n: number): number {
+  let result = 0;
+  for (let i = 0; i < 32; i++) {
+    let bit = (n >>> i) & 1;
+    // put the bit to the reversed position
+    let position = 31 - i;
+    result += (bit << position);
+  }
+
+  return result >>> 0; // return as a 32-bit integer
+}
+```
+
+#### Time and space complexity
+
+We know that the input and our result are always 32-bit integers (and, we don't have to use any other additional data structure), we run a loop 32 times as well, which is a fixed number, so both the time and space complexities are $O(1)$.
+
+---
+
+Up next, we'll take a look at [Missing Number](https://leetcode.com/problems/missing-number). Until then, happy coding.
