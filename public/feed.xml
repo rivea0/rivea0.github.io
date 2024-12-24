@@ -4,9 +4,85 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 23 Dec 2024 12:16:14 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 24 Dec 2024 13:24:18 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Missing Number]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-24/76-lm.png" alt="Cover image"></p>
+<p>Let&#39;s start with the description for <a href="https://leetcode.com/problems/missing-number" target="_blank" rel="noopener noreferrer">this problem</a>:</p>
+<blockquote>
+<p>Given an array <code>nums</code> containing <code>n</code> distinct numbers in the range <code>[0, n]</code>, return <em>the only number in the range that is missing from the array.</em></p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: nums = [3, 0, 1]
+Output: 2
+
+Explanation: n = 3 since there are 3 numbers, so all numbers are in the range [0, 3]. 2 is the missing number in the range since it does not appear in nums.
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: nums = [0, 1]
+Output: 2
+
+Explanation: n = 2 since there are 2 numbers, so all numbers are in the range [0, 2]. 2 is the missing number in the range since it does not appear in nums.
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: nums = [9, 6, 4, 2, 3, 5, 7, 0, 1]
+Output: 8
+
+Explanation: n = 9 since there are 9 numbers, so all numbers are in the range [0, 9]. 8 is the missing number in the range since it does not appear in nums.
+</code></pre>
+<p>It&#39;s also stated that <em>all the numbers of <code>nums</code> are <strong>unique</strong>.</em></p>
+<hr>
+<p>One easy way to solve this is to get the total sum of the range, then subtract the sum of the given array. What is left will be the missing number.</p>
+<p>It can be done using <code>reduce</code> to sum the numbers, like this:</p>
+<pre><code class="language-ts">function missingNumber(nums: number[]): number {
+  return Array.from({ 
+    length: nums.length + 1 
+  }, (_, idx) =&gt; idx).reduce((acc, item) =&gt; acc + item, 0) 
+  - nums.reduce((acc, item) =&gt; acc + item, 0);
+}
+</code></pre>
+<p>First, we create an array with values from <code>0</code> to <code>nums.length + 1</code> and get its sum, then subtract the sum of <code>nums</code> from it.</p>
+<p>However, the time and space complexities will be $O(n)$ with this solution as we create an array for the range.</p>
+<p>We can have a more (<em>storage-wise</em>) efficient solution using bit manipulation.<br>In fact, we can use an <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-xor" target="_blank" rel="noopener noreferrer">XOR</a> operation to help us with that.</p>
+<p>To remember, XOR results in 1 if both of the bits are different — that is, one of them is 0 and the other is 1.<br>When we XOR a number with itself, it will result in 0, as all the bits are the same.</p>
+<p>For example, 3 in binary is <code>11</code>, when we do <code>11 ^ 11</code> the result is <code>0</code>:</p>
+<pre><code class="language-ts">const n = 3;
+const result = n ^ n; // 0
+</code></pre>
+<p>In other words, <mark>an XOR operation of a number with itself will result in 0</mark>.</p>
+<p>If we do XOR with each number in the array with the indices, eventually all of them will cancel out (result in 0), leaving only the missing number.</p>
+<p>You might think that not all numbers are at their index, for example if <code>nums</code> is <code>[3, 0, 1]</code>, it is obvious that <code>3</code> does not even have an &quot;index 3&quot; that can be associated with it!</p>
+<p>For that, we can start by initializing our result to <code>nums.length</code>. Now, even if the missing number is equal to <code>nums.length</code>, we are handling that edge case.</p>
+<pre><code class="language-ts">let result = nums.length;
+</code></pre>
+<p>Also, <em>XOR is commutative and associative</em>, so it&#39;s not important at which index a number appears (or doesn&#39;t have one, like in the example above) — they eventually will cancel out.</p>
+<p>Now, with a <code>for</code> loop, we can do the XOR using the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_XOR_assignment" target="_blank" rel="noopener noreferrer">bitwise XOR assignment operator</a>:</p>
+<pre><code class="language-ts">for (let i = 0; i &lt; nums.length; i++) {
+  result ^= i ^ nums[i];
+}
+</code></pre>
+<p>And, the final result is the missing number. The solution overall looks like this:</p>
+<pre><code class="language-ts">function missingNumber(nums: number[]): number {
+  let result = nums.length;
+  for (let i = 0; i &lt; nums.length; i++) {
+    result ^= i ^ nums[i];
+  }
+
+  return result;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>The time complexity is again $O(n)$ as we iterate through each number in the array, but the space complexity will be $O(1)$ as we don&#39;t have any additional storage need that will grow as the input size increases.</p>
+<hr>
+<p>Next up, we will take a look at the final problem of the entire series, <a href="https://leetcode.com/problems/sum-of-two-integers" target="_blank" rel="noopener noreferrer">Sum of Two Integers</a>. Until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-missing-number</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-missing-number</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Tue, 24 Dec 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Reverse Bits]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-23/75-lm.png" alt="Cover image"></p>

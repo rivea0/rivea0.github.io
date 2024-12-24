@@ -1,0 +1,117 @@
+---
+title: "LeetCode Meditations: Missing Number"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Missing Number problem.
+slug: leetcode-meditations-missing-number
+date: 2024-12-24
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-24/76-lm.png)
+
+Let's start with the description for [this problem](https://leetcode.com/problems/missing-number):
+
+> Given an array `nums` containing `n` distinct numbers in the range `[0, n]`, return _the only number in the range that is missing from the array._
+
+For example:
+
+```
+Input: nums = [3, 0, 1]
+Output: 2
+
+Explanation: n = 3 since there are 3 numbers, so all numbers are in the range [0, 3]. 2 is the missing number in the range since it does not appear in nums.
+```
+
+Or:
+
+```
+Input: nums = [0, 1]
+Output: 2
+
+Explanation: n = 2 since there are 2 numbers, so all numbers are in the range [0, 2]. 2 is the missing number in the range since it does not appear in nums.
+```
+
+Or:
+
+```
+Input: nums = [9, 6, 4, 2, 3, 5, 7, 0, 1]
+Output: 8
+
+Explanation: n = 9 since there are 9 numbers, so all numbers are in the range [0, 9]. 8 is the missing number in the range since it does not appear in nums.
+```
+
+It's also stated that *all the numbers of `nums` are **unique**.*
+
+---
+
+One easy way to solve this is to get the total sum of the range, then subtract the sum of the given array. What is left will be the missing number.
+
+It can be done using `reduce` to sum the numbers, like this:
+
+```ts
+function missingNumber(nums: number[]): number {
+  return Array.from({ 
+    length: nums.length + 1 
+  }, (_, idx) => idx).reduce((acc, item) => acc + item, 0) 
+  - nums.reduce((acc, item) => acc + item, 0);
+}
+```
+
+First, we create an array with values from `0` to `nums.length + 1` and get its sum, then subtract the sum of `nums` from it.
+
+However, the time and space complexities will be $O(n)$ with this solution as we create an array for the range.
+
+We can have a more (*storage-wise*) efficient solution using bit manipulation. 
+In fact, we can use an [XOR](https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-xor) operation to help us with that.
+
+To remember, XOR results in 1 if both of the bits are different — that is, one of them is 0 and the other is 1.
+When we XOR a number with itself, it will result in 0, as all the bits are the same.
+
+For example, 3 in binary is `11`, when we do `11 ^ 11` the result is `0`:
+
+```ts
+const n = 3;
+const result = n ^ n; // 0
+```
+
+In other words, <mark>an XOR operation of a number with itself will result in 0</mark>.
+
+If we do XOR with each number in the array with the indices, eventually all of them will cancel out (result in 0), leaving only the missing number.
+
+You might think that not all numbers are at their index, for example if `nums` is `[3, 0, 1]`, it is obvious that `3` does not even have an "index 3" that can be associated with it!
+
+For that, we can start by initializing our result to `nums.length`. Now, even if the missing number is equal to `nums.length`, we are handling that edge case.
+
+```ts
+let result = nums.length;
+```
+
+Also, *XOR is commutative and associative*, so it's not important at which index a number appears (or doesn't have one, like in the example above) — they eventually will cancel out.
+
+Now, with a `for` loop, we can do the XOR using the [bitwise XOR assignment operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_XOR_assignment):
+
+```ts
+for (let i = 0; i < nums.length; i++) {
+  result ^= i ^ nums[i];
+}
+```
+
+And, the final result is the missing number. The solution overall looks like this:
+
+```ts
+function missingNumber(nums: number[]): number {
+  let result = nums.length;
+  for (let i = 0; i < nums.length; i++) {
+    result ^= i ^ nums[i];
+  }
+
+  return result;
+}
+```
+
+#### Time and space complexity
+
+The time complexity is again $O(n)$ as we iterate through each number in the array, but the space complexity will be $O(1)$ as we don't have any additional storage need that will grow as the input size increases.
+
+---
+
+Next up, we will take a look at the final problem of the entire series, [Sum of Two Integers](https://leetcode.com/problems/sum-of-two-integers). Until then, happy coding.
