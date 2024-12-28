@@ -1,0 +1,83 @@
+---
+title: "LeetCode Meditations: Sum of Two Integers"
+tags: [Computer Science, TypeScript, JavaScript]
+description: Solving the LeetCode Sum of Two Integers problem.
+slug: leetcode-meditations-sum-of-two-integers
+date: 2024-12-28
+---
+
+![Cover image](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-28/77-lm.png)
+
+The description given for [Sum of Two Integers](https://leetcode.com/problems/sum-of-two-integers) is very simple:
+
+> Given two integers `a` and `b`, return _the sum of the two integers without using the operators_ `+` _and_ `-`.
+
+For example:
+
+```
+Input: a = 1, b = 2
+Output: 3
+```
+
+Or:
+
+```
+Input: a = 2, b = 3
+Output: 5
+```
+
+---
+
+In the very last problem of this series, we will close off with adding two integers using [bit manipulation](https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation) instead of our beloved plus operator.
+
+Adding two bits, either of which can only be 1 or 0, doesn't have many varying results.
+If we're adding two bits which are 1 and 0 (or, 0 and 1), the result will be 1. If we're adding two 0 bits, the result is 0. If, however, we're adding two 1 bits, we have a *carry* — which means we have to write <mark>0 in the output</mark>, but <mark>also carry a 1</mark>.
+
+For example, adding 2 and 3 will result in 5, and we will have a carry value during the operation:
+
+![Example of a binary addition of 2 and 3](https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-28/binary-add.gif)
+
+Without thinking about the carry value, the output we need to have after adding two bits resembles a lot like what we would have after an [XOR operation](https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-xor). If we have different bits (*0 and 1*, or, *1 and 0*), the output will be 1, otherwise 0 (adding *0 and 0*, or, *1 and 1*).
+
+So, an XOR operation can help us with the output.
+
+What about the carry?
+
+We have a carry value only when both of the bits are 1 — which looks like an [AND operation](https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-and). 
+
+So, an AND operation can help us with the carry.
+
+Also note that the carry value is shifted to the left, for which we also have a handy [left-shift operator](https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-left-shift-zerofill).
+
+So, our output and carry can look like this:
+
+```ts
+let output = a ^ b;
+let carry = (a & b) << 1;
+```
+
+We can keep modifying the two values we have, and keep going until we don't have any carry values left. We can modify `a` to be the `output`, and `b` to be the `carry`, and return `a`, which holds the final output at the end.
+
+Overall, the final solution might look like this in TypeScript:
+
+```ts
+function getSum(a: number, b: number): number {
+  // while we still have carry
+  while (b !== 0) {
+    let output = a ^ b;
+    let carry = (a & b) << 1;
+    a = output;
+    b = carry;
+  }
+
+  return a;
+}
+```
+
+#### Time and space complexity
+
+Both `a` and `b` are constant values, and we also don't need an additional data structure whose size will grow proportionately to the input, so both our time and space complexities will be constant, $O(1)$.
+
+---
+
+And, that is the final problem of [LeetCode Meditations](https://rivea0.github.io/leetcode-meditations) series! We will wrap it up with a conclusion in the next post — until then, happy coding.

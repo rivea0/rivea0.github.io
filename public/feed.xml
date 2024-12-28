@@ -4,9 +4,63 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 24 Dec 2024 13:24:18 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 28 Dec 2024 20:30:29 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Sum of Two Integers]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-28/77-lm.png" alt="Cover image"></p>
+<p>The description given for <a href="https://leetcode.com/problems/sum-of-two-integers" target="_blank" rel="noopener noreferrer">Sum of Two Integers</a> is very simple:</p>
+<blockquote>
+<p>Given two integers <code>a</code> and <code>b</code>, return <em>the sum of the two integers without using the operators</em> <code>+</code> <em>and</em> <code>-</code>.</p>
+</blockquote>
+<p>For example:</p>
+<pre><code>Input: a = 1, b = 2
+Output: 3
+</code></pre>
+<p>Or:</p>
+<pre><code>Input: a = 2, b = 3
+Output: 5
+</code></pre>
+<hr>
+<p>In the very last problem of this series, we will close off with adding two integers using <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation" target="_blank" rel="noopener noreferrer">bit manipulation</a> instead of our beloved plus operator.</p>
+<p>Adding two bits, either of which can only be 1 or 0, doesn&#39;t have many varying results.<br>If we&#39;re adding two bits which are 1 and 0 (or, 0 and 1), the result will be 1. If we&#39;re adding two 0 bits, the result is 0. If, however, we&#39;re adding two 1 bits, we have a <em>carry</em> — which means we have to write <mark>0 in the output</mark>, but <mark>also carry a 1</mark>.</p>
+<p>For example, adding 2 and 3 will result in 5, and we will have a carry value during the operation:</p>
+<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-28/binary-add.gif" alt="Example of a binary addition of 2 and 3"></p>
+<p>Without thinking about the carry value, the output we need to have after adding two bits resembles a lot like what we would have after an <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-xor" target="_blank" rel="noopener noreferrer">XOR operation</a>. If we have different bits (<em>0 and 1</em>, or, <em>1 and 0</em>), the output will be 1, otherwise 0 (adding <em>0 and 0</em>, or, <em>1 and 1</em>).</p>
+<p>So, an XOR operation can help us with the output.</p>
+<p>What about the carry?</p>
+<p>We have a carry value only when both of the bits are 1 — which looks like an <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-and" target="_blank" rel="noopener noreferrer">AND operation</a>. </p>
+<p>So, an AND operation can help us with the carry.</p>
+<p>Also note that the carry value is shifted to the left, for which we also have a handy <a href="https://rivea0.github.io/blog/leetcode-meditations-chapter-14-bit-manipulation#bitwise-left-shift-zerofill" target="_blank" rel="noopener noreferrer">left-shift operator</a>.</p>
+<p>So, our output and carry can look like this:</p>
+<pre><code class="language-ts">let output = a ^ b;
+let carry = (a &amp; b) &lt;&lt; 1;
+</code></pre>
+<p>We can keep modifying the two values we have, and keep going until we don&#39;t have any carry values left. We can modify <code>a</code> to be the <code>output</code>, and <code>b</code> to be the <code>carry</code>, and return <code>a</code>, which holds the final output at the end.</p>
+<p>Overall, the final solution might look like this in TypeScript:</p>
+<pre><code class="language-ts">function getSum(a: number, b: number): number {
+  // while we still have carry
+  while (b !== 0) {
+    let output = a ^ b;
+    let carry = (a &amp; b) &lt;&lt; 1;
+    a = output;
+    b = carry;
+  }
+
+  return a;
+}
+</code></pre>
+<h4>Time and space complexity</h4>
+<p>Both <code>a</code> and <code>b</code> are constant values, and we also don&#39;t need an additional data structure whose size will grow proportionately to the input, so both our time and space complexities will be constant, $O(1)$.</p>
+<hr>
+<p>And, that is the final problem of <a href="https://rivea0.github.io/leetcode-meditations" target="_blank" rel="noopener noreferrer">LeetCode Meditations</a> series! We will wrap it up with a conclusion in the next post — until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-sum-of-two-integers</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-sum-of-two-integers</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sat, 28 Dec 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Missing Number]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-24/76-lm.png" alt="Cover image"></p>
