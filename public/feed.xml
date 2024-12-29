@@ -4,9 +4,29 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 28 Dec 2024 20:30:29 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 29 Dec 2024 15:23:45 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[LeetCode Meditations: Conclusion]]></title>
+            <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-29/78-lm-conclusion.png" alt="Cover image"></p>
+<p>With some detours here and there, we have finished looking at the problems in the <a href="https://neetcode.io/practice" target="_blank" rel="noopener noreferrer">NeetCode Practice roadmap</a> (which is also the classic old <a href="https://leetcode.com/discuss/general-discussion/460599/Blind-75-LeetCode-Questions/1057039" target="_blank" rel="noopener noreferrer">Blind 75 list</a>).</p>
+<p>Overall, we took a look at <strong>sixty-two problems</strong>, with <strong>fourteen chapter introductions</strong>. </p>
+<p>I did not start out with specific rules for this series, or how it will take shape—for example, we have also used Python for the earlier examples, but gradually switched to TypeScript—but it was a great experience to dissect the solutions, and slowly grasp the components that go with them.</p>
+<p>Although I have to say that eventually, with time, we might forget, and the concepts and the patterns we learned might disappear. But, that&#39;s not a problem in itself, because as you might have realized, if there is one idea that should stick with us with this project is that <mark>problems are best solved when they are broken into smaller parts</mark>.<br>And, as with anything else, writing, or talking to oneself (see <a href="https://en.wikipedia.org/wiki/Rubber_duck_debugging" target="_blank" rel="noopener noreferrer">duck debugging</a>), works miracles. </p>
+<p>Even though we live in an interesting timeline where some people might think writing (or, any other creative activity) doesn&#39;t seem to matter that much anymore since we have now artificial &quot;brains&quot; to do it, we can still appreciate its value when we <em>ourselves</em> engage in it (or, any other creative activity).</p>
+<p>Well, to admit, writing about the solutions to programming interview questions that have already been solved turns into seemingly generic outputs after a while; however, committing to this project was, to me, very meaningful.<br>It was not only the solutions, but the ritual that went with writing this series — including preparing the GIFs in chapter introductions, the cover images, and finding the nature photographs that go with them.</p>
+<p>Talking of which, the photographs in the cover images that accompany each post are in fact taken by actual human beings, and can be found in <a href="https://unsplash.com/collections/ezmSUcDxmaM/leetcode-meditations-cover-images" target="_blank" rel="noopener noreferrer">this Unsplash collection</a>. Also, all the visual assets can be found in <a href="https://github.com/rivea0/leetcode-meditations-assets" target="_blank" rel="noopener noreferrer">this repository</a>.</p>
+<p>Now, it&#39;s time to take a deep breath.</p>
+<hr>
+<p>It was a beautiful adventure to undertake this project, and hopefully you found some value as well if you came across a post.</p>
+<p>Have a beautiful journey ahead, and until then, happy coding.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/leetcode-meditations-conclusion</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/leetcode-meditations-conclusion</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Sun, 29 Dec 2024 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Sum of Two Integers]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-28/77-lm.png" alt="Cover image"></p>
