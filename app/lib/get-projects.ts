@@ -21,22 +21,6 @@ type ProjectProps = {
 
 const projects: ProjectProps[] = [
   {
-    title: 'QuestionMark',
-    description: ' A question-answering application using a lightweight pretrained machine learning model that runs in the browser, with Transformers.js ✨',
-    demoHref: 'https://thequestionmark.netlify.app',
-    codeHref: 'https://github.com/rivea0/questionmark',
-    language: ['TypeScript'],
-    framework: ['React'],
-  },
-  {
-    title: 'Lemon: 30-Day Challenge Tracker',
-    description: LemonDescription(),
-    demoHref: '',
-    codeHref: 'https://github.com/rivea0/lemon',
-    language: ['TypeScript'],
-    framework: ['Next.js'],
-  },
-  {
     title: 'Obsidian Prime',
     description: PrimeThemeDescription(),
     demoHref: '',
@@ -54,6 +38,30 @@ const projects: ProjectProps[] = [
     more: GlowCloudMore(),
   },
   {
+    title: 'QuestionMark',
+    description: ' A question-answering application using a lightweight pretrained machine learning model that runs in the browser, with Transformers.js ✨',
+    demoHref: 'https://thequestionmark.netlify.app',
+    codeHref: 'https://github.com/rivea0/questionmark',
+    language: ['TypeScript'],
+    framework: ['React'],
+  },
+  {
+    title: 'discrete-math-ref',
+    description:
+      'A Vue application to display basic discrete math formulas, and copy their TeX source to clipboard.',
+    codeHref: 'https://github.com/rivea0/discrete-math-ref',
+    language: ['TypeScript'],
+    framework: ['Vue'],
+  },
+  {
+    title: 'Lemon: 30-Day Challenge Tracker',
+    description: LemonDescription(),
+    demoHref: '',
+    codeHref: 'https://github.com/rivea0/lemon',
+    language: ['TypeScript'],
+    framework: ['Next.js'],
+  },
+  {
     title: 'Vocab-Build',
     description: 'A Python CLI tool to study English vocabulary.',
     demoHref: '',
@@ -66,23 +74,6 @@ const projects: ProjectProps[] = [
       'A simple website to search for anagrams of a word, taken from its Wiktionary page.',
     demoHref: 'https://wikianagrams.vercel.app/',
     codeHref: 'https://github.com/rivea0/wikianagrams',
-    language: ['TypeScript'],
-    framework: ['Next.js'],
-  },
-  {
-    title: 'discrete-math-ref',
-    description:
-      'A Vue application to display basic discrete math formulas, and copy their TeX source to clipboard.',
-    codeHref: 'https://github.com/rivea0/discrete-math-ref',
-    language: ['TypeScript'],
-    framework: ['Vue'],
-  },
-  {
-    title: 'Terra Incognita',
-    description:
-      'The hackathon project for NASA Space Apps Challenge 2023, in the category of "Planetary Tourism Office."',
-    demoHref: 'https://terra-incognita.vercel.app',
-    codeHref: 'https://github.com/rivea0/terra-incognita',
     language: ['TypeScript'],
     framework: ['Next.js'],
   },
