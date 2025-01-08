@@ -41,11 +41,6 @@ export default function Socials() {
         tooltip="RSS"
       />
       <SocialButton
-        href="https://dev.to/rivea0"
-        icon={<Dev color="none" fillColor={`var(--icon-dev-fill-color)`} viewBox='0 0 30 30' />}
-        tooltip="DEV.to"
-      />
-      <SocialButton
         href="https://www.buymeacoffee.com/rivea0"
         icon={<BuyMeACoffee color={`var(--icon-buy-me-a-coffee-color)`} />}
         tooltip="Buy Me a Coffee"

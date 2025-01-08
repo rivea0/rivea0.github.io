@@ -49,7 +49,6 @@
   --icon-github-color: #e5e8ee;
   --icon-mail-color: #CDCFFC;
   --icon-rss-color: #CDFCFA;
-  --icon-dev-fill-color: #E4E1E1;
   --icon-buy-me-a-coffee-color: #F9F596;
 
   /* Syntax Highlighting */
@@ -87,9 +86,7 @@
   --icon-github-color: #19212d;
   --icon-mail-color: #a994ff;
   --icon-rss-color: #54ded8;
-  --icon-dev-fill-color: #a79e9e;
   --icon-buy-me-a-coffee-color: #E5C600;
-
 }
 
 * {
