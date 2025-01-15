@@ -17,12 +17,11 @@ export default function Page() {
       <div className={styles.container}>
         <div className={styles.paragraphDiv}>
           <p>Hi, I'm Eda.</p>
-          <p >I hold a B.A. in English Literature, currently in a software developer role.</p>
+          <p >I hold a B.A. in English Literature, and am currently in a software developer role.</p>
           <p >I have many kinds of interests, and I try to write helpful guides, usually to my future self to retain information better — as writing is the best learning strategy.</p>
           <p >Here are <em>some</em> of the things that I love the most (at this time of writing):</p>
           <ul className={styles.ul}>
-            <li>trying to solve LeetCode problems <Link href="https://rivea0.github.io/blog/leetcode-meditations-introduction">mindfully</Link></li>
-            <li>learning TypeScript</li>
+            <li>using TypeScript</li>
             <li>reading Emerson and Thoreau</li>
             <li>writing words as a human being</li>
             <li>basic mathematical logic</li>
