@@ -9,10 +9,11 @@ type ProjectProps = {
   description: string | ReactNode;
   demoHref?: string;
   codeHref?: string;
+  thirdPartyHref?: string;
   isWriting?: boolean;
   more?: string | ReactNode;
-  isThirdParty?: boolean;
   thirdPartyName?: string;
+  demoName?: string;
   language?: string[];
   framework?: string[];
   imageSrc?: string;
@@ -43,10 +44,11 @@ export default function Project({
   description,
   demoHref,
   codeHref,
+  thirdPartyHref,
   isWriting,
   more,
-  isThirdParty,
   thirdPartyName,
+  demoName,
   language,
   framework,
   imageSrc,
@@ -122,7 +124,7 @@ export default function Project({
         {demoHref && (
           <>
             <Link href={demoHref} className={styles.link}>
-              <p>{`${isThirdParty ? thirdPartyName : 'Website'}`}</p>
+              <p>{`${demoName}`}</p>
               <ExternalLink />
             </Link>
           </>
@@ -131,6 +133,14 @@ export default function Project({
           <>
             <Link href={codeHref} className={styles.link}>
               <p>Source</p>
+              <ExternalLink />
+            </Link>
+          </>
+        )}
+        {thirdPartyHref && (
+          <>
+            <Link href={thirdPartyHref} className={styles.link}>
+              <p>{`${thirdPartyName}`}</p>
               <ExternalLink />
             </Link>
           </>
