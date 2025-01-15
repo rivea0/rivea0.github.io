@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import {
+  CompromiseRedactDescription,
   GlowCloudMore,
   LemonDescription,
   PrimeThemeDescription,
@@ -10,10 +11,11 @@ type ProjectProps = {
   description: string | ReactNode;
   demoHref?: string;
   codeHref?: string;
+  thirdPartyHref?: string;
   isWriting?: boolean;
   more?: string | ReactNode;
-  isThirdParty?: boolean;
   thirdPartyName?: string;
+  demoName?: string;
   language?: string[];
   framework?: string[];
   imageSrc?: string;
@@ -67,6 +69,12 @@ const projects: ProjectProps[] = [
     demoHref: '',
     codeHref: 'https://github.com/rivea0/vocab-build',
     language: ['Python'],
+  },
+  {
+    title: 'compromise-redact-selections',
+    description: CompromiseRedactDescription(),
+    codeHref: 'https://github.com/rivea0/compromise-redact-selections',
+    language: ['JavaScript', 'Shell'],
   },
   {
     title: 'WikiAnagrams',

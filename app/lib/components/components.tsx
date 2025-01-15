@@ -47,3 +47,12 @@ export function PrimeThemeDescription() {
     </>
   )
 }
+
+export function CompromiseRedactDescription() {
+  return (
+    <>
+      A small script to extend the selections of the <code>redact</code> method from the NPM package 
+      <span> <Link href="https://www.npmjs.com/package/compromise">compromise</Link></span>.
+    </>
+  )
+}
