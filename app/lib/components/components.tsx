@@ -56,3 +56,11 @@ export function CompromiseRedactDescription() {
     </>
   )
 }
+
+export function UnprettyBytesDescription() {
+  return (
+    <>
+      A small package to convert a human-readable string to bytes: <br/> <code>'1 GiB'</code> → <code>1073741824</code>.
+    </>
+  )
+}

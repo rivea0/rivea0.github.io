@@ -4,6 +4,7 @@ import {
   GlowCloudMore,
   LemonDescription,
   PrimeThemeDescription,
+  UnprettyBytesDescription,
 } from './components/components';
 
 type ProjectProps = {
@@ -28,6 +29,13 @@ const projects: ProjectProps[] = [
     demoHref: '',
     codeHref: 'https://github.com/rivea0/obsidian-prime',
     language: ['CSS'],
+  },
+  {
+    title: 'unpretty-bytes',
+    description: UnprettyBytesDescription(),
+    demoHref: '',
+    codeHref: 'https://github.com/rivea0/unpretty-bytes',
+    language: ['TypeScript', 'Node.js'],
   },
   {
     title: 'Glow Cloud: The Weather',
