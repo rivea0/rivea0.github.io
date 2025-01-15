@@ -1,25 +1,23 @@
-'use client'
+'use client';
 
-import Link from '@components/link'
-import { useState } from 'react'
-import clsx from 'clsx'
-import BlockEntry from '@components/block-entry'
-import type { Post } from '@lib/types'
-import styles from './posts-list.module.css'
+import Link from '@components/link';
+import { useState } from 'react';
+import clsx from 'clsx';
+import BlockEntry from '@components/block-entry';
+import type { Post } from '@lib/types';
+import styles from './posts-list.module.css';
 
-type Props =
-  | {
-      posts: Post[]
-      paginate?: boolean
-    }
-  // | {
-  //     skeleton: true
-  //   }
-
+type Props = {
+  posts: Post[];
+  paginate?: boolean;
+};
+// | {
+//     skeleton: true
+//   }
 
 export default function PostsList(props: Props) {
   // const [showMore, setShowMore] = useState(4)
-  const [filterTopic, setfilterTopic] = useState('')
+  const [filterTopic, setfilterTopic] = useState('');
 
   // if ('skeleton' in props) {
   //   return (
@@ -31,72 +29,91 @@ export default function PostsList(props: Props) {
   //   )
   // }
   // const { posts, paginate } = props
-  const { posts } = props
-  const allTagsSet = new Set()
-  posts.map(p => p.tags.forEach(tag => allTagsSet.add(tag)))
-  const allTags = Array.from(allTagsSet).sort()
+  const { posts } = props;
+  const allTagsSet = new Set();
+  posts.map((p) => p.tags.forEach((tag) => allTagsSet.add(tag)));
+  const allTags = Array.from(allTagsSet).sort();
 
   return (
     <>
       <details className={styles.filters}>
         <summary>Apply filter</summary>
         <ul className={styles.filterList}>
-        {allTags.map((tag: string) => {
-          return ( 
-            <li key={tag}>
-              <button 
-                onClick={(e) => {
-                setfilterTopic((e.target as HTMLButtonElement).textContent)
-              }}
-                type="button"
-                className={clsx({[styles.activeBtn]: filterTopic === tag})}
-              >
-                {tag}
-              </button>
-            </li>
-          )})}
-      </ul>
-      <button 
-        onClick={() => setfilterTopic('')} type="button"
-        className={clsx(styles.clearFilter, {[styles.clearActive]: filterTopic === ''})}
-      >
-        Clear filter
-      </button>
+          {allTags.map((tag: string) => {
+            return (
+              <li key={tag}>
+                <button
+                  onClick={(e) => {
+                    setfilterTopic((e.target as HTMLButtonElement).textContent);
+                  }}
+                  type="button"
+                  className={clsx({ [styles.activeBtn]: filterTopic === tag })}
+                >
+                  {tag}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        <button
+          onClick={() => setfilterTopic('')}
+          type="button"
+          className={clsx(styles.clearFilter, {
+            [styles.clearActive]: filterTopic === '',
+          })}
+        >
+          Clear filter
+        </button>
       </details>
 
       <ul className={styles.container}>
-        <BlockEntry
-          key="lm"
-          href="leetcode-meditations"
-          title="🌳 LeetCode Meditations"
-          date={new Date(posts.find(p => p.slug.startsWith('leetcode-meditations') && p.date)?.date)}
-          dateInfo="Latest post:"
-        />
-
         {/* {posts.slice(0, paginate ? showMore : undefined) */}
         {posts
-          .filter(p => {
-          if (p.slug.startsWith('leetcode-meditations')) {
-            return undefined;
-          }
-          if (filterTopic === '') return p
-          return p.tags.includes(filterTopic) ? p : undefined
-        }).map((post) => {
-          const date = new Date(post.date).toLocaleDateString('en-US', {
-            month: 'numeric',
-            day: 'numeric',
-            year: 'numeric',
+          .filter((p) => {
+            if (
+              p.slug.startsWith('leetcode-meditations') &&
+              p.slug !== 'leetcode-meditations-conclusion'
+            ) {
+              return undefined;
+            }
+            if (filterTopic === '') return p;
+            return p.tags.includes(filterTopic) ? p : undefined;
           })
+          .map((post) => {
+            const date = new Date(post.date).toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+              year: 'numeric',
+            });
 
-          return (
-            <BlockEntry
-              key={`post-item-${post.slug}`}
-              href={`/blog/${post.slug}`}
-              title={post.title}
-              date={new Date(date)}
-            />
-          )
-        })}
+            if (post.slug === 'leetcode-meditations-conclusion') {
+              return (
+                <BlockEntry
+                  key="lm"
+                  href="leetcode-meditations"
+                  title="🌳 LeetCode Meditations"
+                  date={
+                    new Date(
+                      posts.find(
+                        (p) =>
+                          p.slug.startsWith('leetcode-meditations') && p.date
+                      )?.date
+                    )
+                  }
+                  dateInfo="Series spanning from February 13 to "
+                />
+              );
+            } else {
+              return (
+                <BlockEntry
+                  key={`post-item-${post.slug}`}
+                  href={`/blog/${post.slug}`}
+                  title={post.title}
+                  date={new Date(date)}
+                />
+              );
+            }
+          })}
         {/* {paginate && showMore < posts.length && (
           <button
             onClick={() => {
@@ -109,6 +126,5 @@ export default function PostsList(props: Props) {
         )} */}
       </ul>
     </>
-
-  )
+  );
 }
