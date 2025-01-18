@@ -1,7 +1,6 @@
 import Link from '@components/link'
-import { GitHub, Mail, RSS, BuyMeACoffee, Dev } from '@components/icons'
+import { GitHub, Mail, RSS, BuyMeACoffee } from '@components/icons'
 import Tooltip from '@components/tooltip'
-import ThemeSwitcher from '@components/theme-switcher'
 import styles from './social-links.module.css'
 
 type SocialButtonProps = {
@@ -27,25 +26,24 @@ export default function Socials() {
     <div className={styles.socials}>
       <SocialButton
         href="https://github.com/rivea0"
-        icon={<GitHub color={`var(--icon-github-color)`} />}
+        icon={<GitHub color={`var(--icon-generic-color)`} />}
         tooltip="GitHub"
       />
       <SocialButton
         href="mailto:e.e.ereneda@gmail.com"
-        icon={<Mail color={`var(--icon-mail-color)`} />}
+        icon={<Mail color={`var(--icon-generic-color)`} />}
         tooltip="Email"
       />
       <SocialButton
         href="/feed.xml"
-        icon={<RSS color={`var(--icon-rss-color)`} strokeWidth={1.6} />}
+        icon={<RSS color={`var(--icon-generic-color)`} strokeWidth={1.6} />}
         tooltip="RSS"
       />
       <SocialButton
         href="https://www.buymeacoffee.com/rivea0"
-        icon={<BuyMeACoffee color={`var(--icon-buy-me-a-coffee-color)`} />}
+        icon={<BuyMeACoffee color={`var(--icon-generic-color)`} />}
         tooltip="Buy Me a Coffee"
       />
-      <ThemeSwitcher />
     </div>
   )
 }

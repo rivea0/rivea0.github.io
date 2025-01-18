@@ -51,6 +51,8 @@
   --icon-rss-color: #CDFCFA;
   --icon-buy-me-a-coffee-color: #F9F596;
 
+  --icon-generic-color: var(--gray-alpha);
+
   /* Syntax Highlighting */
   --token: #999;
   --comment: #999;
