@@ -4,6 +4,8 @@
   font-size: 1.1rem;
   margin-top: 1rem;
   margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: .125rem solid var(--project-bg);
 }
 
 .nav a {

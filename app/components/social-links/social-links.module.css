@@ -8,7 +8,6 @@
   display: inline-flex;
   border-radius: var(--radius);
   padding: var(--gap-three-q);
-  /* color: var(--gray-alpha) !important; */
   line-height: 50%;
   background-color: transparent;
   cursor: pointer;
@@ -19,4 +18,10 @@
   /* color: var(--fg) !important; */
   box-shadow: none !important;
   background: var(--lightest-gray) !important;
+}
+
+@media screen and (max-width: 768px) {
+  .icon:first-child {
+    padding-left: var(--gap-quarter);
+  }
 }
