@@ -8,7 +8,7 @@ import styles from './layout.module.css'
 import siteConfig from '../siteConfig.json'
 import { GCScript } from 'next-goatcounter';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const inter = Inter({ subsets: ['latin'], weight: ['500'], variable: '--font-inter' })
 
 export default function RootLayout({
   children,
@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
 
   return (
-    <html lang="en" className={inter.className} suppressHydrationWarning>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body>
         <ThemeProvider>
         <GCScript siteUrl={`https://${siteConfig.GC}.goatcounter.com/count`} />
