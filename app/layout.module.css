@@ -23,7 +23,7 @@
 .headingText h1 {
   color: var(--link);
   font-size: 2rem;
-  font-weight: 500;
+  font-weight: 300;
 }
 
 .footer {
@@ -33,10 +33,6 @@
 }
 
 @media (max-width: 768px) {
-  .heading {
-    flex-direction: column;
-  }
-
   .headingText h1 {
     font-size: 1.875rem;
   }

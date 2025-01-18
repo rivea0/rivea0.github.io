@@ -1,12 +1,15 @@
 .footer {
-  color: var(--gray);
-  opacity: 0.5;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: .125rem solid var(--project-bg);
   text-align: center;
   position: sticky;
   top: 100vh;
 }
 
 .footer > p {
+  opacity: 0.5;
+  color: var(--gray);
   font-size: 1rem;
 }
 

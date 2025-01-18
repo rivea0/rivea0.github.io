@@ -1,14 +1,14 @@
 import '@styles/global.css'
 import { Inter } from 'next/font/google'
-import SocialLinks from '@components/social-links'
 import NavLinks from '@components/nav-links'
 import Footer from '@components/footer'
 import ThemeProvider from '@components/theme-provider'
 import styles from './layout.module.css'
 import siteConfig from '../siteConfig.json'
 import { GCScript } from 'next-goatcounter';
+import ThemeSwitcher from '@components/theme-switcher'
 
-const inter = Inter({ subsets: ['latin'], weight: ['500'], variable: '--font-inter' })
+const inter = Inter({ subsets: ['latin'], weight: ['300', '500'], variable: '--font-inter' })
 
 export default function RootLayout({
   children,
@@ -25,7 +25,7 @@ export default function RootLayout({
             <main className={styles.main}>
               <div className={styles.heading}>
                 <span className={styles.headingText}><h1>Eda Eren</h1></span>
-                <SocialLinks />
+                <ThemeSwitcher />
               </div>
               <NavLinks />
               {children}
