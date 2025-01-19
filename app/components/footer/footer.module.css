@@ -3,6 +3,10 @@
   padding-top: 1rem;
   border-top: .125rem solid var(--project-bg);
   text-align: center;
+  /* display: flex;
+  flex-direction: column;
+  justify-content: center; */
+  /* align-items: center; */
   position: sticky;
   top: 100vh;
 }
