@@ -42,6 +42,10 @@
 
 @media screen and (max-width: 768px) {
   .tags > li {
-    padding: 2px 4px;
+    min-width: max-content;
+  }
+
+  .tags {
+    flex-wrap: wrap;
   }
 }
