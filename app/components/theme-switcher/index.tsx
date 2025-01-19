@@ -3,7 +3,6 @@
 import { useTheme } from 'next-themes'
 import { PropsWithChildren, useEffect, useState } from 'react'
 import { Moon, Sun } from '@components/icons'
-import socialStyles from '@components/social-links/social-links.module.css'
 import Tooltip from '@components/tooltip'
 
 export default function ThemeSwitcher({
@@ -36,7 +35,7 @@ export default function ThemeSwitcher({
           <button
             onClick={() => setTheme(activeTheme === 'light' ? 'dark' : 'light')}
             aria-label="Change the theme"
-            className={`${socialStyles.icon} ${className}`}
+            className={`${className}`}
           >
             {activeTheme === 'light' ? (
               <Moon color={`var(--icon-moon-color)`} />

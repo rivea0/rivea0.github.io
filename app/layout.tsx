@@ -25,7 +25,7 @@ export default function RootLayout({
             <main className={styles.main}>
               <div className={styles.heading}>
                 <span className={styles.headingText}><h1>Eda Eren</h1></span>
-                <ThemeSwitcher />
+                <ThemeSwitcher className={styles.themeSwitcher} hideTooltip />
               </div>
               <NavLinks />
               {children}

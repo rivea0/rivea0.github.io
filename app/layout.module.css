@@ -26,6 +26,16 @@
   font-weight: 300;
 }
 
+.themeSwitcher {
+  user-select: none;
+  display: inline-flex;
+  padding: var(--gap-three-q) 0;
+  line-height: 50%;
+  background-color: transparent;
+  cursor: pointer;
+  border: none;
+}
+
 .footer {
   margin-top: var(--small-gap);
   display: flex;
