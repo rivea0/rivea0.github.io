@@ -1,7 +1,6 @@
 .note {
   border: 2px solid var(--light-gray);
   padding: 12px;
-  /* background-color: var(--lightest-gray); */
   border-radius: 12px;
 }
 

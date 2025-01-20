@@ -32,19 +32,19 @@
 
   /* Dark Mode Colors */
   --bg: #0d1117;
-  --bg2: #131922;
-  --bg-alpha: hsla(0, 0%, 7%, 0.9);
+  /* --bg: #151C1E; */
+  --bg2: #20202a;
+  /* --bg2: #1e2528; */
   --fg: #fafbfc;
   --gray: silver;
-  --light-gray: #444;
-  --lighter-gray: #222;
-  --lightest-gray: #20252d;
-  --article-color: #eaeaea;
+  --light-gray: #363647;
+  --lighter-gray: var(--bg2);
+  --lightest-gray: #20252d; /* remove */
+
   --gray-alpha: rgba(255, 255, 255, 0.5);
   --selection: rgba(255, 255, 255, 0.88);
   --link: #9ca0fa;
   --nav-link: #fff;
-  --project-bg: rgba(255, 255, 255, 0.05);
 
   --icon-github-color: #e5e8ee;
   --icon-mail-color: #CDCFFC;
@@ -54,35 +54,22 @@
   --icon-generic-color: var(--gray-alpha);
 
   /* Syntax Highlighting */
-  --token: #999;
-  --comment: #999;
-  --keyword: #fff;
-  --name: #fff;
   --highlight: #282a36;
 }
 
 [data-theme='light'] {
-  --bg: #fff;
-  --bg2: #f7f7f7;
-  --bg-alpha: hsla(0, 0%, 100%, 0.9);
-  --fg: #444;
+  --bg: #eff1f5;
+  --bg2: #e6e9ef;
+  --fg: #363647;
   --gray: gray;
-  --light-gray: rgb(222, 222, 222);
-  --lighter-gray: rgb(240, 240, 240);
-  --lightest-gray: rgb(245, 245, 245);
-  --article-color: #212121;
-  --header-bg: rgba(255, 255, 255, 0.8);
+  --light-gray: #ccd0da;
+  --lighter-gray: var(--bg2);
+  --lightest-gray: rgb(245, 245, 245); /* remove */
   --gray-alpha: rgba(19, 20, 21, 0.5);
   --selection: rgba(0, 0, 0, 0.99);
   --link:  #947AFF;
-  --project-bg: rgba(0, 0, 0, 0.03);
 
-  --token: #666;
-  --comment: #999;
-  --keyword: #000;
-  --name: #333;
-  --highlight: #eaeaea;
-  --highlight: #fafafa;
+  --highlight: #dce0e8;
   --nav-link: black;
 
   --icon-github-color: #19212d;
@@ -286,17 +273,11 @@ mark {
     --bg: #fff;
     --fg: #000;
     --gray: #888;
-    --light-gray: #dedede;
+    --light-gray: #ccd0da;
     --lighter-gray: #f5f5f5;
     --lightest-gray: #fafafa;
-    --article-color: #212121;
     --gray-alpha: rgba(19, 20, 21, 0.5);
     --selection: rgba(0, 0, 0, 0.99);
-
-    --token: #666;
-    --comment: #999;
-    --keyword: #000;
-    --name: #333;
     --highlight: #eaeaea;
   }
 }

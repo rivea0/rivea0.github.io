@@ -12,5 +12,5 @@
 .icon:hover {
   /* color: var(--fg) !important; */
   box-shadow: none !important;
-  background: var(--lightest-gray) !important;
+  background: var(--bg2) !important;
 }

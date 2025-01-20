@@ -1,7 +1,7 @@
 .footer {
   margin-top: 2rem;
   padding-top: 1rem;
-  border-top: .125rem solid var(--project-bg);
+  border-top: .125rem solid var(--bg2);
   text-align: center;
   /* display: flex;
   flex-direction: column;

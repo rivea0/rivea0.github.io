@@ -100,7 +100,7 @@ export default function PostsList(props: Props) {
                       )?.date
                     )
                   }
-                  dateInfo="Series spanning from February 13 to "
+                  dateInfo="Feb 13 -"
                 />
               );
             } else {
