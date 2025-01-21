@@ -3,7 +3,7 @@
   padding: 4px 12px;
   display: grid;
   grid-template-rows: 95px 95px 1fr 1fr;
-  border-radius: 8px;
+  border-radius: var(--radius);
 }
 
 .writingProject {

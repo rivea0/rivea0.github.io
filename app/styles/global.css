@@ -230,8 +230,7 @@ summary {
 }
 
 details {
-  border-radius: var(--radius);
-  background: var(--lightest-gray);
+  border: 1px solid var(--bg);
   padding: 1rem;
   border-radius: var(--radius);
 }
