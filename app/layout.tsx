@@ -8,7 +8,7 @@ import siteConfig from '../siteConfig.json'
 import { GCScript } from 'next-goatcounter';
 import ThemeSwitcher from '@components/theme-switcher'
 
-const inter = Inter({ subsets: ['latin'], weight: ['300', '500'], variable: '--font-inter' })
+const inter = Inter({ subsets: ['latin'], weight: ['300', '500', '600', '700'], variable: '--font-inter' })
 
 export default function RootLayout({
   children,
