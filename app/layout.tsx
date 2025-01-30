@@ -8,7 +8,8 @@ import siteConfig from '../siteConfig.json'
 import { GCScript } from 'next-goatcounter';
 import ThemeSwitcher from '@components/theme-switcher'
 
-const inter = Inter({ subsets: ['latin'], weight: ['300', '500', '600', '700'], variable: '--font-inter' })
+// const inter = Inter({ subsets: ['latin'], weight: ['300', '500', '600', '700'], variable: '--font-inter' })
+const inter = Inter({ subsets: ['latin'], weight: ['300', '500', '600', '700'] })
 
 export default function RootLayout({
   children,
@@ -17,7 +18,7 @@ export default function RootLayout({
 }) {
 
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html lang="en" className={inter.className} suppressHydrationWarning>
       <body>
         <ThemeProvider>
         <GCScript siteUrl={`https://${siteConfig.GC}.goatcounter.com/count`} />
