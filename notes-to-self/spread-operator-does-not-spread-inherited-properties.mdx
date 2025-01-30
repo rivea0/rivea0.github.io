@@ -1,0 +1,17 @@
+---
+title: "Spread operator doesn't spread inherited properties"
+tags: [JavaScript]
+description: Spread operator doesn't spread inherited properties
+slug: spread-operator-does-not-spread-inherited-properties
+postIndex: 1
+---
+
+The spread operator only spreads the enumerable **own** properties of an object, not any inherited ones:
+ 
+```js
+let o = Object.create({ x: 1 }); // o inherits the property x 
+let p = { ...o };
+p.x // => undefined
+```
+
+See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax#description

@@ -1,0 +1,29 @@
+---
+title: "The number of parameters is important for the Array constructor"
+tags: [JavaScript]
+description: The number of parameters is important for the Array constructor
+slug: the-number-of-parameters-is-important-for-the-array-constructor
+postIndex: 2
+---
+
+> When the `Array()` constructor function is invoked with one numeric argument, it uses that argument as an array length. But when invoked with more than one numeric argument, it treats those arguments as elements for the array to be created.
+>
+> This means that the `Array()` constructor cannot be used to create an array with a single numeric element.
+
+For example:
+
+```js
+const a = new Array(10);
+a; // [ <10 empty items> ]
+
+const b = new Array(10, 20);
+b; // [ 10, 20 ]
+```
+
+To pass the arguments as elements for the array, you can use `Array.of()`:
+
+```js
+Array.of() // []; returns empty array with no arguments 
+Array.of(10) // [ 10 ]; can create arrays with a single numeric argument 
+Array.of(1, 2, 3) // [ 1, 2, 3 ]
+```
