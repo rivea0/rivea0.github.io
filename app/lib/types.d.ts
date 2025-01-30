@@ -1,4 +1,4 @@
-export type Post = {
+export type Entry = {
   title: string
   slug: string
   date: string
@@ -6,6 +6,7 @@ export type Post = {
   description: string
   body: string
   lastModified?: number
+  postIndex?: number
 }
 
 export type Project = {

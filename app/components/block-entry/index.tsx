@@ -8,15 +8,8 @@ type Props =
       date?: Date,
       dateInfo?: string
     }
-  // | {
-  //     skeleton: true
-  //   }
 
 export default function BlockEntry(props: Props) {
-  // if ('skeleton' in props) {
-  //   return <li className={styles.skeleton} />
-  // }
-
   const { title, href, date, dateInfo } = props
 
   return (

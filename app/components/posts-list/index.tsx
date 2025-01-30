@@ -1,38 +1,23 @@
 'use client';
 
-import Link from '@components/link';
 import { useState } from 'react';
 import clsx from 'clsx';
 import BlockEntry from '@components/block-entry';
-import type { Post } from '@lib/types';
+import type { Entry } from '@lib/types';
 import styles from './posts-list.module.css';
+import { getEntryTags } from '@lib/get-entry-tags';
 
 type Props = {
-  posts: Post[];
+  posts: Entry[];
   paginate?: boolean;
 };
-// | {
-//     skeleton: true
-//   }
 
 export default function PostsList(props: Props) {
   // const [showMore, setShowMore] = useState(4)
   const [filterTopic, setfilterTopic] = useState('');
 
-  // if ('skeleton' in props) {
-  //   return (
-  //     <ul className={styles.container}>
-  //       {[...Array(4)].map((_, i) => (
-  //         <BlockEntry key={i} skeleton />
-  //       ))}
-  //     </ul>
-  //   )
-  // }
-  // const { posts, paginate } = props
-  const { posts } = props;
-  const allTagsSet = new Set();
-  posts.map((p) => p.tags.forEach((tag) => allTagsSet.add(tag)));
-  const allTags = Array.from(allTagsSet).sort();
+  const { posts, paginate } = props;
+  const allTags = getEntryTags(posts);
 
   return (
     <>

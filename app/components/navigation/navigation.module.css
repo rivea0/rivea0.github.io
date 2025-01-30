@@ -28,7 +28,6 @@
 
 .title {
   font-weight: normal;
-  /* margin-bottom: var(--gap-quarter); */
   color: var(--link)
 }
 
