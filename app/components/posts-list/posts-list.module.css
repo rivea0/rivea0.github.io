@@ -5,29 +5,6 @@
   padding: 0;
 }
 
-.button {
-  margin-top: var(--gap-half);
-  width: 100%;
-  cursor: pointer;
-  border-radius: var(--radius);
-  color: var(--gray);
-  font-weight: 500;
-  background: var(--lighter-gray);
-  border: none;
-  padding: var(--gap-half) var(--gap);
-  transition: background-color var(--transition), color var(--transition);
-  outline: none;
-}
-
-.button:hover,
-.button:focus {
-  color: var(--fg);
-}
-
-.button:active {
-  background-color: var(--lightest-gray);
-}
-
 .filters {
   background-color: var(--bg);
   text-decoration: underline var(--link);
@@ -36,33 +13,31 @@
   border: none;
 }
 
-.filterList {
+.filters > summary {
+  margin-bottom: .5rem;
+}
+
+.tagsPills {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 4px;
+  margin-bottom: 1rem;
 }
 
-.filterList > li > button, .clearFilter {
-  background-color: var(--bg);
-  border: 1px solid var(--fg);
-  padding: 6px;
-  border-radius: 4px;
-  font-size: smaller;
+.tagPill > button {
+  background-color: var(--light-gray);
+  padding: 4px 8px;
+  border-radius: .35rem;
+}
+
+.tagPill > button:hover,
+.tagPill > button:focus {
+  background-color: var(--link);
+  color: var(--bg);
   cursor: pointer;
 }
 
-.clearFilter {
-  margin-top: 1rem;
-  border-radius: 4px;
-
-}
-
-.clearActive {
-  border: 1px solid var(--link);
-}
-
-
-.filterList > li > button.activeBtn {
-  border: 1px solid var(--link);
+.tagPill > button.activeBtn {
+  background-color: var(--link);
+  color: var(--bg);
 }

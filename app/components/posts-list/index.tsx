@@ -23,10 +23,21 @@ export default function PostsList(props: Props) {
     <>
       <details className={styles.filters}>
         <summary>Apply filter</summary>
-        <ul className={styles.filterList}>
+        <ul className={styles.tagsPills}>
+          <li key="all" className={styles.tagPill}>
+            <button
+              onClick={() => {
+                setfilterTopic('');
+              }}
+              type="button"
+              className={clsx({ [styles.activeBtn]: filterTopic === '' })}
+            >
+              All
+            </button>
+          </li>
           {allTags.map((tag: string) => {
             return (
-              <li key={tag}>
+              <li key={tag} className={styles.tagPill}>
                 <button
                   onClick={(e) => {
                     setfilterTopic((e.target as HTMLButtonElement).textContent);
@@ -40,15 +51,6 @@ export default function PostsList(props: Props) {
             );
           })}
         </ul>
-        <button
-          onClick={() => setfilterTopic('')}
-          type="button"
-          className={clsx(styles.clearFilter, {
-            [styles.clearActive]: filterTopic === '',
-          })}
-        >
-          Clear filter
-        </button>
       </details>
 
       <ul className={styles.container}>
