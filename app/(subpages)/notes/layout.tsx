@@ -1,4 +1,4 @@
-import { Fira_Code } from 'next/font/google';
+import { Fira_Mono } from 'next/font/google';
 
 export const metadata = {
   title: 'Notes',
@@ -7,9 +7,10 @@ export const metadata = {
     canonical: 'https://rivea0.github.io/notes',
   },
 };
-const firaCode = Fira_Code({
+const firaMono = Fira_Mono({
   subsets: ['latin'],
-  weight: ['300', '500', '600', '700'],
+  weight: ['500', '700'],
+  fallback: ['Menlo', 'Monaco', 'Courier New', 'monospace'],
 });
 
 export default function NotesLayout({
@@ -17,9 +18,5 @@ export default function NotesLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className={firaCode.className}>
-      {children}
-    </div>
-  );
+  return <div className={firaMono.className}>{children}</div>;
 }
