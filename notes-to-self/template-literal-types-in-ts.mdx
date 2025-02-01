@@ -1,0 +1,22 @@
+---
+title: Template literal types in TypeScript
+tags: [TypeScript]
+description: Template literal types in TypeScript
+slug: template-literal-types-in-ts
+postIndex: 9
+---
+
+For example:
+
+```typescript
+type ColorShade = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+type Color = 'red' | 'blue' | 'green';
+
+type ColorPalette = `${Color}-${ColorShade}`;
+
+let myColor: ColorPalette = 'red-500'; // OK
+let myColor2: ColorPalette = 'blue-900'; // OK
+let myColor3: ColorPalette = 'gray-2032' // nope
+```
+
+*From https://www.totaltypescript.com/books/total-typescript-essentials/designing-your-types-in-typescript#template-literal-types-in-typescript.*

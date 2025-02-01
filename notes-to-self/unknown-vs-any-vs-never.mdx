@@ -1,0 +1,18 @@
+---
+title: "`unknown` vs. `any` vs. `never`"
+tags: [TypeScript]
+description: "`unknown` vs. `any` vs. `never`"
+slug: unknown-vs-any-vs-never
+postIndex: 10
+---
+
+`unknown` is the widest type, it can't be assigned to anything. `any` can be assigned to anything.
+
+> `unknown` is a safe type, but `any` is not. `unknown` means "I don't know what this is", while `any` means "I don't care what this is".
+>
+> — *Total TypeScript: Essentials*, Matt Pocock
+
+
+`never` is the narrowest type. We most likely don't have to use it ourselves, it shows up in error messages. 
+It represents something that can never happen, and you we never assign anything to it.
+But, we can assign `never` to anything, as it's the narrowest type.
