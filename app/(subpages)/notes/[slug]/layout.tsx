@@ -2,6 +2,13 @@ import { Metadata } from 'next';
 import Navigation from '@components/navigation';
 import styles from '../../blog/[slug]/layout.module.css';
 import getEntries from '@lib/get-entries';
+import { Fira_Mono } from 'next/font/google';
+
+const firaMono = Fira_Mono({
+  subsets: ['latin'],
+  weight: ['500', '700'],
+  fallback: ['Menlo', 'Monaco', 'Courier New', 'monospace'],
+});
 
 export async function generateStaticParams() {
   const notes = getEntries('notes-to-self');
@@ -52,7 +59,7 @@ export default function NoteLayout({
 
   return (
     <>
-      <article className={styles.article}>
+      <article className={`${styles.article} ${firaMono.className}`}>
         {date && (
           <span className={styles.date}>
             {new Date(date).toLocaleDateString('en-US', {
