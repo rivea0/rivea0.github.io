@@ -6,6 +6,6 @@ slug: default-exports-can-make-tree-shaking-harder-for-bundlers
 postIndex: 11
 ---
 
-[...] a module could provide only a default export, which is an object where all the functionality is exposed as properties of such an object. When we import a default object, ==most module bundlers will consider the entire object being used== and they won't be able to eliminate any unused code from the exported functionality.
+> [...] a module could provide only a default export, which is an object where all the functionality is exposed as properties of such an object. When we import a default object, <mark>most module bundlers will consider the entire object being used</mark> and they won't be able to eliminate any unused code from the exported functionality.
 > 
 > — *Node.js Design Patterns*, Packt Publishing, 2020
