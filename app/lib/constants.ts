@@ -20,4 +20,3 @@ export const selectedPosts = [
     date: '2022-02-22',
   },
 ];
-
