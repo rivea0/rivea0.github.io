@@ -1,0 +1,14 @@
+---
+title: When multiple arguments are passed to `unshift`, they are inserted as a chunk
+tags: [JavaScript]
+description: Passing multiple arguments to `unshift` is not what you think
+slug: passing-multiple-arguments-to-unshift
+postIndex: 6
+---
+
+If you pass multiple arguments to `unshift()`, they are not inserted one by one, but as a chunk:
+
+```js
+let a = []; // []
+a.unshift(1, 2) // [1, 2] -- not [2, 1]
+```

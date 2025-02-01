@@ -1,0 +1,19 @@
+---
+title: Iterating over a range of numbers in shell
+tags: [Shell]
+description: Iterating over a range of numbers in shell
+slug: iterating-over-a-range-in-shell
+postIndex: 4
+---
+
+Use `seq` to iterate over a range of numbers:
+
+```shell
+for i in $(seq 0 9); do echo $i; done
+```
+
+With a variable:
+
+```sh
+for i in $(seq 1 $END); do echo $i; done
+```

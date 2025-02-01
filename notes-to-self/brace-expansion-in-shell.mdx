@@ -1,0 +1,61 @@
+---
+title: Brace expansion in shell
+tags: [Shell]
+description: Brace expansion in shell
+slug: brace-expansion-in-shell
+postIndex: 8
+---
+
+For example, printing sequences:
+
+```shell
+echo Number_{1..5}
+```
+
+outputs:
+
+```
+Number_1 Number_2 Number_3 Number_4 Number_5
+```
+
+Works with zero padding too:
+
+```shell
+echo {01..10}
+# 01 02 03 04 05 06 07 08 09 10
+```
+
+You can also provide an increment value:
+
+```shell
+echo {0..15..2}
+# 0 2 4 6 8 10 12 14
+```
+
+---
+
+Also works with letters:
+
+```shell
+echo {Z..A}
+```
+
+outputs:
+
+```
+Z Y X W V U T S R Q P O N M L K J I H G F E D C B A
+```
+
+---
+
+A nested braces example:
+
+```shell
+echo a{A{1,2},B{3,4}}b
+```
+
+outputs:
+
+```
+aA1b aA2b aB3b aB4b
+```

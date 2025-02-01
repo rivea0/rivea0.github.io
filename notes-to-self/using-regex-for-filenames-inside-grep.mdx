@@ -1,0 +1,16 @@
+---
+title: Using regex for filenames inside `grep`
+tags: [Shell]
+description: Using regex for filenames inside `grep`
+slug: using-regex-for-filenames-inside-grep
+postIndex: 5
+---
+
+You can use `find`.
+
+For example, to search all `txt` files inside current directory:
+
+```shell
+grep "searching" $(find . -name "*.txt")
+```
+
