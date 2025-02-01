@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import clsx from 'clsx';
+import type { MouseEvent } from 'react';
 import BlockEntry from '@components/block-entry';
 import type { Entry } from '@lib/types';
 import styles from './posts-list.module.css';
 import { getEntryTags } from '@lib/get-entry-tags';
+import TagsFilter from '@components/tags-filter';
 
 type Props = {
   posts: Entry[];
@@ -14,43 +15,27 @@ type Props = {
 
 export default function PostsList(props: Props) {
   // const [showMore, setShowMore] = useState(4)
-  const [filterTopic, setfilterTopic] = useState('');
+  const [selectedTag, setSelectedTag] = useState('');
+
+  function handleTagSelection(e: MouseEvent<HTMLButtonElement>) {
+    setSelectedTag((e.target as HTMLButtonElement).textContent);
+  }
 
   const { posts, paginate } = props;
-  const allTags = getEntryTags(posts);
+  const postsTags = getEntryTags(posts);
 
   return (
     <>
       <details className={styles.filters}>
         <summary>Apply filter</summary>
-        <ul className={styles.tagsPills}>
-          <li key="all" className={styles.tagPill}>
-            <button
-              onClick={() => {
-                setfilterTopic('');
-              }}
-              type="button"
-              className={clsx({ [styles.activeBtn]: filterTopic === '' })}
-            >
-              All
-            </button>
-          </li>
-          {allTags.map((tag: string) => {
-            return (
-              <li key={tag} className={styles.tagPill}>
-                <button
-                  onClick={(e) => {
-                    setfilterTopic((e.target as HTMLButtonElement).textContent);
-                  }}
-                  type="button"
-                  className={clsx({ [styles.activeBtn]: filterTopic === tag })}
-                >
-                  {tag}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        <TagsFilter
+          allTags={postsTags}
+          selectedTag={selectedTag}
+          handleAllTagSelection={() => {
+            setSelectedTag('');
+          }}
+          handleTagSelection={handleTagSelection}
+        />
       </details>
 
       <ul className={styles.container}>
@@ -63,8 +48,8 @@ export default function PostsList(props: Props) {
             ) {
               return undefined;
             }
-            if (filterTopic === '') return p;
-            return p.tags.includes(filterTopic) ? p : undefined;
+            if (selectedTag === '') return p;
+            return p.tags.includes(selectedTag) ? p : undefined;
           })
           .map((post) => {
             const date = new Date(post.date).toLocaleDateString('en-US', {

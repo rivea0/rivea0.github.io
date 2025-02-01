@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import clsx from 'clsx';
+import type { MouseEvent } from 'react';
 import type { Entry } from '@lib/types';
 import { getEntryTags } from '@lib/get-entry-tags';
 import NoteEntry from '@components/note-entry';
 import styles from './notes-list.module.css';
+import TagsFilter from '@components/tags-filter';
 
 type Props = {
   notes: Entry[];
@@ -14,47 +15,31 @@ type Props = {
 
 export default function NotesList(props: Props) {
   // const [showMore, setShowMore] = useState(4)
-  const [filterTopic, setfilterTopic] = useState('');
+  const [selectedTag, setSelectedTag] = useState('');
+
+  function handleTagSelection(e: MouseEvent<HTMLButtonElement>) {
+    setSelectedTag((e.target as HTMLButtonElement).textContent);
+  }
 
   const { notes, paginate } = props;
-  const allTags = getEntryTags(notes);
+  const notesTags = getEntryTags(notes);
 
   return (
     <>
-      <ul className={styles.tagsPills}>
-        <li key="all" className={styles.tagPill}>
-          <button
-            onClick={() => {
-              setfilterTopic('');
-            }}
-            type="button"
-            className={clsx({ [styles.activeBtn]: filterTopic === '' })}
-          >
-            All
-          </button>
-        </li>
-        {allTags.map((tag: string) => {
-          return (
-            <li key={tag} className={styles.tagPill}>
-              <button
-                onClick={(e) => {
-                  setfilterTopic((e.target as HTMLButtonElement).textContent);
-                }}
-                type="button"
-                className={clsx({ [styles.activeBtn]: filterTopic === tag })}
-              >
-                {tag}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+      <TagsFilter
+        allTags={notesTags}
+        selectedTag={selectedTag}
+        handleAllTagSelection={() => {
+          setSelectedTag('');
+        }}
+        handleTagSelection={handleTagSelection}
+      />
       <ul className={styles.container}>
         {/* {notes.slice(0, paginate ? showMore : undefined) */}
         {notes
           .filter((note) => {
-            if (filterTopic === '') return note;
-            return note.tags.includes(filterTopic) ? note : undefined;
+            if (selectedTag === '') return note;
+            return note.tags.includes(selectedTag) ? note : undefined;
           })
           .map((note) => {
             return (
