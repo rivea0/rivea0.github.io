@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import styles from './page.module.css';
 import BlockEntry from '@components/block-entry';
-import { selectedPosts } from '@lib/get-posts';
+import { selectedPosts } from '@lib/constants';
 
 
 export default async function HomePage() {
