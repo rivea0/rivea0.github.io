@@ -1,6 +1,6 @@
 .nav {
   display: flex;
-  gap: 14px;
+  gap: .9rem;
   font-size: 1.1rem;
   margin-top: 1rem;
   margin-bottom: 1.5rem;
@@ -21,3 +21,9 @@
 .nav .activeLink {
   text-decoration: underline;
 }
+
+/* @media (max-width: 768px) {
+  .nav {
+    justify-content: space-between;
+  }
+} */
