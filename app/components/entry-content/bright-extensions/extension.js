@@ -1,4 +1,19 @@
+import { CopyButton } from '@components/copy-code';
+import { Code } from 'bright';
+
 /** @type {import("bright").Extension} */
+export const copyCode = {
+  name: 'copyCode',
+  Pre: (brightProps) => {
+    return (
+      <div style={{ position: 'relative' }}>
+        <CopyButton text={brightProps.code} />
+        <Code.Pre {...brightProps} />
+      </div>
+    );
+  },
+};
+
 export const focus = {
   name: 'focus',
   MultilineAnnotation: ({ children }) => (

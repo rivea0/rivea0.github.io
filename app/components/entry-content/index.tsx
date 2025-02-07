@@ -6,7 +6,7 @@ import { MDXNote } from '@components/mdx-note';
 import { MDXTable } from '@components/mdx-table';
 import catppuccinLatte from './bright-themes/catppuccinLatte.json';
 import draculaUpdated from './bright-themes/draculaUpdated.json';
-import { focus } from './bright-extensions/extension';
+import { copyCode, focus } from './bright-extensions/extension';
 import type { VFile } from '@mdx-js/mdx/lib/compile';
 
 export default async function EntryContent({
@@ -22,7 +22,7 @@ export default async function EntryContent({
     light: catppuccinLatte,
   };
   Code.style = { overflow: 'scroll' };
-  Code.extensions = [focus];
+  Code.extensions = [focus, copyCode];
 
   return (
     <Content

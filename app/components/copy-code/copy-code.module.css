@@ -1,0 +1,11 @@
+.copyCodeBtn {
+  position: absolute;
+  right: .45rem;
+  top: .45rem;
+  background: none;
+  color: var(--gray);
+}
+
+.copyCodeBtn:hover {
+  cursor: pointer;
+}
