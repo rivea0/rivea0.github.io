@@ -1,0 +1,50 @@
+---
+title: React server components vs. SSR
+tags: [React]
+description: React server components vs. server-side rendering
+slug: react-server-components-vs-ssr
+postIndex: 12
+---
+
+#### React server components
+
+> the interesting word in "server components" is "components," not "server"
+
+• no interactivity or side-effects as they are non-interactive components, meaning no hydration whatsoever
+
+• more like $\text{UI} = f(\text{data})$ instead of $\text{UI} = f(\text{state})$
+
+• libraries/dependencies used by your server components won't be shipped to the browser, meaning **less bundle size**
+
+• each component can be responsible for its own data/data-fetching
+
+#### Server-side rendering
+
+• entire bundle is sent to the client, including dependencies — consider this example from [Tymek Zapała](https://www.tymzap.com/blog/5-differences-between-react-server-components-and-server-side-rendering):
+
+```js
+import { formatDistanceToNow, formatRelative } from 'date-fns';
+
+export function ProductPriceInfo({ product }) {
+  const priceUpdatedAt = new Date(product.priceUpdatedAt);
+
+  const timeSinceLastUpdate = formatDistanceToNow(priceUpdatedAt, { addSuffix: true });
+  const relativeDate = formatRelative(priceUpdatedAt, new Date());
+
+  return (
+    <div>
+      <header>
+        <strong>{product.name}</strong>
+        <small>Last price update: {relativeDate} ({timeSinceLastUpdate})</small>
+      </header>
+      <p>Current price: {product.price}</p>
+    </div>
+  );
+}
+```
+
+even though the date formatting happens on the server, `date-fns` library is still included in the client bundle (because of the rehydration process)
+
+• rerunning the JavaScript on the client-side to rehydrate the page
+
+• an entire route is responsible for data/data-fetching (for example, [`getServerSideProps`](https://nextjs.org/docs/pages/building-your-application/data-fetching/get-server-side-props))

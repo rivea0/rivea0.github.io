@@ -1,0 +1,133 @@
+---
+title: "JSON.parse always has `any` as its return type"
+tags: [TypeScript]
+description: JSON.parse always has `any` as its return type
+slug: json-parse-always-has-any-as-its-return-type
+date: 2025-02-07
+---
+
+Let's say we have stringified an object with a proper type:
+
+```ts
+type Person = {
+  name: string,
+  age: number,
+}
+
+let user: Person = {
+  name: 'Alice',
+  age: 20,
+}
+
+const str = JSON.stringify(user);
+```
+
+If we parse it, the result type will be `any`:
+
+```tsx
+// result: any
+const result = JSON.parse(str);
+```
+
+But, here, we know that the result type is just `Person`, so we can type it ourselves:
+
+```ts
+const result: Person = JSON.parse(str);
+```
+
+However, we could type it anything, and the TypeScript compiler wouldn't complain.
+
+For example, we can type it absurdly as `bigint`:
+
+```ts
+const result: bigint = JSON.parse(str);
+```
+
+Of course, no error!
+
+The reason is that <mark>we can't know what type `JSON.parse` will result in at runtime, so the return type will be `any`</mark>.
+
+Also, note that `JSON.parse` is not a generic, so it can't receive type arguments like this:
+
+```ts
+// Error: Expected 0 type arguments, but got 1.
+JSON.parse<{ name: string, age: number }>('{ "name": "Alice", "age": 20 }');
+```
+
+<Note>
+A function is generic if it declares type parameters.
+</Note>
+
+---
+
+Using [an example](https://stackoverflow.com/a/62438143), we can try writing a generic wrapper.
+
+It will take a function that acts as a type guard as its input and return an object with the parsed value or error.
+
+<br />
+
+If this is our JSON string:
+
+```ts
+const str = '{ "name": "Alice", "age": "20" }';
+```
+
+Our type should be this:
+
+```ts
+type CorrectType = { name: string; age: number; };
+```
+
+Then, our type guard function can look like this:
+
+```ts
+function isCorrectType(o: any): o is CorrectType {
+  return 'name' in o && 'age' in o;
+}
+```
+
+Now, if the text that's parsed by `JSON.parse` passes the type guard check, we'll return an object with the parsed result and a `hasError` property, which in this case, is `false`.
+Otherwise if it cannot pass the check, we'll return only `hasError` as `true`.
+
+So, the result type looks like this:
+
+```ts
+type SafeJsonParseResult<T> =
+  | { parsedObj: T; hasError: false; error?: undefined }
+  | { parsedObj?: undefined; hasError: true; error?: unknown }
+```
+
+And the wrapper is:
+
+```ts
+function safeJsonParse<T>(typeguard: (o: any) => o is T) {
+  return (text: string): SafeJsonParseResult<T> => {
+    const parsedObj = JSON.parse(text);
+    if (typeguard(parsedObj)) {
+      return { parsedObj, hasError: false };
+    } else {
+      return { hasError: true };
+    }
+  }
+}
+```
+
+This is a generic function that takes in a guard function (`typeguard: (o: any) => o is T`), then passes the given `text` into `JSON.parse`. The output will be the object that is of `SafeJsonParseResult` type.
+
+```ts
+const result = safeJsonParse(isCorrectType)(str);
+// result: SafeJsonParseResult<CorrectType>
+```
+
+Using it:
+
+```ts
+if (result.hasError) {
+  console.log("error...");
+} else {
+  console.log(`Name: ${result.parsedObj.name}, Age: ${result.parsedObj.age}`);
+}
+```
+
+Here, `result.parsedObj` is `CorrectType`, so we made sure that it's safely parsed with the type we wanted it to have. 
+A bit of TypeScript magic.

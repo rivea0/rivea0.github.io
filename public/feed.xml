@@ -4,9 +4,97 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 29 Dec 2024 15:23:45 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 08 Feb 2025 00:00:02 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[JSON.parse always has `any` as its return type]]></title>
+            <description><![CDATA[<p>Let&#39;s say we have stringified an object with a proper type:</p>
+<pre><code class="language-ts">type Person = {
+  name: string,
+  age: number,
+}
+
+let user: Person = {
+  name: &#39;Alice&#39;,
+  age: 20,
+}
+
+const str = JSON.stringify(user);
+</code></pre>
+<p>If we parse it, the result type will be <code>any</code>:</p>
+<pre><code class="language-tsx">// result: any
+const result = JSON.parse(str);
+</code></pre>
+<p>But, here, we know that the result type is just <code>Person</code>, so we can type it ourselves:</p>
+<pre><code class="language-ts">const result: Person = JSON.parse(str);
+</code></pre>
+<p>However, we could type it anything, and the TypeScript compiler wouldn&#39;t complain.</p>
+<p>For example, we can type it absurdly as <code>bigint</code>:</p>
+<pre><code class="language-ts">const result: bigint = JSON.parse(str);
+</code></pre>
+<p>Of course, no error!</p>
+<p>The reason is that <mark>we can&#39;t know what type <code>JSON.parse</code> will result in at runtime, so the return type will be <code>any</code></mark>.</p>
+<p>Also, note that <code>JSON.parse</code> is not a generic, so it can&#39;t receive type arguments like this:</p>
+<pre><code class="language-ts">// Error: Expected 0 type arguments, but got 1.
+JSON.parse&lt;{ name: string, age: number }&gt;(&#39;{ &quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 20 }&#39;);
+</code></pre>
+<Note>
+A function is generic if it declares type parameters.
+</Note>
+
+<hr>
+<p>Using <a href="https://stackoverflow.com/a/62438143" target="_blank" rel="noopener noreferrer">an example</a>, we can try writing a generic wrapper.</p>
+<p>It will take a function that acts as a type guard as its input and return an object with the parsed value or error.</p>
+<br />
+
+<p>If this is our JSON string:</p>
+<pre><code class="language-ts">const str = &#39;{ &quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: &quot;20&quot; }&#39;;
+</code></pre>
+<p>Our type should be this:</p>
+<pre><code class="language-ts">type CorrectType = { name: string; age: number; };
+</code></pre>
+<p>Then, our type guard function can look like this:</p>
+<pre><code class="language-ts">function isCorrectType(o: any): o is CorrectType {
+  return &#39;name&#39; in o &amp;&amp; &#39;age&#39; in o;
+}
+</code></pre>
+<p>Now, if the text that&#39;s parsed by <code>JSON.parse</code> passes the type guard check, we&#39;ll return an object with the parsed result and a <code>hasError</code> property, which in this case, is <code>false</code>.<br>Otherwise if it cannot pass the check, we&#39;ll return only <code>hasError</code> as <code>true</code>.</p>
+<p>So, the result type looks like this:</p>
+<pre><code class="language-ts">type SafeJsonParseResult&lt;T&gt; =
+  | { parsedObj: T; hasError: false; error?: undefined }
+  | { parsedObj?: undefined; hasError: true; error?: unknown }
+</code></pre>
+<p>And the wrapper is:</p>
+<pre><code class="language-ts">function safeJsonParse&lt;T&gt;(typeguard: (o: any) =&gt; o is T) {
+  return (text: string): SafeJsonParseResult&lt;T&gt; =&gt; {
+    const parsedObj = JSON.parse(text);
+    if (typeguard(parsedObj)) {
+      return { parsedObj, hasError: false };
+    } else {
+      return { hasError: true };
+    }
+  }
+}
+</code></pre>
+<p>This is a generic function that takes in a guard function (<code>typeguard: (o: any) =&gt; o is T</code>), then passes the given <code>text</code> into <code>JSON.parse</code>. The output will be the object that is of <code>SafeJsonParseResult</code> type.</p>
+<pre><code class="language-ts">const result = safeJsonParse(isCorrectType)(str);
+// result: SafeJsonParseResult&lt;CorrectType&gt;
+</code></pre>
+<p>Using it:</p>
+<pre><code class="language-ts">if (result.hasError) {
+  console.log(&quot;error...&quot;);
+} else {
+  console.log(`Name: ${result.parsedObj.name}, Age: ${result.parsedObj.age}`);
+}
+</code></pre>
+<p>Here, <code>result.parsedObj</code> is <code>CorrectType</code>, so we made sure that it&#39;s safely parsed with the type we wanted it to have.<br>A bit of TypeScript magic.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/json-parse-always-has-any-as-its-return-type</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/json-parse-always-has-any-as-its-return-type</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Fri, 07 Feb 2025 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[LeetCode Meditations: Conclusion]]></title>
             <description><![CDATA[<p><img src="https://raw.githubusercontent.com/rivea0/leetcode-meditations-assets/main/src/2024-12-29/78-lm-conclusion.png" alt="Cover image"></p>
