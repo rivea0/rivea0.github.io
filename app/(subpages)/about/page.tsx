@@ -23,14 +23,13 @@ export default function Page() {
           <ul className={styles.ul}>
             <li>using TypeScript</li>
             <li>reading Emerson and Thoreau</li>
-            <li>writing words as a human being</li>
-            <li>basic mathematical logic</li>
+            <li>(amateur) landscape photography</li>
             <li>epiphanies that lead to nowhere</li>
             <li>epiphanies that lead to somewhere</li>
           </ul>
         </div>
         <div className={styles.profileDiv}>
-          <Image src='/about/profile.jpg' alt='Profile image' width={250} height={250} className={styles.profile} /> 
+          <Image src='/about/profile.jpeg' alt='Profile image' width={250} height={250} className={styles.profile} />
         </div>
       </div>
       <div>

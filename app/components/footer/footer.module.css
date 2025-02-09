@@ -3,16 +3,12 @@
   padding-top: 1rem;
   border-top: .125rem solid var(--bg2);
   text-align: center;
-  /* display: flex;
-  flex-direction: column;
-  justify-content: center; */
-  /* align-items: center; */
   position: sticky;
   top: 100vh;
 }
 
 .footer > p {
-  opacity: 0.5;
+  opacity: 0.75;
   color: var(--gray);
   font-size: 1rem;
 }
