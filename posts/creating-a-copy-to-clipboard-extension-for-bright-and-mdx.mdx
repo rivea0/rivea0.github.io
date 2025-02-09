@@ -1,0 +1,163 @@
+---
+title: Creating a copy-to-clipboard extension for Bright and MDX
+tags: [TypeScript, React, Miscellaneous]
+description: Creating a copy-to-clipboard extension for the React server component syntax highlighter Bright and MDX.
+slug: creating-a-copy-to-clipboard-extension-for-bright-and-mdx
+date: 2025-02-09
+---
+
+[Bright](https://bright.codehike.org/) is a React server component for syntax highlighting. It comes with built-in themes and features like dark/light mode, line numbers, title, etc.
+
+It's also easy to use with [MDX](https://mdxjs.com/). One possible usage looks like this: 
+
+```app/components/blog-entry/index.tsx
+import * as runtime from 'react/jsx-runtime';
+import { run } from '@mdx-js/mdx';
+import { Code } from 'bright';
+import type { VFile } from '@mdx-js/mdx/lib/compile';
+
+export default async function EntryContent({
+  mdxFunctionBody,
+}: {
+  mdxFunctionBody: VFile;
+}) {
+  const code = String(mdxFunctionBody);
+  const { default: Content } = await run(code, runtime);
+
+  Code.theme = {
+    dark: 'dracula',
+    light: 'material-lighter',
+  };
+  Code.style = { overflow: 'scroll' };
+
+  return (
+    <Content components={{ pre: Code }} />
+  );
+}
+```
+
+If you ignore the parts related to creating an MDX component (about which you can check out more [here](https://rivea0.github.io/blog/converting-mdx-files-with-frontmatter-into-an-mdx-component-nextjs-13)), using Bright is very straightforward. We import a component called `Code`:
+
+```tsx
+import { Code } from 'bright';
+```
+
+Then, we define global props like `theme` and `style`, and also use built-in themes:
+
+```tsx
+Code.theme = {
+  dark: 'dracula',
+  light: 'material-lighter',
+};
+
+Code.style = { overflow: 'scroll' };
+```
+
+To integrate it with MDX, we simply define it as the `pre` element for the MDX component:
+
+```tsx
+<Content components={{ pre: Code }} />
+```
+
+This is all good, but one thing that's very common with code blocks in a blog post is the copy-to-clipboard button that when pressed, copies the code.
+
+We can add it directly to Bright as an extension.
+To do that, we can first create a React component called `CopyButton`:
+
+```app/components/copy-button/index.tsx
+'use client';
+
+import { useState } from 'react';
+import { Check, Copy } from '@components/icons';
+import styles from './copy-button.module.css';
+
+export function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  return (
+    <button
+      className={styles.copyCodeBtn}
+      aria-label="Copy to clipboard"
+      onClick={() => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1200);
+      }}
+    >
+      {copied ? <Check /> : <Copy />}
+    </button>
+  );
+}
+```
+
+Since copying has to be on client, and we have to use [`useState`](https://react.dev/reference/react/useState) and the [Clipboard API](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API), it has to be a client component.
+
+The props have a `text` property that is a string, and it's the code string that we're interested in copying.
+
+Inside the component, we have a state variable `copied` that helps us with switching icons depending on the state.
+
+The most interesting thing is the `button` that we return, which has an `onClick` handler that we write the text to clipboard with. After 1200 milliseconds, we reset the state of `copied` to `false`.
+
+<Note>
+We also import styles from a `copy-button.module.css`, which can look like this:
+
+```app/components/copy-button/copy-button.module.css
+.copyCodeBtn {
+  position: absolute;
+  right: .45rem;
+  top: .45rem;
+  background: none;
+  color: var(--gray);
+}
+
+.copyCodeBtn:hover {
+  cursor: pointer;
+}
+```
+
+It's absolutely positioned to stay in the upper right corner of the code block.
+
+(and, its parent element will be positioned relatively, as we'll see below.)
+</Note>
+
+Now, we can create an `extensions.js` to integrate our extension to Bright:
+
+```app/components/blog-entry/bright-extensions/extension.js
+import { CopyButton } from '@components/copy-button';
+import { Code } from 'bright';
+
+/** @type {import("bright").Extension} */
+export const copyCode = {
+  name: 'copyCode',
+  Pre: (brightProps) => {
+    return (
+      <div style={{ position: 'relative' }}>
+        <CopyButton text={brightProps.code} />
+        <Code.Pre {...brightProps} />
+      </div>
+    );
+  },
+};
+```
+
+We define an object `copyCode` with the `name` property and override `Pre` to include our newly created `CopyButton` component.
+
+The `text` prop to `CopyButton` is the `brightProps.code` element which is the formatted/prettified code string.
+
+<Note>
+We positioned the outer `div` as `relative` for our copy button to stay absolutely positioned to the code block.
+</Note>
+
+Now we can use our extension in the file where we define the global props to `Code`:
+
+```app/components/blog-entry/index.tsx
+import { copyCode } from './bright-extensions/extension';
+
+/* ... */
+
+Code.extensions = [copyCode];
+```
+
+The code block `div`s are still server components, and now they also include `CopyButton`, which is a client component.
+
+For inspiration, Bright has some very cool [recipes](https://bright.codehike.org/recipes), like adding collapse functionality to lines, file icons based on file type, tabs, and more.
