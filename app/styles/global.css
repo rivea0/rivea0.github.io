@@ -203,7 +203,9 @@ ul {
   margin-left: -2.5rem;
 }
 
-code {
+p > code,
+h1 > code,
+h4 > code {
   background-color: var(--highlight);
 }
 

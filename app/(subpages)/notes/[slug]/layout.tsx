@@ -1,13 +1,14 @@
 import { Metadata } from 'next';
+import { Fira_Code } from 'next/font/google';
 import Navigation from '@components/navigation';
 import styles from '../../blog/[slug]/layout.module.css';
 import getEntries from '@lib/get-entries';
-import { Fira_Mono } from 'next/font/google';
 import { convertMDWithInlineCodeToHTML } from '@lib/utils';
 
-const firaMono = Fira_Mono({
+const firaCode = Fira_Code({
   subsets: ['latin'],
   weight: ['500', '700'],
+  display: 'swap',
   fallback: ['Menlo', 'Monaco', 'Courier New', 'monospace'],
 });
 
@@ -60,7 +61,7 @@ export default function NoteLayout({
 
   return (
     <>
-      <article className={`${styles.article} ${firaMono.className}`}>
+      <article className={`${styles.article} ${firaCode.className}`}>
         {date && (
           <span className={styles.date}>
             {new Date(date).toLocaleDateString('en-US', {
