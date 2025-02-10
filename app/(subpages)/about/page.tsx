@@ -23,7 +23,7 @@ export default function Page() {
           <ul className={styles.ul}>
             <li>using TypeScript</li>
             <li>reading Emerson and Thoreau</li>
-            <li>(amateur) landscape photography</li>
+            <li>learning a bit of <Link href="https://doc.rust-lang.org/book/">Rust</Link></li>
             <li>epiphanies that lead to nowhere</li>
             <li>epiphanies that lead to somewhere</li>
           </ul>
