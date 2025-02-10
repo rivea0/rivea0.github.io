@@ -1,5 +1,6 @@
 import Link from '@components/link';
 import styles from './note-entry.module.css';
+import { convertMDWithInlineCodeToHTML } from '@lib/utils';
 
 type Props = {
   title: string;
@@ -22,7 +23,12 @@ export default function NoteEntry(props: Props) {
             ))}
           </ul>
         )}
-        <h4 className={`${styles.title}`}>{title}</h4>
+        <h4
+          className={`${styles.title}`}
+          dangerouslySetInnerHTML={{
+            __html: convertMDWithInlineCodeToHTML(title),
+          }}
+        ></h4>
       </Link>
     </li>
   );

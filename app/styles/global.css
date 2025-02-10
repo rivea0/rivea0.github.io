@@ -203,7 +203,7 @@ ul {
   margin-left: -2.5rem;
 }
 
-p > code {
+code {
   background-color: var(--highlight);
 }
 

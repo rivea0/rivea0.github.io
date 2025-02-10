@@ -1,16 +1,16 @@
-import Link from '@components/link'
-import styles from './block-entry.module.css'
+import Link from '@components/link';
+import styles from './block-entry.module.css';
+import { convertMDWithInlineCodeToHTML } from '@lib/utils';
 
-type Props =
-  | {
-      title: string
-      href: string
-      date?: Date,
-      dateInfo?: string
-    }
+type Props = {
+  title: string;
+  href: string;
+  date?: Date;
+  dateInfo?: string;
+};
 
 export default function BlockEntry(props: Props) {
-  const { title, href, date, dateInfo } = props
+  const { title, href, date, dateInfo } = props;
 
   return (
     <li className={styles.item}>
@@ -35,9 +35,14 @@ export default function BlockEntry(props: Props) {
             )}
           </div>
         )}
-        <h4 className={`${styles.title}`}>{title}</h4>
+        <h4
+          className={`${styles.title}`}
+          dangerouslySetInnerHTML={{
+            __html: convertMDWithInlineCodeToHTML(title),
+          }}
+        ></h4>
         {/* {description && <p className={styles.description}>{description}</p>} */}
       </Link>
     </li>
-  )
+  );
 }

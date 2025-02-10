@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import getEntries from '@lib/get-entries';
 import Navigation from '@components/navigation';
 import styles from './layout.module.css';
+import { convertMDWithInlineCodeToHTML } from '@lib/utils';
 
 export async function generateStaticParams() {
   const posts = getEntries('posts');
@@ -66,7 +67,12 @@ export default function PostLayout({
             <li>{tags}</li>
           )}
         </ul>
-        <h1 className={styles.title}>{title}</h1>
+        <h1
+          className={styles.title}
+          dangerouslySetInnerHTML={{
+            __html: convertMDWithInlineCodeToHTML(title),
+          }}
+        ></h1>
         {children}
       </article>
       <Navigation previous={previous} next={next} entryPath="blog" />

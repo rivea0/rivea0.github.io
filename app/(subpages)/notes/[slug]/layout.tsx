@@ -3,6 +3,7 @@ import Navigation from '@components/navigation';
 import styles from '../../blog/[slug]/layout.module.css';
 import getEntries from '@lib/get-entries';
 import { Fira_Mono } from 'next/font/google';
+import { convertMDWithInlineCodeToHTML } from '@lib/utils';
 
 const firaMono = Fira_Mono({
   subsets: ['latin'],
@@ -76,7 +77,12 @@ export default function NoteLayout({
             <li>{tags}</li>
           )}
         </ul>
-        <h1 className={styles.title}>{title}</h1>
+        <h1
+          className={styles.title}
+          dangerouslySetInnerHTML={{
+            __html: convertMDWithInlineCodeToHTML(title),
+          }}
+        ></h1>
         {children}
       </article>
       <Navigation previous={previous} next={next} entryPath="notes" />
