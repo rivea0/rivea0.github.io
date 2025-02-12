@@ -1,0 +1,107 @@
+---
+title: Interface extension vs. intersection in TypeScript
+tags: [TypeScript]
+description: The differences between interface extension (interface...extends) and intersection 
+slug: interface-extension-vs-intersection-in-typescript
+date: 2025-02-12
+---
+
+There are two ways to combine types:
+
+• using `interface...extends` (interface extension)
+
+```ts
+interface BaseSpell {
+  name: string;
+  incantation: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+interface DefensiveSpell extends BaseSpell {
+  protectionLevel: number;
+}
+```
+
+• using `&` with type aliases (intersection)
+
+```ts
+type BaseSpell = {
+  name: string;
+  incantation: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+type DefensiveSpell = BaseSpell & { protectionLevel: number };
+```
+
+For performance and error-handling reasons, [it's recommended](https://github.com/microsoft/TypeScript/wiki/Performance#preferring-interfaces-over-intersections) to use interface extensions over intersections.
+
+**Performance**, because _TypeScript can cache the resulting type of an interface based on its name._
+
+**Error-handling**, because _if the properties of interfaces are not compatible (i.e., they have the same property name but different types), TypeScript will raise an error_, but with intersections, it will result in `never` type.
+For example:
+
+```ts
+type BaseSpell = {
+  name: string;
+  incantation: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+type DefensiveSpell = BaseSpell & { name: number };
+
+declare const spell: DefensiveSpell;
+spell.name; // (property) name: never
+```
+
+But this will have an error:
+
+```ts
+interface BaseSpell {
+  name: string;
+  incantation: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+interface DefensiveSpell extends BaseSpell {
+  name: number;
+}
+// Interface 'DefensiveSpell' incorrectly extends interface 'BaseSpell'. 
+// Types of property 'name' are incompatible. Type 'number' is not assignable to type 'string'.
+```
+
+The reason behind the performance gains is also explained as:
+
+> Interfaces create a single flat object type that detects property conflicts, which are usually important to resolve! Intersections on the other hand just recursively merge properties, and in some cases produce `never`. [...] Type relationships between interfaces are also cached, as opposed to intersection types as a whole.
+
+However, while interfaces are pretty good, one thing to be aware of is interface merging, where if you define two interfaces with the same name, they will merge into one.
+
+If we have our `BaseSpell` interface again:
+
+```ts
+interface BaseSpell {
+  name: 'string';
+  incantation: 'string';
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+```
+
+And we redefine it for whatever reason as to have only a `spellName`:
+
+```ts
+interface BaseSpell {
+  spellName: string;
+}
+```
+
+Now they are merged, and a variable of type `BaseSpell` has to have all four properties:
+
+```ts
+declare const spell: BaseSpell;
+// spell.name;
+// spell.incantation;
+// spell.difficulty;
+// spell.spellName;
+```
+
+The TL;DR of this is: <mark>prefer interface extensions over intersections</mark> for performance and better error-handling, <mark>but beware of interface merging</mark> to avoid unexpected issues.

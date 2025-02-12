@@ -4,9 +4,90 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 09 Feb 2025 20:21:26 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 12 Feb 2025 09:54:46 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[Interface extension vs. intersection in TypeScript]]></title>
+            <description><![CDATA[<p>There are two ways to combine types:</p>
+<p>• using <code>interface...extends</code> (interface extension)</p>
+<pre><code class="language-ts">interface BaseSpell {
+  name: string;
+  incantation: string;
+  difficulty: &#39;easy&#39; | &#39;medium&#39; | &#39;hard&#39;;
+}
+
+interface DefensiveSpell extends BaseSpell {
+  protectionLevel: number;
+}
+</code></pre>
+<p>• using <code>&amp;</code> with type aliases (intersection)</p>
+<pre><code class="language-ts">type BaseSpell = {
+  name: string;
+  incantation: string;
+  difficulty: &#39;easy&#39; | &#39;medium&#39; | &#39;hard&#39;;
+}
+
+type DefensiveSpell = BaseSpell &amp; { protectionLevel: number };
+</code></pre>
+<p>For performance and error-handling reasons, <a href="https://github.com/microsoft/TypeScript/wiki/Performance#preferring-interfaces-over-intersections" target="_blank" rel="noopener noreferrer">it&#39;s recommended</a> to use interface extensions over intersections.</p>
+<p><strong>Performance</strong>, because <em>TypeScript can cache the resulting type of an interface based on its name.</em></p>
+<p><strong>Error-handling</strong>, because <em>if the properties of interfaces are not compatible (i.e., they have the same property name but different types), TypeScript will raise an error</em>, but with intersections, it will result in <code>never</code> type.<br>For example:</p>
+<pre><code class="language-ts">type BaseSpell = {
+  name: string;
+  incantation: string;
+  difficulty: &#39;easy&#39; | &#39;medium&#39; | &#39;hard&#39;;
+}
+
+type DefensiveSpell = BaseSpell &amp; { name: number };
+
+declare const spell: DefensiveSpell;
+spell.name; // (property) name: never
+</code></pre>
+<p>But this will have an error:</p>
+<pre><code class="language-ts">interface BaseSpell {
+  name: string;
+  incantation: string;
+  difficulty: &#39;easy&#39; | &#39;medium&#39; | &#39;hard&#39;;
+}
+
+interface DefensiveSpell extends BaseSpell {
+  name: number;
+}
+// Interface &#39;DefensiveSpell&#39; incorrectly extends interface &#39;BaseSpell&#39;. 
+// Types of property &#39;name&#39; are incompatible. Type &#39;number&#39; is not assignable to type &#39;string&#39;.
+</code></pre>
+<p>The reason behind the performance gains is also explained as:</p>
+<blockquote>
+<p>Interfaces create a single flat object type that detects property conflicts, which are usually important to resolve! Intersections on the other hand just recursively merge properties, and in some cases produce <code>never</code>. [...] Type relationships between interfaces are also cached, as opposed to intersection types as a whole.</p>
+</blockquote>
+<p>However, while interfaces are pretty good, one thing to be aware of is interface merging, where if you define two interfaces with the same name, they will merge into one.</p>
+<p>If we have our <code>BaseSpell</code> interface again:</p>
+<pre><code class="language-ts">interface BaseSpell {
+  name: &#39;string&#39;;
+  incantation: &#39;string&#39;;
+  difficulty: &#39;easy&#39; | &#39;medium&#39; | &#39;hard&#39;;
+}
+</code></pre>
+<p>And we redefine it for whatever reason as to have only a <code>spellName</code>:</p>
+<pre><code class="language-ts">interface BaseSpell {
+  spellName: string;
+}
+</code></pre>
+<p>Now they are merged, and a variable of type <code>BaseSpell</code> has to have all four properties:</p>
+<pre><code class="language-ts">declare const spell: BaseSpell;
+// spell.name;
+// spell.incantation;
+// spell.difficulty;
+// spell.spellName;
+</code></pre>
+<p>The TL;DR of this is: <mark>prefer interface extensions over intersections</mark> for performance and better error-handling, <mark>but beware of interface merging</mark> to avoid unexpected issues.</p>
+]]></description>
+            <link>https://rivea0.github.io/blog/interface-extension-vs-intersection-in-typescript</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/interface-extension-vs-intersection-in-typescript</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Wed, 12 Feb 2025 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[Creating a copy-to-clipboard extension for Bright and MDX]]></title>
             <description><![CDATA[<p><a href="https://bright.codehike.org/" target="_blank" rel="noopener noreferrer">Bright</a> is a React server component for syntax highlighting. It comes with built-in themes and features like dark/light mode, line numbers, title, etc.</p>
@@ -135,7 +216,7 @@ Code.extensions = [copyCode];
             <pubDate>Sun, 09 Feb 2025 00:00:00 GMT</pubDate>
         </item>
         <item>
-            <title><![CDATA[JSON.parse always has `any` as its return type]]></title>
+            <title><![CDATA[`JSON.parse` always has `any` as its return type]]></title>
             <description><![CDATA[<p>Let&#39;s say we have stringified an object with a proper type:</p>
 <pre><code class="language-ts">type Person = {
   name: string,
