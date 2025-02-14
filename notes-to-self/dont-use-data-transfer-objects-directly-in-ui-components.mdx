@@ -1,0 +1,49 @@
+---
+title: Don't use data transfer objects directly in UI components
+tags: [Miscellaneous]
+description: Don't use data transfer objects directly in UI components, create data access layers instead
+slug: dont-use-data-transfer-objects-directly-in-ui-components
+postIndex: 13
+---
+
+Data transfer objects (DTOs) usually come from a backend API or service and _represent the raw data structure used for transfer across the network._
+
+Don't pass them directly to UI components as props. Instead, create a data access layer that _acts as an abstraction boundary between the UI and the backend services._
+Think of it as simplified object models tailored for the needs of the UI.
+
+For example, with a DTO like this:
+
+```js
+{
+  id: 'abc123',
+  authorId: 42,
+  title: 'New Blog Post',
+  content: 'This is my new blog post...',
+  metadata: {
+    createdAt: '2022-01-15T08:25:00Z',
+    updatedAt: '2022-01-15T08:25:00Z',
+    tags: ['react', 'javascript']
+  }
+}
+```
+
+We can create this data access layer:
+
+```js
+{
+  id: 'abc123',
+  author: 'Jane Doe',
+  title: 'New Blog Post',
+  content: 'This is my new blog post...',
+  formattedDate: 'January 15, 2022',
+  tags: ['react', 'javascript']
+}
+```
+
+The `authodId` is dropped, and we use `formattedDate` for display purposes.
+
+---
+
+The example and learning is from https://darios.blog/posts/do-not-pass-dtos-to-ui-components.
+
+Also: https://frontendatscale.com/courses/frontend-architecture/designing/domain-modeling/
