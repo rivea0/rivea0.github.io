@@ -4,9 +4,67 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 12 Feb 2025 09:54:46 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 05 Mar 2025 23:45:07 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[Font display timeline]]></title>
+            <description><![CDATA[<p>The time when a browser attempts to use a downloaded font face is divided into three periods<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display#description" target="_blank" rel="noopener noreferrer">^1</a>:</p>
+<ul>
+<li><p><strong>Font block:</strong></p>
+<p>  If the font is not loaded during this period, elements that use it must render an invisible fallback font face (making the text invisible).</p>
+</li>
+<li><p><strong>Font swap:</strong></p>
+<p>  Occurs after the font block period. If the font is not loaded during this period, elements that use it must render a fallback font face.</p>
+</li>
+<li><p><strong>Font failure:</strong></p>
+<p>  Occurs after the font swap period. If the font is still not loaded, then it&#39;s a failure, so normal font fallback happens.</p>
+</li>
+</ul>
+<hr>
+<h2>The <code>font-display</code> descriptor</h2>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display" target="_blank" rel="noopener noreferrer"><code>font-display</code></a> can be used to control <em>how a downloadable font renders before it&#39;s fully loaded</em>.<br>It can be used inside the <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_syntax/At-rule" target="_blank" rel="noopener noreferrer">at-rule</a> <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face" target="_blank" rel="noopener noreferrer"><code>@font-face</code></a>:</p>
+<pre><code class="language-css">@font-face {
+  /* ... */
+  font-display: &lt;auto | block | swap | fallback | optional&gt;;
+}
+</code></pre>
+<h3><code>font-display: auto</code></h3>
+<p>The display strategy is defined by the user agent.</p>
+<h3><code>font-display: block</code></h3>
+<p>A <strong>short block</strong> period and an <strong>infinite swap</strong> period.</p>
+<blockquote>
+<p>the browser draws &quot;invisible&quot; text at first if the font is not loaded, but swaps the font face in as soon as it loads.<br>[...]<br>This value <mark>should only be used if rendering text in a particular typeface is required for the page to be usable.</mark></p>
+</blockquote>
+<h3><code>font-display: swap</code></h3>
+<p>An <strong>extremely small block</strong> period and an <strong>infinite swap</strong> period.</p>
+<blockquote>
+<p>the browser draws text immediately with a fallback if the font face isn&#39;t loaded, but swaps the font face in as soon as it loads.</p>
+</blockquote>
+<h3><code>font-display: fallback</code></h3>
+<p>An <strong>extremely small block</strong> period and a <strong>short swap</strong> period.</p>
+<blockquote>
+<p>the font face is rendered with a fallback at first if it&#39;s not loaded, but the font is swapped as soon as it loads. However, <mark>if too much time passes, the fallback will be used for the rest of the page&#39;s lifetime.</mark></p>
+</blockquote>
+<h3><code>font-display: optional</code></h3>
+<p>An <strong>extremely small block</strong> period and a <strong>no swap</strong> period.</p>
+<blockquote>
+<p>this is a good choice for when the downloading font is more of a “nice to have” but not critical to the experience.</p>
+</blockquote>
+<hr>
+<p>In Firefox, the &quot;short&quot; period is defined by the <code>gfx.downloadable_fonts.fallback_delay</code> preference, and by default it&#39;s 3000ms, and can also be found here: <a href="https://github.com/mozilla/gecko-dev/blob/d74b4d1e74f3dee81369db61c69ccbe325f21385/layout/style/nsFontFaceLoader.cpp#L38" target="_blank" rel="noopener noreferrer">https://github.com/mozilla/gecko-dev/blob/d74b4d1e74f3dee81369db61c69ccbe325f21385/layout/style/nsFontFaceLoader.cpp#L38</a></p>
+<Note>
+The "short" period is also 3000ms in Chrome 35+ and Opera.[^2]
+</Note>
+
+<p>&quot;Extremely small&quot; period is the <code>gfx.downloadable_fonts.fallback_delay_short</code> preference and by default it&#39;s 100ms, and can be found here: <a href="https://github.com/mozilla/gecko-dev/blob/d74b4d1e74f3dee81369db61c69ccbe325f21385/layout/style/nsFontFaceLoader.cpp#L42" target="_blank" rel="noopener noreferrer">https://github.com/mozilla/gecko-dev/blob/d74b4d1e74f3dee81369db61c69ccbe325f21385/layout/style/nsFontFaceLoader.cpp#L42</a></p>
+<hr>
+]]></description>
+            <link>https://rivea0.github.io/blog/font-display-timeline</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/font-display-timeline</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Wed, 05 Mar 2025 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[Interface extension vs. intersection in TypeScript]]></title>
             <description><![CDATA[<p>There are two ways to combine types:</p>

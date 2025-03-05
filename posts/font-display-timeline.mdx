@@ -1,0 +1,82 @@
+---
+title: Font display timeline
+tags: [CSS]
+description: Font display timeline and font-display descriptor for the CSS at-rule font-face
+slug: font-display-timeline
+date: 2025-03-05
+---
+
+The time when a browser attempts to use a downloaded font face is divided into three periods[^1]:
+
+- **Font block:**
+  
+    If the font is not loaded during this period, elements that use it must render an invisible fallback font face (making the text invisible).
+
+- **Font swap:**
+
+    Occurs after the font block period. If the font is not loaded during this period, elements that use it must render a fallback font face.
+
+- **Font failure:**
+
+    Occurs after the font swap period. If the font is still not loaded, then it's a failure, so normal font fallback happens.
+
+---
+
+## The `font-display` descriptor
+
+[`font-display`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display) can be used to control _how a downloadable font renders before it's fully loaded_. 
+It can be used inside the [at-rule](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_syntax/At-rule) [`@font-face`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face):
+
+
+```css
+@font-face {
+  /* ... */
+  font-display: <auto | block | swap | fallback | optional>;
+}
+```
+
+### `font-display: auto`
+
+The display strategy is defined by the user agent.
+
+### `font-display: block`
+
+A **short block** period and an **infinite swap** period.
+
+> the browser draws "invisible" text at first if the font is not loaded, but swaps the font face in as soon as it loads.
+> [...]
+> This value <mark>should only be used if rendering text in a particular typeface is required for the page to be usable.</mark>
+
+### `font-display: swap`
+
+An **extremely small block** period and an **infinite swap** period.
+
+> the browser draws text immediately with a fallback if the font face isn't loaded, but swaps the font face in as soon as it loads.
+
+### `font-display: fallback`
+
+An **extremely small block** period and a **short swap** period.
+
+> the font face is rendered with a fallback at first if it's not loaded, but the font is swapped as soon as it loads. However, <mark>if too much time passes, the fallback will be used for the rest of the page's lifetime.</mark>
+
+### `font-display: optional`
+
+An **extremely small block** period and a **no swap** period.
+
+> this is a good choice for when the downloading font is more of a “nice to have” but not critical to the experience.
+
+---
+
+In Firefox, the "short" period is defined by the `gfx.downloadable_fonts.fallback_delay` preference, and by default it's 3000ms, and can also be found here: https://github.com/mozilla/gecko-dev/blob/d74b4d1e74f3dee81369db61c69ccbe325f21385/layout/style/nsFontFaceLoader.cpp#L38
+
+<Note>
+The "short" period is also 3000ms in Chrome 35+ and Opera.[^2]
+</Note>
+
+"Extremely small" period is the `gfx.downloadable_fonts.fallback_delay_short` preference and by default it's 100ms, and can be found here: https://github.com/mozilla/gecko-dev/blob/d74b4d1e74f3dee81369db61c69ccbe325f21385/layout/style/nsFontFaceLoader.cpp#L42
+
+---
+
+[^1]: https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display#description
+
+[^2]: https://developer.chrome.com/blog/font-display/#differences_in_font_rendering_today
