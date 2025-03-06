@@ -1,0 +1,27 @@
+---
+title: Don't use the `skew()` transform function 
+tags: [CSS]
+description: Don't use the skew() transform function. Use skewX() and skewY() instead.
+slug: dont-use-the-skew-transform-function
+postIndex: 14
+---
+
+What this function does is that it skews an element on the 2D plane, and it has the parameters for the angle(s) to use to skew the element along the x and y axes.
+
+But, the [spec](https://drafts.csswg.org/css-transforms/#funcdef-transform-skew) says "_`skew()` exists for compatibility reasons, and should not be used in new content. Use `skewX()` or `skewY()` instead, noting that the behavior of `skew()` is different from multiplying `skewX()` with `skewY()`._"
+
+So instead of this:
+
+```css
+.element {
+  transform: skew(15deg, 15deg);
+}
+```
+
+Prefer this:
+
+```css
+.element {
+  transform: skewX(15deg) skewY(15deg);
+}
+```
