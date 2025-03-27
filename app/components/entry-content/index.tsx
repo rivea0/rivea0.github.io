@@ -6,8 +6,9 @@ import { MDXNote } from '@components/mdx-note';
 import { MDXTable } from '@components/mdx-table';
 import catppuccinLatte from './bright-themes/catppuccinLatte.json';
 import draculaUpdated from './bright-themes/draculaUpdated.json';
-import { copyCode, focus } from './bright-extensions/extension';
+import { copyCode, focus, titleBar } from './bright-extensions/extension';
 import type { VFile } from '@mdx-js/mdx/lib/compile';
+import MDXExercise from '@components/mdx-exercise';
 
 export default async function EntryContent({
   mdxFunctionBody,
@@ -22,11 +23,18 @@ export default async function EntryContent({
     light: catppuccinLatte,
   };
   Code.style = { overflow: 'scroll' };
-  Code.extensions = [focus, copyCode];
+  Code.extensions = [focus, copyCode, titleBar];
 
   return (
     <Content
-      components={{ img: MDXImage, pre: Code, Note: MDXNote, Table: MDXTable }}
+      components={{
+        img: MDXImage,
+        pre: Code,
+        Note: MDXNote,
+        Table: MDXTable,
+        Exercise: MDXExercise,
+        Code: Code,
+      }}
     />
   );
 }
