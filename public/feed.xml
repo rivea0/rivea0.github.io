@@ -4,9 +4,197 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 05 Mar 2025 23:47:02 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 28 Mar 2025 00:49:42 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[Notes on a first encounter with Rust's ownership]]></title>
+            <description><![CDATA[<p>One thing that&#39;s great about first-time learning Rust is its amazing learning resources. </p>
+<p><a href="https://doc.rust-lang.org/book/" target="_blank" rel="noopener noreferrer">&quot;The Book&quot;</a> is especially very approachable for newcomers. Maybe it&#39;s a bit weird to say, but it gives you a cozy feeling somehow.</p>
+<p>(Or, maybe it has to do with the fireplace ambience that plays in the background while I&#39;m reading it.)</p>
+<Note>
+This post is mostly notes (with some \*interactivity\*) on what has been written in sections 4.1 and 4.2 of The Book, so the reader (that's you!) is assumed to have read (or at least be familiar with) them.
+
+<p>Also, some examples in the exercises do not include <code>fn main() {}</code> for simplicity.<br></Note></p>
+<h2>Some notes on stack and heap</h2>
+<p>The program address space includes the <em>stack</em>, where usually the local variables and parameters reside, and the <em>heap</em>, where dynamic memory allocation happens.</p>
+<p>The stack grows and shrinks as the functions are called and returned, for that reason, it&#39;s usually allocated near the bottom of memory (<em>at the highest memory addresses)</em>. The data stored on the stack has a fixed size.<br>Heap, on the other hand, is usually far from the stack, and as more space is dynamically allocated, it grows into higher addresses towards the stack.[^1]</p>
+<p>Going back to Rustland, here are some tidbits on stack and heap operations from <a href="https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html" target="_blank" rel="noopener noreferrer">The Book</a>:</p>
+<blockquote>
+<p><mark>Pushing to the stack is faster than allocating on the heap</mark> because the allocator never has to search for a place to store new data; that location is always at the top of the stack. Comparatively, <mark>allocating space on the heap requires more work because the allocator must first find a big enough space</mark> to hold the data and <mark>then perform bookkeeping to prepare for the next allocation</mark>.</p>
+</blockquote>
+<blockquote>
+<p><mark>Accessing data in the heap is slower than accessing data on the stack</mark> because you have to follow a pointer to get there.</p>
+</blockquote>
+<h2>What about ownership?</h2>
+<p>Now that we&#39;ve refreshed our memory on stack and heap, here is what The Book says about ownership:</p>
+<blockquote>
+<p>Keeping track of what parts of code are using what data on the heap, minimizing the amount of duplicate data on the heap, and cleaning up unused data on the heap so you don&#39;t run out of space are all problems that ownership addresses. [...] knowing <mark>that the main purpose of ownership is to manage heap data</mark> can help explain why it works the way it does.</p>
+</blockquote>
+<hr>
+<p>So, to remember, <em><strong>ownership</strong> enables Rust to make memory safety guarantees without needing a garbage collector.</em></p>
+<p>It is <em>a set of rules that govern how a Rust program manages memory.</em> And, <em>if any of the rules are violated, the program won&#39;t compile.</em></p>
+<p>Let&#39;s also remember the ownership rules:</p>
+<ul>
+<li>Each value has an owner.</li>
+<li>There can only be one owner at a time.</li>
+<li>When the owner goes out of scope, the value will be dropped.</li>
+</ul>
+<hr>
+<p>The Book says that in Rust, <em>the memory is automatically returned once the variable that owns it goes out of scope.</em> It happens with the <a href="https://doc.rust-lang.org/std/ops/trait.Drop.html#tymethod.drop" target="_blank" rel="noopener noreferrer"><code>drop</code></a> function.</p>
+<p>Let&#39;s say we have this code example:</p>
+<Code lang="rust" lineNumbers>
+{`{
+    let s = String::from("hey");
+}
+`}
+</Code>
+
+<p>On which line does the variable <code>s</code> go out of scope and <code>drop</code> is called for it?</p>
+<Exercise correctAnswer="a">
+<>Line 3</>
+
+<p>&lt;&gt;Line 4&lt;/&gt;</p>
+<p>The answer is line 3. With the closed brace, the scope is over, and <code>s</code> is no longer valid.<br></Exercise></p>
+<h2>Let&#39;s...move?</h2>
+<p>An example from The Book is this one:</p>
+<pre><code class="language-rust">let s1 = String::from(&quot;hey&quot;);
+let s2 = s1;
+</code></pre>
+<p>When <code>s1</code> is assigned to <code>s2</code>, not the data itself, but the pointer is copied. So, both <code>s1</code> and <code>s2</code> point to the same data in memory, but <code>s1</code> is no longer valid since it&#39;s <em>moved</em>.</p>
+<p>With which example we&#39;ll get the error <code>borrow of moved value: `s1` </code>?</p>
+<Exercise correctAnswer="a">
+<>
+<Code lang="rust" title="Example A" lineNumbers>
+{`{
+    let s1 = String::from("hey");
+    let s2 = s1; println!("{s1} there");
+}`}
+</Code>
+</>
+
+<p>&lt;&gt;<br><Code lang="rust" title="Example B" lineNumbers><br>{<code>{     let s1 = String::from(&quot;hey&quot;);     let s2 = s1; } println!(&quot;{s1} there&quot;); </code>}<br></Code><br>&lt;/&gt;</p>
+<p>The answer is Example A, because the value is moved to <code>s2</code> and we&#39;re still in the same scope. Since <code>s1</code> is no longer valid, there&#39;s no need to free any memory for it.<br>With Example B, the error would say <code>cannot find value </code>s1<code> in this scope</code> instead.<br></Exercise></p>
+<hr>
+<blockquote>
+<p>If a type implements the <code>Copy</code> trait, variables that use it do not move, but rather are trivially copied, making them still valid after assignment to another variable.</p>
+</blockquote>
+<p>Which one of these will be moved, <code>n1</code> or <code>c1</code>?</p>
+<Exercise>
+<>
+<Code lang="rust" title="n1" lineNumbers>
+{`let n1 = 42;
+let n2 = n1;`}
+</Code>
+</>
+
+<p>&lt;&gt;<br><Code lang="rust" title="c1" lineNumbers><br>{<code>let c1 = &#39;a&#39;; let c2 = c1;</code>}<br></Code><br>&lt;/&gt;</p>
+<p>Answer: neither. The types of both of them (<code>n1</code> being a <code>i32</code> and <code>c1</code> being a <code>char</code>) implement <a href="https://doc.rust-lang.org/std/marker/trait.Copy.html#implementors" target="_blank" rel="noopener noreferrer">the <code>Copy</code> trait</a>, so they don&#39;t move. Also, their sizes are known at compile time, so they&#39;re stored on the stack.<br></Exercise></p>
+<br />
+
+<p>Which one of these will give the error <code>borrow of moved value: `a_string` </code>?</p>
+<Exercise correctAnswer="b">
+<>
+<Code lang="rust" title="Example A" lineNumbers>
+{`fn main() {
+    let s = String::from("hey");
+    let a_string = this_one(s);
+    println!("{a_string} there");
+}
+
+<p>fn this_one(a_str: String) -&gt; String {<br>    a_str<br>}<br>`}<br></Code><br>&lt;/&gt;</p>
+<p>&lt;&gt;<br><Code lang="rust" title="Example B" lineNumbers><br>{`<br>fn main() {<br>    let a_string = that_one();<br>    let s = a_string;<br>    println!("{a_string} there");<br>}</p>
+<p>fn that_one() -> String {<br>    let s = String::from("hey");<br>    s<br>}<br>`}<br></Code><br>&lt;/&gt;</p>
+<p>The answer is Example B. We try to use <code>a_string</code> after the value is moved to <code>s</code>.<br>In Example A, if we tried to use <code>s</code> after it&#39;s moved to <code>a_string</code>, we&#39;ll also get a <code>borrow of moved value</code> error.<br></Exercise></p>
+<hr>
+<h2>References, please</h2>
+<blockquote>
+<p>A <em>reference</em> is like a pointer in that <mark>it&#39;s an address we can follow to access the data stored at that address</mark>; that data is owned by some other variable. <mark>Unlike a pointer, a reference is guaranteed to point to a valid value of a particular type for the life of that reference.</mark></p>
+</blockquote>
+<p>So, <em>referring to some value without taking ownership of it</em> can be done with the ampersand:</p>
+<pre><code class="language-rust">fn main() {
+    let a_string = String::from(&quot;hey&quot;);
+    let len = calculate_length(&amp;a_string);
+
+    println!(&quot;{a_string} has the length {len}&quot;);
+}
+
+fn calculate_length(s: &amp;String) -&gt; usize {
+    s.len()
+}
+</code></pre>
+<p>So, while this one will give the error <code>borrow of moved value: `s` </code>...:</p>
+<pre><code class="language-rust">fn main() {
+    let s = String::from(&quot;hey&quot;);
+    let a_string = this_one(s);
+    println!(&quot;{s} there&quot;);
+}
+
+fn this_one(a_str: String) -&gt; String {
+    a_str
+}
+</code></pre>
+<p>...this one won&#39;t (because we&#39;re using references!):</p>
+<pre><code class="language-rust">fn main() {
+    let s = String::from(&quot;hey&quot;);
+    let a_string = this_one(&amp;s);
+    println!(&quot;{s} here&quot;);
+}
+
+fn this_one(a_str: &amp;String) -&gt; &amp;String {
+    a_str
+}
+</code></pre>
+<p><code>&amp;s</code> refers to the value of <code>s</code> but doesn&#39;t own it, so <em>the value it points to</em> won&#39;t be dropped when it&#39;s stopped being used.</p>
+<p>It&#39;s also called <em>borrowing</em>.</p>
+<p>References are also immutable by default, unless they are explicitly created as a mutable reference:</p>
+<pre><code class="language-rust">fn main() {
+    let mut s = String::from(&quot;hey&quot;);
+    change(&amp;mut s);
+
+    println!(&quot;{s}&quot;); // hey...
+}
+
+fn change(a_string: &amp;mut String) {
+    a_string.push_str(&quot;...&quot;);
+}
+</code></pre>
+<p>We can only have one mutable reference to a value.<br>The Book says that multiple mutable references can only exist <em>if they are not simultaneous.</em> </p>
+<p>We can have <mark><em>either</em> one mutable reference <em>or</em> any number of immutable references.</mark></p>
+<p>So, which one of these will give the error <code>cannot borrow </code>s<code> as mutable because it is also borrowed as immutable</code>:</p>
+<Exercise correctAnswer="a">
+<>
+<Code lang="rust" title="Example A" lineNumbers>
+{`fn main() {
+    let mut s = String::from("hey");
+    let r1 = &s;
+    let r2 = &s;
+    let r3 = &mut s;
+
+<pre><code>println!(&quot;{r1} there&quot;);
+println!(&quot;{r2} there&quot;);
+println!(&quot;{r3} there&quot;);
+</code></pre>
+<p>}`}<br></Code><br>&lt;/&gt;</p>
+<p>&lt;&gt;<br><Code lang="rust" title="Example B" lineNumbers><br>{`<br>fn main() {<br>    let mut s = String::from("hey");<br>    let r1 = &s;<br>    let r2 = &s;</p>
+<pre><code>println!(&quot;{r1} there&quot;);
+println!(&quot;{r2} there&quot;);
+
+let r3 = &amp;mut s;
+println!(&quot;{r3} there&quot;);
+</code></pre>
+<p>}<br>`}<br></Code><br>&lt;/&gt;</p>
+<p>The answer is Example A. We simultaneously try to have both mutable and immutable references to <code>s</code>. In Example B, <code>r1</code> and <code>r2</code> are not used again, so when <code>r3</code> is created, their scopes are over.<br></Exercise></p>
+<p><a href="https://rust-book.cs.brown.edu/ch04-00-understanding-ownership.html" target="_blank" rel="noopener noreferrer">The interactive version of The Book from Brown University</a> includes more extensive sections on ownership (it also has quizzes!), so it can be a great supplement.</p>
+<p>Usually, the problems are best solved when they are broken into smaller parts, and learning new things is similar, it&#39;s best to take a bite-sized approach and let new concepts sit with you for a while. So, next up is section 4.3, <em>The Slice Type</em>.</p>
+<p>Until then, happy coding.</p>
+<p>[^1]: <a href="https://diveintosystems.org/book/C2-C_depth/scope_memory.html#_parts_of_program_memory_and_scope" target="_blank" rel="noopener noreferrer"><em>Dive into Systems</em> by Suzanne J. Matthews, Tia Newhall, Kevin C. Webb. 2020.</a></p>
+]]></description>
+            <link>https://rivea0.github.io/blog/notes-on-a-first-encounter-with-rust-ownership</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/notes-on-a-first-encounter-with-rust-ownership</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Fri, 28 Mar 2025 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[Font display timeline]]></title>
             <description><![CDATA[<p>The time when a browser attempts to use a downloaded font face is divided into three periods<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display#description" target="_blank" rel="noopener noreferrer">^1</a>:</p>

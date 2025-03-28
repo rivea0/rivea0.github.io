@@ -1,0 +1,293 @@
+---
+title: Notes on a first encounter with Rust's ownership
+tags: [Rust]
+description: Going through the first two sections of The Book's ownership chapter (with some interactivity)
+slug: notes-on-a-first-encounter-with-rust-ownership
+date: 2025-03-28
+---
+
+One thing that's great about first-time learning Rust is its amazing learning resources. 
+
+["The Book"](https://doc.rust-lang.org/book/) is especially very approachable for newcomers. Maybe it's a bit weird to say, but it gives you a cozy feeling somehow.
+
+(Or, maybe it has to do with the fireplace ambience that plays in the background while I'm reading it.)
+
+<Note>
+This post is mostly notes (with some \*interactivity\*) on what has been written in sections 4.1 and 4.2 of The Book, so the reader (that's you!) is assumed to have read (or at least be familiar with) them.
+
+Also, some examples in the exercises do not include `fn main() {}` for simplicity.
+</Note>
+
+## Some notes on stack and heap
+
+The program address space includes the _stack_, where usually the local variables and parameters reside, and the _heap_, where dynamic memory allocation happens.
+
+The stack grows and shrinks as the functions are called and returned, for that reason, it's usually allocated near the bottom of memory (_at the highest memory addresses)_. The data stored on the stack has a fixed size.
+Heap, on the other hand, is usually far from the stack, and as more space is dynamically allocated, it grows into higher addresses towards the stack.[^1]
+
+Going back to Rustland, here are some tidbits on stack and heap operations from [The Book](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html):
+
+> <mark>Pushing to the stack is faster than allocating on the heap</mark> because the allocator never has to search for a place to store new data; that location is always at the top of the stack. Comparatively, <mark>allocating space on the heap requires more work because the allocator must first find a big enough space</mark> to hold the data and <mark>then perform bookkeeping to prepare for the next allocation</mark>.
+
+> <mark>Accessing data in the heap is slower than accessing data on the stack</mark> because you have to follow a pointer to get there.
+
+## What about ownership?
+
+Now that we've refreshed our memory on stack and heap, here is what The Book says about ownership:
+
+> Keeping track of what parts of code are using what data on the heap, minimizing the amount of duplicate data on the heap, and cleaning up unused data on the heap so you don't run out of space are all problems that ownership addresses. [...] knowing <mark>that the main purpose of ownership is to manage heap data</mark> can help explain why it works the way it does.
+
+---
+
+So, to remember, _**ownership** enables Rust to make memory safety guarantees without needing a garbage collector._
+
+It is _a set of rules that govern how a Rust program manages memory._ And, _if any of the rules are violated, the program won't compile._
+
+Let's also remember the ownership rules:
+- Each value has an owner.
+- There can only be one owner at a time.
+- When the owner goes out of scope, the value will be dropped.
+
+---
+
+The Book says that in Rust, _the memory is automatically returned once the variable that owns it goes out of scope._ It happens with the [`drop`](https://doc.rust-lang.org/std/ops/trait.Drop.html#tymethod.drop) function.
+
+Let's say we have this code example:
+
+<Code lang="rust" lineNumbers>
+{`{
+    let s = String::from("hey");
+}
+`}
+</Code>
+
+On which line does the variable `s` go out of scope and `drop` is called for it?
+
+<Exercise correctAnswer="a">
+<>Line 3</>
+
+<>Line 4</>
+
+The answer is line 3. With the closed brace, the scope is over, and `s` is no longer valid.
+</Exercise>
+
+## Let's...move?
+
+An example from The Book is this one:
+
+```rust
+let s1 = String::from("hey");
+let s2 = s1;
+```
+
+When `s1` is assigned to `s2`, not the data itself, but the pointer is copied. So, both `s1` and `s2` point to the same data in memory, but `s1` is no longer valid since it's _moved_.
+
+With which example we'll get the error ``borrow of moved value: `s1` ``?
+
+<Exercise correctAnswer="a">
+<>
+<Code lang="rust" title="Example A" lineNumbers>
+{`{
+    let s1 = String::from("hey");
+    let s2 = s1; println!("{s1} there");
+}`}
+</Code>
+</>
+
+<>
+<Code lang="rust" title="Example B" lineNumbers>
+{`{
+    let s1 = String::from("hey");
+    let s2 = s1;
+} println!("{s1} there");
+`}
+</Code>
+</>
+
+The answer is Example A, because the value is moved to `s2` and we're still in the same scope. Since `s1` is no longer valid, there's no need to free any memory for it.
+With Example B, the error would say `cannot find value `s1` in this scope` instead.
+</Exercise>
+
+---
+
+> If a type implements the `Copy` trait, variables that use it do not move, but rather are trivially copied, making them still valid after assignment to another variable.
+
+Which one of these will be moved, `n1` or `c1`?
+
+<Exercise>
+<>
+<Code lang="rust" title="n1" lineNumbers>
+{`let n1 = 42;
+let n2 = n1;`}
+</Code>
+</>
+
+<>
+<Code lang="rust" title="c1" lineNumbers>
+{`let c1 = 'a';
+let c2 = c1;`}
+</Code>
+</>
+
+Answer: neither. The types of both of them (`n1` being a `i32` and `c1` being a `char`) implement [the `Copy` trait](https://doc.rust-lang.org/std/marker/trait.Copy.html#implementors), so they don't move. Also, their sizes are known at compile time, so they're stored on the stack.
+</Exercise>
+
+<br />
+
+Which one of these will give the error ``borrow of moved value: `a_string` ``?
+
+<Exercise correctAnswer="b">
+<>
+<Code lang="rust" title="Example A" lineNumbers>
+{`fn main() {
+    let s = String::from("hey");
+    let a_string = this_one(s);
+    println!("{a_string} there");
+}
+
+fn this_one(a_str: String) -> String {
+    a_str
+}
+`}
+</Code>
+</>
+
+<>
+<Code lang="rust" title="Example B" lineNumbers>
+{`
+fn main() {
+    let a_string = that_one();
+    let s = a_string;
+    println!("{a_string} there");
+}
+
+fn that_one() -> String {
+    let s = String::from("hey");
+    s
+}
+`}
+</Code>
+</>
+
+The answer is Example B. We try to use `a_string` after the value is moved to `s`.
+In Example A, if we tried to use `s` after it's moved to `a_string`, we'll also get a `borrow of moved value` error.
+</Exercise>
+
+---
+## References, please
+
+> A _reference_ is like a pointer in that <mark>it's an address we can follow to access the data stored at that address</mark>; that data is owned by some other variable. <mark>Unlike a pointer, a reference is guaranteed to point to a valid value of a particular type for the life of that reference.</mark>
+
+So, _referring to some value without taking ownership of it_ can be done with the ampersand:
+
+```rust
+fn main() {
+    let a_string = String::from("hey");
+    let len = calculate_length(&a_string);
+
+    println!("{a_string} has the length {len}");
+}
+
+fn calculate_length(s: &String) -> usize {
+    s.len()
+}
+```
+
+So, while this one will give the error ``borrow of moved value: `s` ``...:
+
+```rust
+fn main() {
+    let s = String::from("hey");
+    let a_string = this_one(s);
+    println!("{s} there");
+}
+
+fn this_one(a_str: String) -> String {
+    a_str
+}
+```
+
+...this one won't (because we're using references!):
+
+```rust
+fn main() {
+    let s = String::from("hey");
+    let a_string = this_one(&s);
+    println!("{s} here");
+}
+
+fn this_one(a_str: &String) -> &String {
+    a_str
+}
+```
+
+`&s` refers to the value of `s` but doesn't own it, so _the value it points to_ won't be dropped when it's stopped being used.
+
+It's also called _borrowing_.
+
+References are also immutable by default, unless they are explicitly created as a mutable reference:
+
+```rust
+fn main() {
+    let mut s = String::from("hey");
+    change(&mut s);
+
+    println!("{s}"); // hey...
+}
+
+fn change(a_string: &mut String) {
+    a_string.push_str("...");
+}
+```
+
+We can only have one mutable reference to a value.
+The Book says that multiple mutable references can only exist _if they are not simultaneous._ 
+
+We can have <mark>_either_ one mutable reference _or_ any number of immutable references.</mark>
+
+So, which one of these will give the error `cannot borrow `s` as mutable because it is also borrowed as immutable`:
+
+<Exercise correctAnswer="a">
+<>
+<Code lang="rust" title="Example A" lineNumbers>
+{`fn main() {
+    let mut s = String::from("hey");
+    let r1 = &s;
+    let r2 = &s;
+    let r3 = &mut s;
+
+    println!("{r1} there");
+    println!("{r2} there");
+    println!("{r3} there");
+}`}
+</Code>
+</>
+
+<>
+<Code lang="rust" title="Example B" lineNumbers>
+{`
+fn main() {
+    let mut s = String::from("hey");
+    let r1 = &s;
+    let r2 = &s;
+
+    println!("{r1} there");
+    println!("{r2} there");
+
+    let r3 = &mut s;
+    println!("{r3} there");
+}
+`}
+</Code>
+</>
+
+The answer is Example A. We simultaneously try to have both mutable and immutable references to `s`. In Example B, `r1` and `r2` are not used again, so when `r3` is created, their scopes are over.
+</Exercise>
+
+[The interactive version of The Book from Brown University](https://rust-book.cs.brown.edu/ch04-00-understanding-ownership.html) includes more extensive sections on ownership (it also has quizzes!), so it can be a great supplement.
+
+Usually, the problems are best solved when they are broken into smaller parts, and learning new things is similar, it's best to take a bite-sized approach and let new concepts sit with you for a while. So, next up is section 4.3, _The Slice Type_.
+
+Until then, happy coding.
+
+[^1]: [_Dive into Systems_ by Suzanne J. Matthews, Tia Newhall, Kevin C. Webb. 2020.](https://diveintosystems.org/book/C2-C_depth/scope_memory.html#_parts_of_program_memory_and_scope)
