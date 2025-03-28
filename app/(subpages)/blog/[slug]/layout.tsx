@@ -23,6 +23,14 @@ export const generateMetadata = async ({
     alternates: {
       canonical: `https://rivea0.github.io/blog/${params.slug}`,
     },
+    openGraph: {
+      title: post?.title,
+      description: post?.description,
+      url: `https://rivea0.github.io/blog/${params.slug}`,
+      type: 'article',
+      siteName: 'Eda Eren',
+      locale: 'en_US',
+    },
   };
 };
 
