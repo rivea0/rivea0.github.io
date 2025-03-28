@@ -1,0 +1,90 @@
+.removeBlur {
+  opacity: 1;
+}
+
+.addBlur {
+  filter: blur(6px);
+}
+
+.options {
+  display: grid;
+  max-width: var(--main-content);
+}
+
+.exerciseSection {
+  background-color: var(--lighter-gray);
+  padding: .5rem .75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.vs {
+  justify-self: center;
+  border: .1rem solid var(--link);
+  border-radius: 50%;
+  padding: .5rem;
+  font-weight: bold;
+}
+
+.optionBlock {
+  border: .1rem solid var(--fg);
+  border-radius: .5rem;
+  padding: 4px 12px;
+  overflow-x: auto;
+}
+
+.optionBlock:hover {
+  cursor: pointer;
+  border: .1rem solid var(--link);
+}
+
+.showAnswerOptionBlock {
+  border: .1rem solid var(--link);
+}
+
+.correctOption, .correctOption:hover {
+  border-color: springgreen;
+}
+
+.incorrectOption, .incorrectOption:hover {
+  border-color: red;
+}
+
+.answerBox {
+  position: relative;
+  margin-top: 1rem;
+  padding: 5rem 0;
+  background-color: var(--light-gray);
+}
+
+.mysteryBox {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: .1rem solid transparent;
+  border-radius: .5rem;
+  padding: .25rem 1rem;
+}
+
+.showAnswerBtn {
+  z-index: 20;
+  font-size: larger;
+  background-color: var(--light-gray);
+  padding: .5rem .75rem;
+}
+
+.showAnswerBtn:hover {
+  cursor: pointer;
+  border: .075rem solid var(--fg);
+  border-radius: .25rem;
+}
+
+.hideShowAnswerBtn {
+  display: none;
+}
