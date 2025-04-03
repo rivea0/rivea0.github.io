@@ -1,0 +1,43 @@
+---
+title: Cypress commands and queries are not promises
+tags: [Cypress, Testing]
+description: Cypress commands and queries are not promises that can be awaited
+slug: cypress-commands-and-queries-are-not-promises
+postIndex: 15
+---
+
+We can't `await` Cypress commands and queries even though they are asynchronous, and there is a `.then()` syntax that looks very similar to JavaScript promises.
+
+The docs say:
+
+> Cypress commands and queries are not promises - they are serial commands passed into a central queue, to be executed asynchronously at a later date. These commands are designed to deliver deterministic, repeatable and consistent tests.
+
+An example from the [Core Concepts section](https://docs.cypress.io/app/core-concepts/introduction-to-cypress) is this:
+
+```js
+it('does not work as we expect', () => {
+  cy.visit('/my/resource/path') // Nothing happens yet
+
+  cy.get('.awesome-selector') // Still nothing happening
+    .click() // Nope, nothing
+    .then(() => {
+      // placing this code inside the .then() ensures
+      // it runs after the cypress commands 'execute'
+      let el = Cypress.$('.new-el') // evaluates after .then()
+
+      if (el.length) {
+        cy.get('.another-selector')
+      } else {
+        cy.get('.optional-selector')
+      }
+    })
+})
+
+// Ok, the test function has finished executing...
+// We've queued all of these commands and now
+// Cypress will begin running them in order!
+```
+
+So, we cannot do something like `await cy.click()`.
+
+We also cannot chain `.catch()`, or run multiple commands in parallel (think `Promise.all`, `Promise.race`, [etc.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#promise_concurrency)).
