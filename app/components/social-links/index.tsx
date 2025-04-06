@@ -6,15 +6,16 @@ import styles from './social-links.module.css'
 type SocialButtonProps = {
   href: string
   icon: React.ReactNode
-  tooltip: string
+  tooltip: string,
+  rel?: string
 }
 
 function SocialButton({ 
-  tooltip, href, icon 
+  tooltip, href, icon, rel
 }: SocialButtonProps) {
   return (
     <Tooltip text={tooltip}>
-      <Link href={href} className={styles.icon}>
+      <Link href={href} className={styles.icon} rel={rel}>
         {icon}
       </Link>
     </Tooltip>
@@ -48,6 +49,7 @@ export default function Socials() {
         href="https://mastodon.social/@rivea0"
         icon={<Mastodon color={`var(--icon-generic-color)`} />}
         tooltip="Mastodon"
+        rel="me"
       />
     </div>
   )

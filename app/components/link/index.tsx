@@ -12,6 +12,7 @@ type Props = LinkProps & {
   className?: string
   underline?: boolean
   tabIndex?: number
+  rel?: string
 }
 
 export default function Link({
@@ -22,6 +23,7 @@ export default function Link({
   title,
   underline = true,
   tabIndex = 0,
+  rel,
   ...props
 }: Props) {
   const className = clsx(
@@ -53,6 +55,7 @@ export default function Link({
       className={className}
       {...props}
       tabIndex={tabIndex}
+      rel={rel}
     >
       {children}
     </NextLink>

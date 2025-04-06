@@ -29,7 +29,7 @@ export default function Page() {
           </ul>
         </div>
         <div className={styles.profileDiv}>
-          <Image src='/about/profile.jpeg' alt='Profile image' width={250} height={250} className={styles.profile} />
+          <Image src='/about/profile.jpg' alt='Profile image' width={250} height={250} className={styles.profile} />
         </div>
       </div>
       <div>
