@@ -40,6 +40,11 @@
   fill: var(--link);
 }
 
+.secondaryDiv {
+  margin-top: var(--gap-half);
+  color: var(--gray);
+}
+
 @media (max-width: 768px) {
   .heading {
     flex-direction: column;

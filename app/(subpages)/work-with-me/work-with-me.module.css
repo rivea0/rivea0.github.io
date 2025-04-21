@@ -1,0 +1,29 @@
+.primaryP {
+  font-weight: bold;
+  font-size: larger;
+  margin-top: 4rem;
+  margin-bottom: -4px;
+}
+
+.link {
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.hr {
+  width: 50%;
+}
+
+.ul > li {
+  margin-top: 1rem;
+}
+
+.noteP {
+  color: var(--gray);
+  font-style: italic;
+  margin: 0 0 0 1rem;
+  font-size: 16px;
+}
