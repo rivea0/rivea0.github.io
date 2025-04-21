@@ -8,6 +8,13 @@ export const metadata = {
   alternates: {
     canonical: 'https://rivea0.github.io/work-with-me',
   },
+  openGraph: {
+    title: 'Work with Me',
+    description: 'Contact information & more.',
+    url: 'https://rivea0.github.io/work-with-me',
+    siteName: 'Eda Eren',
+    locale: 'en_US',
+  },
 }
 
 export default function Page() {
