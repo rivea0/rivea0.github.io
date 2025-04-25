@@ -1,5 +1,5 @@
 import Link from '@components/link'
-import { GitHub, Mail, RSS, BuyMeACoffee, Mastodon } from '@components/icons'
+import { GitHub, Mail, RSS, Mastodon } from '@components/icons'
 import Tooltip from '@components/tooltip'
 import styles from './social-links.module.css'
 
@@ -39,11 +39,6 @@ export default function Socials() {
         href="/feed.xml"
         icon={<RSS color={`var(--icon-generic-color)`} strokeWidth={1.6} />}
         tooltip="RSS"
-      />
-      <SocialButton
-        href="https://www.buymeacoffee.com/rivea0"
-        icon={<BuyMeACoffee color={`var(--icon-generic-color)`} />}
-        tooltip="Buy Me a Coffee"
       />
       <SocialButton
         href="https://mastodon.social/@rivea0"
