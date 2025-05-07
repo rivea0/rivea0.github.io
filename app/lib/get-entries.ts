@@ -3,6 +3,20 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { Entry } from './types';
 
+const thirdPartyPosts: Entry[] = [
+  {
+    title: 'Recursive Types in TypeScript: A Brief Exploration',
+    description:
+      'A short look at recursive types in TypeScript and some use cases.',
+    body: '',
+    date: '2025-05-07',
+    slug: '',
+    tags: ['TypeScript'],
+    isThirdParty: true,
+    href: 'https://www.freecodecamp.org/news/recursive-types-in-typescript-a-brief-exploration',
+  },
+]
+
 export default function getEntries(dirName: 'posts' | 'notes-to-self') {
   const entries = fs.readdirSync(`./${dirName}/`);
   const entriesWithMetadata = entries
@@ -20,6 +34,7 @@ export default function getEntries(dirName: 'posts' | 'notes-to-self') {
     });
 
   return entriesWithMetadata
+    .concat(thirdPartyPosts)
     .filter((entry) => entry !== null)
     .sort((a, b) => {
       if (a && b) {

@@ -58,6 +58,17 @@ export default function PostsList(props: Props) {
               year: 'numeric',
             });
 
+            if (post.isThirdParty) {
+              return (
+                <BlockEntry
+                  key={`post-item-${post.href}`}
+                  href={post.href}
+                  title={post.title}
+                  date={new Date(date)}
+                  thirdPartyPost
+                />
+              )
+            }
             if (post.slug === 'leetcode-meditations-conclusion') {
               return (
                 <BlockEntry

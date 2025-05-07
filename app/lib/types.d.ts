@@ -7,6 +7,8 @@ export type Entry = {
   body: string
   lastModified?: number
   postIndex?: number
+  isThirdParty?: boolean
+  href?: string
 }
 
 export type Project = {
