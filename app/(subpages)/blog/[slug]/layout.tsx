@@ -6,7 +6,11 @@ import { convertMDWithInlineCodeToHTML } from '@lib/utils';
 
 export async function generateStaticParams() {
   const posts = getEntries('posts');
-  return posts.map((post) => ({ slug: post.slug }));
+  return posts.map((post) => {
+    if (post.slug) {
+      return { slug: post.slug }
+    }
+  });
 }
 
 export const generateMetadata = async ({
