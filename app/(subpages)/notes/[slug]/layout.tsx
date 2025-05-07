@@ -14,7 +14,11 @@ const firaCode = Fira_Code({
 
 export async function generateStaticParams() {
   const notes = getEntries('notes-to-self');
-  return notes.map((note) => ({ slug: note.slug }));
+  return notes.map((note) => {
+    if (note.slug) {
+      return { slug: note.slug }
+    }
+  });
 }
 
 export const generateMetadata = async ({
