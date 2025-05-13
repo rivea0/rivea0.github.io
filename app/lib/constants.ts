@@ -1,5 +1,10 @@
 export const selectedPosts = [
   {
+    slug: 'notes-on-a-first-encounter-with-rust-ownership',
+    title: "Notes on a first encounter with Rust's ownership",
+    date: '2025-03-28',
+  },
+  {
     slug: 'the-curious-case-of-recursive-and-iterative-processes',
     title: 'The curious case of recursive and iterative processes',
     date: '2023-12-23',

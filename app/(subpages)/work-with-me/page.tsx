@@ -43,8 +43,8 @@ export default function Page() {
           <ul className={styles.ul}>
             <li>Software that makes the person using it the product</li>
             <li>web3, crypto, etc.</li>
-            <li>The use of generative AI everywhere, all the time, without need or a single care in the world</li>
-            <p className={styles.noteP}>Admittedly, it's fascinating to study and learn about it, but baking AI into everything is not only depressing, but also unhealthy, <Link href="https://arstechnica.com/gadgets/2023/04/generative-ai-is-cool-but-lets-not-forget-its-human-and-environmental-costs">both for the planet and for you</Link>.</p>
+            <li>Careless use of technology</li>
+            <p className={styles.noteP}>One example could be the sloppy injection of generative AI into every product, robbing what is otherwise an amazing and exciting field of its brilliance.</p>
           </ul>
         </div>
       </div>
