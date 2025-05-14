@@ -3,6 +3,7 @@ import {
   CompromiseRedactDescription,
   GlowCloudMore,
   LemonDescription,
+  MatchSyntaxDescription,
   PrimeThemeDescription,
   UnprettyBytesDescription,
 } from './components/components';
@@ -23,6 +24,13 @@ type ProjectProps = {
 };
 
 const projects: ProjectProps[] = [
+  {
+    title: 'MatchSyntax',
+    description: MatchSyntaxDescription(),
+    demoHref: '',
+    codeHref: 'https://github.com/rivea0/obsidian-match-syntax',
+    language: ['TypeScript'],
+  },
   {
     title: 'Obsidian Prime',
     description: PrimeThemeDescription(),

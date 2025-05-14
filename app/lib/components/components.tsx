@@ -39,6 +39,15 @@ export function GlowCloudMore() {
   );
 }
 
+export function MatchSyntaxDescription() {
+  return (
+    <>
+      <span>An <Link href="https://obsidian.md">Obsidian</Link> plugin that lets you write "regex-like" syntax to search the contents of a note, including part-of-speech tagging and (limited) fuzzy matching.</span>
+    </>
+  )
+}
+
+
 export function PrimeThemeDescription() {
   return (
     <>
