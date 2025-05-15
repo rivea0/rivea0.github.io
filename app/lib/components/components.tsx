@@ -9,7 +9,7 @@ export function LemonDescription() {
       database. Created for personal use (
       <em>
         and to tinker with{' '}
-        <Link href="https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations">
+        <Link href="https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations" external>
           Server Actions
         </Link>
         !
@@ -22,15 +22,17 @@ export function LemonDescription() {
 export function GlowCloudMore() {
   return (
     <>
-      The first iteration of Glow Cloud was made with Pure React, using <Link href="https://vitejs.dev/">Vite</Link>:
+      The first iteration of Glow Cloud was made with Pure React, using <Link href="https://vitejs.dev/" external>Vite</Link>:
       <span className={styles.link}>
         <Link
           href="https://glowcloud-vite.netlify.app/"
+          external
         >
           Demo site <ExternalLink />
         </Link>
         <Link
           href="https://github.com/rivea0/glow-cloud-vite"
+          external
         >
           Source code <ExternalLink />
         </Link>
@@ -42,7 +44,7 @@ export function GlowCloudMore() {
 export function MatchSyntaxDescription() {
   return (
     <>
-      <span>An <Link href="https://obsidian.md">Obsidian</Link> plugin that lets you write "regex-like" syntax to search the contents of a note, including part-of-speech tagging and (limited) fuzzy matching.</span>
+      <span>An <Link href="https://obsidian.md" external>Obsidian</Link> plugin that lets you write "regex-like" syntax to search the contents of a note, including part-of-speech tagging and (limited) fuzzy matching.</span>
     </>
   )
 }
@@ -51,8 +53,8 @@ export function MatchSyntaxDescription() {
 export function PrimeThemeDescription() {
   return (
     <>
-      <span>A customizable dark/light theme for <Link href="https://obsidian.md">Obsidian</Link>.</span> 
-      <span> Also comes with <Link href="https://github.com/rivea0/obsidian-prime-snippets">CSS snippets</Link>.</span>
+      <span>A customizable dark/light theme for <Link href="https://obsidian.md" external>Obsidian</Link>.</span>
+      <span> Also comes with <Link href="https://github.com/rivea0/obsidian-prime-snippets" external>CSS snippets</Link>.</span>
     </>
   )
 }
@@ -61,7 +63,7 @@ export function CompromiseRedactDescription() {
   return (
     <>
       A small script to extend the selections of the <code>redact</code> method from the NPM package 
-      <span> <Link href="https://www.npmjs.com/package/compromise">compromise</Link></span>.
+      <span> <Link href="https://www.npmjs.com/package/compromise" external>compromise</Link></span>.
     </>
   )
 }

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@components/link';
 import { ReactNode } from 'react';
 import { ExternalLink } from '@components/icons';
 import styles from './project.module.css';
@@ -77,7 +77,7 @@ export default function Project({
       <div className={styles.projectLinks}>
         {demoHref && (
           <>
-            <Link href={demoHref} className={styles.link}>
+            <Link href={demoHref} className={styles.link} external>
               <p>Demo</p>
               <ExternalLink />
             </Link>
@@ -85,7 +85,7 @@ export default function Project({
         )}
         {codeHref && (
           <>
-            <Link href={codeHref} className={styles.link}>
+            <Link href={codeHref} className={styles.link} external>
               <p>Source</p>
               <ExternalLink />
             </Link>
@@ -123,7 +123,7 @@ export default function Project({
       <div className={styles.projectLinks}>
         {demoHref && (
           <>
-            <Link href={demoHref} className={styles.link}>
+            <Link href={demoHref} className={styles.link} external>
               <p>{`${demoName}`}</p>
               <ExternalLink />
             </Link>
@@ -131,7 +131,7 @@ export default function Project({
         )}
         {codeHref && (
           <>
-            <Link href={codeHref} className={styles.link}>
+            <Link href={codeHref} className={styles.link} external>
               <p>Source</p>
               <ExternalLink />
             </Link>
@@ -139,7 +139,7 @@ export default function Project({
         )}
         {thirdPartyHref && (
           <>
-            <Link href={thirdPartyHref} className={styles.link}>
+            <Link href={thirdPartyHref} className={styles.link} external>
               <p>{`${thirdPartyName}`}</p>
               <ExternalLink />
             </Link>
