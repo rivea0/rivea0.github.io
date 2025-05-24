@@ -36,6 +36,9 @@ export default function Page() {
         <h5>Other:</h5>
         <p>I'm doing very amateur photography, you can check out my <Link href="https://unsplash.com/@rivea0">Unsplash</Link>.</p>
         <p>I also write down some fleeting thoughts at <Link href="https://thementaltraveller.bearblog.dev">thementaltraveller.bearblog.dev</Link>.</p>
+        <div className={styles.secondaryDiv}>
+          <p><em>If you're interested in working with me, you can check out <Link href="/work-with-me">this page</Link>.</em></p>
+        </div>
         <hr />
         <p><em>This site is built using <a href="https://nextjs.org">Next.js</a>, licensed under <Link href="">MIT</Link>.</em></p>
         <p><em><Link href="https://www.goatcounter.com">GoatCounter</Link> (which is <Link href="https://github.com/arp242/goatcounter">open source</Link>!) is used for privacy-friendly analytics.</em></p>

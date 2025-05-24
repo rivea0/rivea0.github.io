@@ -50,10 +50,6 @@ export default async function HomePage() {
           })}
         </ul>
       </div>
-      <div className={styles.secondaryDiv}>
-        <hr />
-        <p><em>If you're interested in working with me, you can check out <Link href="/work-with-me">this page</Link>.</em></p>
-      </div>
       <footer className={styles.footer}></footer>
     </>
   );

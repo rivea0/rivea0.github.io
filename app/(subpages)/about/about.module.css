@@ -29,6 +29,13 @@
   font-style: italic;
 }
 
+.secondaryDiv {
+  margin-top: var(--gap-half);
+  color: var(--gray-alpha);
+  font-size: .25rem;
+  margin-top: 2rem;
+}
+
 @media (orientation: portrait) {
   .container {
     flex-direction: column-reverse;
