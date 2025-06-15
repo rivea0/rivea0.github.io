@@ -14,6 +14,6 @@ export async function EntriesList({
   return entryType === 'post' ? (
     <PostsList posts={entries} paginate={paginate} />
   ) : (
-    <NotesList notes={entries} paginate={paginate} />
+    <NotesList notes={entries.filter(entry => !entry.isThirdParty)} paginate={paginate} />
   );
 }
