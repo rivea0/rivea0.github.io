@@ -4,9 +4,547 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 28 Mar 2025 00:49:42 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 23 Jul 2025 06:32:03 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[A short glimpse into web components and Lit]]></title>
+            <description><![CDATA[<p>As with many topics, the first place I look for reference is the MDN docs, and they also have an extensive guide for <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components" target="_blank" rel="noopener noreferrer">Web Components</a>. For an introductory go-through though, I found another <a href="https://component-odyssey.com/articles/01-writing-components-that-work-in-any-framework" target="_blank" rel="noopener noreferrer">great introduction to get familiar with web components</a>, and took some notes.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#intro" target="_blank" rel="noopener noreferrer">A light introduction to web components</a></li>
+<li><a href="#counter-button" target="_blank" rel="noopener noreferrer"><code>CounterButton</code></a></li>
+<li><a href="#make-it-lit" target="_blank" rel="noopener noreferrer">Make it Lit</a><ul>
+<li><a href="#counter-button-lit" target="_blank" rel="noopener noreferrer"><code>CounterButton</code> with Lit</a></li>
+<li><a href="#property-and-state" target="_blank" rel="noopener noreferrer"><code>@property</code> and <code>@state</code> (or, public properties and internal state)</a></li>
+<li><a href="#change-detection-and-requestUpdate" target="_blank" rel="noopener noreferrer">Change detection and <code>requestUpdate</code></a></li>
+<li><a href="#importing-other-elements-and-passing-down-data" target="_blank" rel="noopener noreferrer">Importing other elements and passing down data</a></li>
+<li><a href="#child-nodes-with-slot" target="_blank" rel="noopener noreferrer">Child nodes with <code>&lt;slot&gt;</code></a></li>
+<li><a href="#dispatching-events-up" target="_blank" rel="noopener noreferrer">Dispatching events up</a></li>
+<li><a href="#accessing-the-dom-elements-with-query" target="_blank" rel="noopener noreferrer">Accessing the DOM elements with <code>@query</code></a></li>
+</ul>
+</li>
+<li><a href="#much-more-to-explore" target="_blank" rel="noopener noreferrer">Much more to explore</a></li>
+</ul>
+<p><a name="intro"></a></p>
+<h3>A light introduction to web components</h3>
+<p>So, there are three things that make up web components:</p>
+<ul>
+<li>custom elements</li>
+<li>shadow DOM</li>
+<li>HTML templates</li>
+</ul>
+<p><em>Custom elements</em> are the HTML elements we define and can reuse. </p>
+<p><em>Shadow DOM</em> offers isolation for elements, it &quot;prevents the rest of the DOM from interfering with your web component,&quot; also making sure that its styles remain isolated as well so that no global style can leak into it.</p>
+<p>And, <em>templates</em>: with web components, they exist to be copied/cloned. They are not used to render content directly.</p>
+<p>As exemplified in the article linked above, here is a basic web component, making use of everything just mentioned:</p>
+<pre><code class="language-js">const template = document.createElement(&#39;template&#39;);
+template.innerHTML = `&lt;p&gt;Hello world&lt;/p&gt;`;
+
+class HelloWorld extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: &#39;open&#39; });
+    this.shadowRoot.append(template.content.cloneNode(true));
+  }
+}
+
+customElements.define(&#39;hello-world&#39;, HelloWorld);
+</code></pre>
+<p>One thing to notice: the markup is defined outside of the component, and the component&#39;s current state is not directly reachable from the template.<br>If you&#39;re familiar with React, what happens in a component is that we return JSX that is the markup, and it has access to the component&#39;s state, that is, markup and component logic are linked.</p>
+<p><a name="counter-button"></a></p>
+<h3><code>CounterButton</code></h3>
+<p>Let&#39;s look at a basic <code>CounterButton</code> component (because obviously we have to build a counter!). With React, we could write something like this:</p>
+<pre><code class="language-jsx">import { useState } from &#39;react&#39;;
+
+export default function CounterButton() {
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;Click me&lt;/button&gt;
+      &lt;p&gt;Clicked {count} times&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p>Using web components, it can look like this (again, as exemplified in the article linked above):</p>
+<pre><code class="language-js">const templateEl = document.createElement(&#39;template&#39;);
+
+templateEl.innerHTML = `
+  &lt;button&gt;Click me&lt;/button&gt;
+  &lt;p&gt;Clicked 0 times&lt;/p&gt;
+`;
+
+export class CounterButton extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: &#39;open&#39; });
+    this.shadowRoot.appendChild(templateEl.content.cloneNode(true));
+    this.button = this.shadowRoot.querySelector(&#39;button&#39;);
+    this.p = this.shadowRoot.querySelector(&#39;p&#39;);
+    this.setAttribute(&#39;count&#39;, &#39;0&#39;);
+  }
+
+  connectedCallback() {
+    this.button.addEventListener(&#39;click&#39;, this.handleClick);
+  }
+
+  disconnectedCallback() {
+    this.button.removeEventListener(&#39;click&#39;, this.handleClick);
+  }
+
+  static observedAttributes = [&#39;disabled&#39;, &#39;count&#39;];
+
+  attributeChangedCallback(name, _, newVal) {
+    if (name === &#39;count&#39;) {
+      this.p.innerHTML = `Clicked ${newVal} times`;
+    }
+    if (name === &#39;disabled&#39;) {
+      this.button.disabled = true;
+    }
+  }
+
+  handleClick = () =&gt; {
+    const counter = Number(this.getAttribute(&#39;count&#39;));
+    this.setAttribute(&#39;count&#39;, `${counter + 1}`);
+  }
+}
+</code></pre>
+<p>There are <code>connectedCallback</code> and <code>disconnectedCallback</code> lifecycle methods for controlling what to do when the component is added and removed to/from the DOM.</p>
+<p><code>observedAttributes</code> are, well, the attributes that we want to observe so that we can react to them with <code>attributeChangedCallback</code> when they change.</p>
+<p><a name="make-it-lit"></a></p>
+<h3>Make it Lit</h3>
+<p>Working with lower-level web components is good to learn more about the web and browsers. But, we can also use <a href="https://lit.dev" target="_blank" rel="noopener noreferrer">Lit</a>, which is a library built on top of web components.</p>
+<p>Voilà, the <code>HelloWorld</code> example above written with Lit:</p>
+<pre><code class="language-hello-world.js">import { LitElement, html } from &#39;lit&#39;;
+
+export class HelloWorld extends LitElement {
+  render() {
+    return html`&lt;p&gt;Hello world&lt;/p&gt;`;
+  }
+}
+
+customElements.define(&#39;hello-world&#39;, HelloWorld);
+</code></pre>
+<p>Here, <em>the markup is defined within the component class</em>. </p>
+<p>Note that we can write it in TypeScript with decorators:</p>
+<pre><code class="language-hello-world.ts">import { html, LitElement } from &#39;lit&#39;;
+import { customElement, property } from &#39;lit/decorators.js&#39;;
+
+@customElement(&#39;hello-world&#39;)
+export class HelloWorld extends LitElement {
+  render() {
+    return html`&lt;p&gt;hello world&lt;/p&gt;`;
+  }
+}
+</code></pre>
+<p>We can then use it inside an <code>index.html</code>:</p>
+<pre><code class="language-index.html">&lt;!DOCTYPE html&gt;
+&lt;head&gt;
+  &lt;script type=&quot;module&quot; src=&quot;./hello-world.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;hello-world&gt;&lt;/hello-world&gt;
+&lt;/body&gt;
+</code></pre>
+<p><code>html</code> returns a <a href="https://lit.dev/docs/api/templates/#TemplateResult" target="_blank" rel="noopener noreferrer"><code>TemplateResult</code></a>, and it means that we can also compose templates like this:</p>
+<pre><code class="language-js">const text = html`&lt;p&gt;hey&lt;/p&gt;`;
+const page = html`
+  &lt;div&gt;${text}&lt;/div&gt;;
+`;
+</code></pre>
+<p><a name="counter-button-lit"></a></p>
+<h4><code>CounterButton</code> with Lit</h4>
+<p>Now, the <code>CounterButton</code> with Lit:</p>
+<pre><code class="language-counter-button.js">import { LitElement, html } from &#39;lit&#39;;
+
+export class CounterButton extends LitElement {
+  static properties = {
+    count: { type: Number },
+    disabled: { type: Boolean }
+  };
+
+  constructor() {
+    super();
+    this.count = 0;
+  }
+
+  onCount() {
+    this.count = this.count + 1;
+  }
+
+  render() {
+    return html`
+      &lt;button ?disabled=${this.disabled} @click=${this.onCount}&gt;
+        Click me
+      &lt;/button&gt;
+      &lt;p&gt;Clicked ${this.count} times&lt;/p&gt;
+    `;
+  }
+}
+
+customElements.define(&#39;counter-button&#39;, CounterButton);
+</code></pre>
+<p>Again, in TypeScript, we can write it as such:</p>
+<pre><code class="language-counter-button.ts">import { LitElement, html } from &#39;lit&#39;;
+import { customElement, property } from &#39;lit/decorators.js&#39;;
+
+@customElement(&#39;counter-button&#39;)
+export class CounterButton extends LitElement {
+  @property()
+  count: number;
+
+  @property()
+  disabled: boolean;
+
+  constructor() {
+    super();
+    this.count = 0;
+  }
+
+  onCount() {
+    this.count = this.count + 1;
+  }
+
+  render() {
+    return html`
+      &lt;button ?disabled=${this.disabled} @click=${this.onCount}&gt;
+        Click me
+      &lt;/button&gt;
+      &lt;p&gt;Clicked ${this.count} times&lt;/p&gt;
+    `;
+  }
+}
+</code></pre>
+<pre><code class="language-index.html">&lt;!DOCTYPE html&gt;
+&lt;head&gt;
+  &lt;script type=&quot;module&quot; src=&quot;./counter-button.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;counter-button&gt;&lt;/counter-button&gt;
+&lt;/body&gt;
+</code></pre>
+<p>The <code>?disabled</code> is a boolean attribute, note that the prefix <code>?</code> is used. And, <code>@click</code> is the event listener for the click event.</p>
+<p><a name="property-and-state"></a></p>
+<h4><code>@property</code> and <code>@state</code> (or, public properties and internal state)</h4>
+<p>A property will trigger a re-render when it changes. With public properties, Lit sets up corresponding observed attributes, and when the attributes change, the properties are also updated.</p>
+<p>But, to note:</p>
+<blockquote>
+<p>While element properties can be of any type, attributes are always strings.</p>
+</blockquote>
+<p>The name of the observed attribute will be the name of the property in lowercase. Continuing our examples with TypeScript:</p>
+<pre><code class="language-ts">// Observed attribute name is &quot;myvalue&quot;
+@property({ type: Number })
+myValue = 0;
+</code></pre>
+<p>We can use any name we want for the observed attribute:</p>
+<pre><code class="language-ts">// Observed attribute will be called my-name
+@property({ attribute: &#39;my-name&#39; })
+myValue = &#39;Dave&#39;;
+</code></pre>
+<p>So, when we use it like this:</p>
+<pre><code class="language-simple-greeting.ts">import { html, css, LitElement } from &#39;lit&#39;;
+import { customElement, property } from &#39;lit/decorators.js&#39;;
+
+@customElement(&#39;simple-greeting&#39;)
+export class SimpleGreeting extends LitElement {
+  // Observed attribute will be called my-name
+  @property({ attribute: &#39;my-name&#39; })
+  myValue = &#39;Dave&#39;;
+
+  render() {
+    return html`&lt;p&gt;Hello, ${this.myValue}!&lt;/p&gt;`;
+  }
+}
+</code></pre>
+<p>We can change the value by passing a new value to the attribute <code>my-name</code>:</p>
+<pre><code class="language-index.html">&lt;!DOCTYPE html&gt;
+&lt;head&gt;
+  &lt;script type=&quot;module&quot; src=&quot;./simple-greeting.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;simple-greeting my-name=&quot;Stephen&quot;&gt;&lt;/simple-greeting&gt;
+&lt;/body&gt;
+</code></pre>
+<p>What we&#39;ve seen are public properties; there is also a <code>state</code> decorator for private and protected reactive properties (which <em>shouldn&#39;t be referenced from outside the component</em>):</p>
+<pre><code class="language-ts">import { LitElement, html } from &#39;lit&#39;;
+import { customElement, state } from &#39;lit/decorators.js&#39;;
+
+@customElement(&#39;counter-button&#39;)
+export class CounterButton extends LitElement {
+  @state()
+  private _count = 0;
+
+ /* ... */
+}
+</code></pre>
+<p><a name="change-detection-and-requestUpdate"></a></p>
+<h4>Change detection and <code>requestUpdate</code></h4>
+<p>A component is rendered initially when it&#39;s added to the DOM. Then, any change in reactive properties causes a re-render. As the docs say:</p>
+<blockquote>
+<p>During an update, only the parts of the DOM that change are re-rendered.</p>
+</blockquote>
+<p>However, since Lit&#39;s detection for change is done using the strict equality check, when an array or an object is mutated (think about pushing something to an array), it isn&#39;t calculated as a change. So, it might be better to use a new reference for an array or objects in that case, but it can be an expensive operation when it comes to time and space complexity. </p>
+<p>Let&#39;s create an array to hold the first six Fibonacci numbers. Everytime there is a click event on the button, we want to add the next number.</p>
+<p>Instead of creating a new reference like this inside <code>_addNewNumber</code>:</p>
+<pre><code class="language-numbers-list.ts">import { LitElement, html } from &#39;lit&#39;;
+import { customElement, state } from &#39;lit/decorators.js&#39;;
+
+@customElement(&#39;numbers-list&#39;)
+export class NumbersList extends LitElement {
+  @state()
+  private _numbersList: number[] = [1, 1, 2, 3, 5, 8];
+
+  private _addNewNumber(n: number) {
+    this._numbersList = [...this._numbersList, n];
+  }
+
+  render() {
+    const x1 = this._numbersList[this._numbersList.length - 1];
+    const x2 = this._numbersList[this._numbersList.length - 2]
+
+    return html`
+      &lt;div&gt;
+        &lt;p&gt;${this._numbersList.join(&#39;, &#39;)}&lt;/p&gt;
+        &lt;button @click=${() =&gt; this._addNewNumber(x1 + x2)}&gt;Add next number&lt;/button&gt;
+      &lt;/div&gt;
+    `;
+  }
+}
+</code></pre>
+<p>If we want to use <code>push</code>, we can request an update with <code>requestUpdate</code> inside our <code>_addNewNumber</code> method:</p>
+<pre><code class="language-numbers-list.ts">import { LitElement, html } from &#39;lit&#39;;
+import { customElement, state } from &#39;lit/decorators.js&#39;;
+
+@customElement(&#39;numbers-list&#39;)
+export class NumbersList extends LitElement {
+  @state()
+  private _numbersList: number[] = [1, 1, 2, 3, 5, 8];
+
+  private _addNewNumber(n: number) {
+    this._numbersList.push(n);
+    this.requestUpdate();
+  }
+
+  render() {
+    const x1 = this._numbersList[this._numbersList.length - 1];
+    const x2 = this._numbersList[this._numbersList.length - 2]
+
+    return html`
+      &lt;div&gt;
+        &lt;p&gt;${this._numbersList.join(&#39;, &#39;)}&lt;/p&gt;
+        &lt;button @click=${() =&gt; this._addNewNumber(x1 + x2)}&gt;Add next number&lt;/button&gt;
+      &lt;/div&gt;
+    `;
+  }
+}
+</code></pre>
+<pre><code class="language-index.html">&lt;!DOCTYPE html&gt;
+&lt;head&gt;
+  &lt;script type=&quot;module&quot; src=&quot;./numbers-list.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;numbers-list&gt;&lt;/numbers-list&gt;
+&lt;/body&gt;
+</code></pre>
+<p><a name="importing-other-elements-and-passing-down-data"></a></p>
+<h4>Importing other elements and passing down data</h4>
+<p>We can also import other elements, which is good for modularity. Let&#39;s say we have a <code>MessageElement</code>:</p>
+<pre><code class="language-message-element.ts">import { LitElement, html } from &#39;lit&#39;;
+import { customElement, property } from &#39;lit/decorators.js&#39;;
+
+@customElement(&#39;message-element&#39;)
+export class MessageElement extends LitElement {
+  @property()
+  message: string;
+
+  render() {
+    return html`
+      &lt;p&gt;${this.message}&lt;/p&gt;
+    `;
+  }
+}
+</code></pre>
+<p>Note that it has a public reactive property called <code>message</code>, and there is no value for it.<br>We can pass down a value from the component that imports it:</p>
+<pre><code class="language-default-page.ts">import { LitElement, html } from &#39;lit&#39;;
+import { customElement } from &#39;lit/decorators.js&#39;;
+import &#39;./message-element.js&#39;;
+
+@customElement(&#39;default-page&#39;)
+export class DefaultPage extends LitElement {
+  render() {
+    return html`
+      &lt;message-element .message=${&#39;hey there&#39;}&gt;&lt;/message-element&gt;
+    `;
+  }
+}
+</code></pre>
+<pre><code class="language-index.html">&lt;!DOCTYPE html&gt;
+&lt;head&gt;
+  &lt;script type=&quot;module&quot; src=&quot;./default-page.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;default-page&gt;&lt;/default-page&gt;
+&lt;/body&gt;
+</code></pre>
+<p>We pass down data using a <em>property binding</em> with the <code>.</code> syntax.</p>
+<Note>
+For the rest of the examples, our `index.html` is not going to change, it will still only render the `default-page` component.
+</Note>
+
+<p><a name="child-nodes-with-slot"></a></p>
+<h4>Child nodes with <code>&lt;slot&gt;</code></h4>
+<p>Now, this is great, but how about adding a <code>span</code> element inside that message? As a child node?</p>
+<p>If we try doing it, however, our <code>span</code> will not be rendered:</p>
+<pre><code class="language-default-page.ts">import { LitElement, html } from &#39;lit&#39;;
+import { customElement } from &#39;lit/decorators.js&#39;;
+import &#39;./message-element.js&#39;;
+
+@customElement(&#39;default-page&#39;)
+export class DefaultPage extends LitElement {
+  render() {
+    return html`
+      &lt;message-element .message=${&#39;hey there&#39;}&gt;
+        &lt;span&gt;this is a span&lt;/span&gt;
+      &lt;/message-element&gt;
+    `;
+  }
+}
+</code></pre>
+<p>The <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot" target="_blank" rel="noopener noreferrer"><code>&lt;slot&gt;</code> element</a> comes to the rescue!<br>It will create a slot for another component to be passed into the component&#39;s shadow DOM:</p>
+<pre><code class="language-message-element.ts">import { LitElement, html } from &#39;lit&#39;;
+import { customElement, property } from &#39;lit/decorators.js&#39;;
+
+@customElement(&#39;message-element&#39;)
+export class MessageElement extends LitElement {
+  @property()
+  message: string;
+
+  render() {
+    return html`
+      &lt;p&gt;${this.message}
+        &lt;slot&gt;&lt;/slot&gt;
+      &lt;/p&gt;
+    `;
+  }
+}
+</code></pre>
+<p>Now, we can see that the <code>span</code> element is rendered.</p>
+<p>But it can be anything, right? Anything can be displayed inside this <code>slot</code> element.<br>Thankfully we have something called <em>named slots</em>, so it&#39;s in our control what to display where:</p>
+<pre><code class="language-message-element.ts">import { LitElement, html } from &#39;lit&#39;;
+import { customElement, property } from &#39;lit/decorators.js&#39;;
+
+@customElement(&#39;message-element&#39;)
+export class MessageElement extends LitElement {
+  @property()
+  message: string;
+
+  render() {
+    return html`
+      &lt;p&gt;${this.message}
+        &lt;slot name=&quot;span-text&quot;&gt;&lt;/slot&gt;
+      &lt;/p&gt;
+    `;
+  }
+}
+</code></pre>
+<p>The <code>span</code> is not displayed anymore. In order to put it into that specific <code>slot</code>, we have to express it as such:</p>
+<pre><code class="language-default-page.ts">import { LitElement, html } from &#39;lit&#39;;
+import { customElement } from &#39;lit/decorators.js&#39;;
+import &#39;./message-element.js&#39;;
+
+@customElement(&#39;default-page&#39;)
+export class DefaultPage extends LitElement {
+  render() {
+    return html`
+      &lt;message-element .message=${&#39;hey there&#39;}&gt;
+        &lt;span slot=&quot;span-text&quot;&gt;this is a span&lt;/span&gt;
+      &lt;/message-element&gt;
+    `;
+  }
+}
+</code></pre>
+<p><a name="dispatching-events-up"></a></p>
+<h4>Dispatching events up</h4>
+<p>If you&#39;re familiar with Vue.js, you might know that <a href="https://vuejs.org/guide/components/events.html#emitting-and-listening-to-events" target="_blank" rel="noopener noreferrer">a child component can emit an event</a> and a parent can listen to it. We can do a similar thing with Lit, where we can use <code>dispatchEvent</code> to dispatch an event:</p>
+<p>Let&#39;s say we have a <code>WaveHi</code> element:</p>
+<pre><code class="language-wave-hi.ts">import { html, LitElement } from &#39;lit&#39;;
+import { customElement } from &#39;lit/decorators.js&#39;;
+
+export type WaveHiEvent = CustomEvent&lt;string&gt;;
+
+@customElement(&#39;wave-hi&#39;)
+export class WaveHi extends LitElement {
+  render() {
+    return html`
+      &lt;button @click=${() =&gt; this.addWaveEmoji()}&gt;wave hi!&lt;/button&gt;
+    `;
+  }
+
+  addWaveEmoji() {
+    this.dispatchEvent(new CustomEvent(&#39;wave&#39;, { detail: &#39;👋&#39;, bubbles: true }));
+  }
+}
+</code></pre>
+<p>We define a <code>CustomEvent</code> for <code>dispatchEvent</code> called <code>wave</code>, add a wave emoji as <code>detail</code>, and we also set <code>bubbles</code> option to true.</p>
+<p>Then our parent element looks like this:</p>
+<pre><code class="language-default-page.ts">import { html, LitElement } from &#39;lit&#39;;
+import { customElement, state } from &#39;lit/decorators.js&#39;;
+import &#39;./wave-hi.js&#39;;
+import type {WaveHiEvent} from &#39;./wave-hi.js&#39;;
+
+@customElement(&#39;default-page&#39;)
+export class DefaultPage extends LitElement {
+  @state()
+  greeting = &#39;hello &#39;;
+
+  render() {
+    return html`
+      &lt;h1&gt;${this.greeting}&lt;/h1&gt;
+      &lt;wave-hi @wave=${(e: WaveHiEvent) =&gt; this.greeting += e.detail}&gt;&lt;/wave-hi&gt;
+    `;
+  }
+}
+</code></pre>
+<p>Everytime we click the &quot;wave hi&quot; button, the parent component adds the wave emoji (which is <code>e.detail</code>) to the greeting.</p>
+<p><a name="accessing-the-dom-elements-with-query"></a></p>
+<h4>Accessing the DOM elements with <code>@query</code></h4>
+<p>We can also select a DOM element in our component using the <code>@query</code> decorator (or, in JavaScript, with <code>this.shadowRoot.querySelector()</code>).</p>
+<pre><code class="language-default-page.ts">import { html, css, LitElement } from &#39;lit&#39;;
+import { customElement, query } from &#39;lit/decorators.js&#39;;
+
+@customElement(&#39;default-page&#39;)
+export class TestElement extends LitElement {
+  @query(&#39;#text&#39;)
+  _p;
+
+  render() {
+    return html`
+      &lt;div&gt;
+        &lt;p id=&quot;text&quot;&gt;Hello&lt;/p&gt;
+        &lt;button @click=${() =&gt; console.log(this._p.textContent)}&gt;Test query&lt;/button&gt;
+      &lt;/div&gt;
+    `;
+  }
+}
+</code></pre>
+<p>When we click the Test query button, we&#39;ll see the text <code>Hello</code> on console.</p>
+<Note>
+We can also use `queryAll` for getting all the matching nodes just like [`querySelectorAll`](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll).
+</Note>
+
+<p><a name="much-more-to-explore"></a></p>
+<h3>Much more to explore</h3>
+<p>One of the good things about Lit is its interoperability, as every Lit component is a standard web component that can be used anywhere.</p>
+<p>There are lots of things we haven&#39;t taken a look at (we didn&#39;t even mention &quot;scoped CSS&quot;!), but the good thing is that there are many resources to learn more about Lit (starting from their <a href="https://lit.dev/docs/" target="_blank" rel="noopener noreferrer">own docs</a>) and web components in general. </p>
+<p>Once you start diving into what web components offer, juggling between all the frameworks can start to seem like a hassle. There is a neat project called <a href="https://custom-elements-everywhere.com" target="_blank" rel="noopener noreferrer">custom-elements-everywhere</a> if you want to check out the interoperability of custom elements with various frameworks. </p>
+]]></description>
+            <link>https://rivea0.github.io/blog/a-short-glimpse-into-web-components-and-lit</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/a-short-glimpse-into-web-components-and-lit</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Wed, 23 Jul 2025 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[Notes on a first encounter with Rust's ownership]]></title>
             <description><![CDATA[<p>One thing that&#39;s great about first-time learning Rust is its amazing learning resources. </p>
