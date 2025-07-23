@@ -40,6 +40,7 @@ export default function robots(): MetadataRoute.Robots {
         'Gemini-Deep-Research',
         'Google-CloudVertexBot',
         'Google-Extended',
+        'GoogleAgent-Mariner',
         'GoogleOther',
         'GoogleOther-Image',
         'GoogleOther-Video',
