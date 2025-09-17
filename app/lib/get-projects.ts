@@ -39,6 +39,13 @@ const projects: ProjectProps[] = [
     language: ['CSS'],
   },
   {
+    title: 'Ambient Sounds Web Components',
+    description: 'Custom audio players, built with web components.',
+    demoHref: 'https://rivea0.github.io/ambient-sounds-web-components/index.html',
+    codeHref: 'https://github.com/rivea0/ambient-sounds-web-components',
+    language: ['JavaScript'],
+  },
+  {
     title: 'unpretty-bytes',
     description: UnprettyBytesDescription(),
     demoHref: '',
