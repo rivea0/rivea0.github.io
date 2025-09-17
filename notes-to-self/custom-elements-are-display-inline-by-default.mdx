@@ -1,0 +1,23 @@
+---
+title: "Custom elements are `display: inline` by default"
+tags: [JavaScript, CSS]
+description: "Custom elements built with web components are `display: inline` by default, also you probably need to update its `hidden` attribute."
+slug: custom-elements-are-display-inline-by-default
+postIndex: 17
+---
+
+Custom elements built with [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) are `display: inline` by default, so you might want to set a `display` value in order to be able to set the `width` or `height`, like this:
+
+```css
+:host {
+  display: block;
+}
+```
+
+Also, if you set it to `block`, it overrides the `hidden` attribute, so you need to set that as well in order to make sure it works as expected:
+
+```css
+:host([hidden]) {
+  display: none;
+}
+```
