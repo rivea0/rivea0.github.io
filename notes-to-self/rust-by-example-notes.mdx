@@ -1,0 +1,69 @@
+---
+title: "📝 Rust by Example notes"
+tags: [Rust]
+description: "Notes taken from Rust by Example (https://doc.rust-lang.org/rust-by-example) as I read through it."
+slug: rust-by-example-notes
+postIndex: 18
+---
+
+> _Some notes taken from [Rust by Example](https://doc.rust-lang.org/rust-by-example) as I go through it._
+
+_[in progress...]_
+
+## Table of Contents
+- [Implement `fmt::Display` for a struct](#implement-fmt-display-for-struct)
+
+
+<a name="implement-fmt-display-for-struct"></a>
+## Implement `fmt::Display` for a struct
+```rust
+use std::fmt;
+
+struct Structure(i32);
+
+impl fmt::Display for Structure {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Write strictly the first element into the supplied output
+        // stream: `f`. Returns `fmt::Result` which indicates whether the
+        // operation succeeded or failed. Note that `write!` uses syntax which
+        // is very similar to `println!`.
+        write!(f, "{}", self.0)
+    }
+}
+```
+
+Or, for a struct where the elements must each be handled sequentially:
+
+```rust
+use std::fmt;
+
+struct List(Vec<i32>);
+
+impl fmt::Display for List {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Extract the value using tuple indexing,
+        // and create a reference to `vec`.
+        let vec = &self.0;
+
+        write!(f, "[")?;
+
+        // Iterate over `v` in `vec` while enumerating the iteration
+        // index in `index`.
+        for (index, v) in vec.iter().enumerate() {
+            // For every element except the first, add a comma.
+            // Use the ? operator to return on errors.
+            if index != 0 { write!(f, ", ")?; }
+            write!(f, "{}", v)?;
+        }
+
+        // Close the opened bracket and return a fmt::Result value.
+        write!(f, "]")
+    }
+}
+
+fn main() {
+    let v = List(vec![1, 2, 3]);
+    println!("{}", v);
+}
+```
+
