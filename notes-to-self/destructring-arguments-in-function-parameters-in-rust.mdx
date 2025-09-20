@@ -1,0 +1,74 @@
+---
+title: "Destructring arguments in function parameters in Rust"
+tags: [Rust]
+description: "Destructring arguments in function parameters in Rust with a tuple example"
+slug: destructring-arguments-in-function-parameters-in-rust
+postIndex: 19
+---
+
+Let's say we have a function that takes a tuple with two numbers, we can destructure it inside the function body:
+
+```rust
+fn print_it(&t: &(i32, i32)) {
+    let (x, y) = t;
+    println!("{}, {}", x, y);
+}
+
+fn main() {
+    let point = (2, 3);
+    print_it(&point);
+}
+```
+
+Or, we can destructure it in function parameters:
+
+```rust
+fn print_it(&(x, y): &(i32, i32)) {
+    println!("{}, {}", x, y);
+}
+
+fn main() {
+    let point = (2, 3);
+    print_it(&point);
+}
+```
+
+---
+
+With a struct example:
+
+```rust
+struct Point {
+    x: f32,
+    y: f32
+}
+
+fn print_it(p: &Point) {
+    let Point { x, y } = p;
+
+    println!("{x}, {y}");
+}
+
+fn main() {
+    let point = Point { x: 9.3, y: 2.5 };
+    print_it(&point);
+}
+```
+
+Voilà:
+
+```rust
+struct Point {
+    x: f32,
+    y: f32
+}
+
+fn print_it(Point { x, y }: &Point) {
+    println!("{x}, {y}");
+}
+
+fn main() {
+    let point = Point { x: 9.3, y: 2.5 };
+    print_it(&point);
+}
+```
