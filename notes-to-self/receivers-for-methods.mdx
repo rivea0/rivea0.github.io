@@ -1,0 +1,23 @@
+---
+title: "Receivers for methods"
+tags: [Rust]
+description: "Receivers for methods in Rust."
+slug: receivers-for-methods
+postIndex: 20
+---
+
+A method is an _associated function whose first parameter is named `self`_.
+
+From [Comprehensive Rust](https://google.github.io/comprehensive-rust/methods-and-traits/methods.html):
+
+> The self arguments specify the “receiver” - the object the method acts on. There are several common receivers for a method:
+> 
+> - `&self`: borrows the object from the caller using a shared and immutable reference. The object can be used again afterwards.
+>
+> - `&mut self`: borrows the object from the caller using a unique and mutable reference. The object can be used again afterwards.
+>
+> - `self`: takes ownership of the object and moves it away from the caller. The method becomes the owner of the object. The object will be dropped (deallocated) when the method returns, unless its ownership is explicitly transmitted. Complete ownership does not automatically mean mutability.
+>
+> - `mut self`: same as above, but the method can mutate the object.
+>
+> - No receiver: this becomes a static method on the struct. Typically used to create constructors that are called new by convention.

@@ -1,0 +1,65 @@
+---
+title: "Methods can be called by explicitly passing the receiver in"
+tags: [Rust]
+description: "Definitions of associated functions and methods. Also, methods can be called by explicitly passing the receiver in."
+slug: methods-can-be-called-by-explicitly-passing-the-receiver-in
+postIndex: 21
+---
+
+First, a definition of associated functions:
+
+> _Associated functions_ are functions associated with a type.
+
+And, a definition of methods:
+
+> <mark>Associated functions whose first parameter is named `self` are called _methods_</mark> and may be invoked using the [method call operator](https://doc.rust-lang.org/reference/expressions/method-call-expr.html), for example, `x.foo()`, as well as the usual function call notation.
+
+Methods can also be called by explicitly passing the receiver in[^1]. For example, with this example:
+
+```rust
+struct Point {
+    x: f32,
+    y: f32
+}
+
+impl Point {
+    fn change_x(&mut self, new_x_value: f32) {
+        self.x = new_x_value;
+    }
+    fn change_y(&mut self, new_y_value: f32) {
+        self.y = new_y_value;
+    }
+}
+
+fn main() {
+    let mut point = Point { x: 9.3, y: 2.5 };
+    println!("{}, {}", point.x, point.y);
+
+    point.change_x(0.5);
+    point.change_y(7.5);
+    println!("{}, {}", point.x, point.y);
+}
+
+// 9.3, 2.5
+// 0.5, 7.5
+```
+
+It can also be:
+
+```rust
+// ...
+
+fn main() {
+    let mut point = Point { x: 9.3, y: 2.5 };
+    println!("{}, {}", point.x, point.y);
+
+    Point::change_x(&mut point, 0.5);
+    Point::change_y(&mut point, 7.5);
+    println!("{}, {}", point.x, point.y);
+}
+
+// 9.3, 2.5
+// 0.5, 7.5
+```
+
+[^1]: _Also, see [receivers for methods](https://rivea0.github.io/notes/receivers-for-methods)._
