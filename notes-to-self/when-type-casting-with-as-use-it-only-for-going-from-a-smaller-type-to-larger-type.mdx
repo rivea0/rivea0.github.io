@@ -1,0 +1,28 @@
+---
+title: "When type casting with `as`, use it only for going from a smaller type to a larger type"
+tags: [Rust]
+description: "Be careful with type casting with `as`, if you're going to use it, use it for going from a smaller type to a larger type."
+slug: when-type-casting-with-as-use-it-only-for-going-from-a-smaller-type-to-larger-type
+postIndex: 22
+---
+
+[_Casting from a larger integer to a smaller integer (e.g. u32 -> u8) will truncate._](https://doc.rust-lang.org/reference/expressions/operator-expr.html#r-expr.as.numeric.int-truncation)
+
+For example, type casting with `as` to convert between integer types:
+
+```rust
+let a: u16 = 255 + 1;
+let b = a as u8;
+```
+
+The maximum value for the u8 type is 255, but _`as` conversions are infallible_, so truncation will occur and the result will be 0.
+
+`256u16` is represented in memory as:
+
+<p align="center">0000000100000000</p>
+
+_When converting to a `u8`, the Rust compiler will keep the last 8 bits of a `u16` memory representation:_
+
+<p align="center">00000001<mark>00000000</mark> -> 00000000</p>
+
+So, be careful with `as`, if you're going to use it, use it for going from a smaller type to a larger type.
