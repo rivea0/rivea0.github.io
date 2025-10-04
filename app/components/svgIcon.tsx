@@ -3,19 +3,23 @@ export default function withIcon(svgPath: string) {
     strokeWidth = 1.5,
     color = 'currentColor',
     fillColor = 'none',
-    viewBox = "0 0 24 24"
+    viewBox = '0 0 24 24',
+    width = 24,
+    height = 24,
   }: {
     strokeWidth?: number;
     color?: string;
     fillColor?: string;
     viewBox?: string;
+    width?: number;
+    height?: number;
   }) {
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="icon"
-        width={24}
-        height={24}
+        width={width}
+        height={height}
         viewBox={viewBox}
         strokeWidth={strokeWidth}
         stroke={color}
@@ -24,9 +28,8 @@ export default function withIcon(svgPath: string) {
         strokeLinejoin="round"
         dangerouslySetInnerHTML={{ __html: svgPath }}
         aria-hidden="true"
-      >
-      </svg>
+      ></svg>
     );
   }
-  return Icon
+  return Icon;
 }

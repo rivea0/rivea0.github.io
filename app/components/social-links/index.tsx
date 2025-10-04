@@ -1,25 +1,23 @@
-import Link from '@components/link'
-import { GitHub, Mail, RSS, Mastodon } from '@components/icons'
-import Tooltip from '@components/tooltip'
-import styles from './social-links.module.css'
+import Link from '@components/link';
+import { GitHub, Mail, RSS, Mastodon } from '@components/icons';
+import Tooltip from '@components/tooltip';
+import styles from './social-links.module.css';
 
 type SocialButtonProps = {
-  href: string
-  icon: React.ReactNode
-  tooltip: string,
-  rel?: string
-}
+  href: string;
+  icon: React.ReactNode;
+  tooltip: string;
+  rel?: string;
+};
 
-function SocialButton({ 
-  tooltip, href, icon, rel
-}: SocialButtonProps) {
+function SocialButton({ tooltip, href, icon, rel }: SocialButtonProps) {
   return (
     <Tooltip text={tooltip}>
       <Link href={href} className={styles.icon} rel={rel}>
         {icon}
       </Link>
     </Tooltip>
-  )
+  );
 }
 
 export default function Socials() {
@@ -27,25 +25,54 @@ export default function Socials() {
     <div className={styles.socials}>
       <SocialButton
         href="https://github.com/rivea0"
-        icon={<GitHub color={`var(--icon-generic-color)`} />}
+        icon={
+          <GitHub
+            color={`var(--icon-generic-color)`}
+            width={24}
+            height={24}
+            strokeWidth={2.15}
+          />
+        }
         tooltip="GitHub"
       />
       <SocialButton
         href="mailto:e.e.ereneda@gmail.com"
-        icon={<Mail color={`var(--icon-generic-color)`} />}
+        icon={
+          <Mail
+            color={`var(--icon-generic-color)`}
+            width={24}
+            height={24}
+            strokeWidth={2}
+          />
+        }
         tooltip="Email"
       />
       <SocialButton
         href="/feed.xml"
-        icon={<RSS color={`var(--icon-generic-color)`} strokeWidth={1.6} />}
+        icon={
+          <RSS
+            color={`var(--icon-generic-color)`}
+            strokeWidth={2}
+            width={24}
+            height={24}
+          />
+        }
         tooltip="RSS"
       />
       <SocialButton
         href="https://mastodon.social/@rivea0"
-        icon={<Mastodon color={`var(--icon-generic-color)`} />}
+        icon={
+          <Mastodon
+            width={22}
+            height={22}
+            strokeWidth={0}
+            fillColor={`var(--icon-generic-color)`}
+            color={`var(--icon-generic-color)`}
+          />
+        }
         tooltip="Mastodon"
         rel="me"
       />
     </div>
-  )
+  );
 }
