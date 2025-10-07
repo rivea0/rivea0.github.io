@@ -5,8 +5,9 @@ import type { MouseEvent } from 'react';
 import type { Entry } from '@lib/types';
 import { getEntryTags } from '@lib/get-entry-tags';
 import NoteEntry from '@components/note-entry';
-import styles from './notes-list.module.css';
+import styles from '@components/posts-list/posts-list.module.css';
 import TagsFilter from '@components/tags-filter';
+import filterStyles from '@components/tags-filter/tags-filter.module.css';
 
 type Props = {
   notes: Entry[];
@@ -26,14 +27,17 @@ export default function NotesList(props: Props) {
 
   return (
     <>
-      <TagsFilter
-        allTags={notesTags}
-        selectedTag={selectedTag}
-        handleAllTagSelection={() => {
-          setSelectedTag('');
-        }}
-        handleTagSelection={handleTagSelection}
-      />
+      <details className={filterStyles.filters}>
+        <summary>Apply filter</summary>
+        <TagsFilter
+          allTags={notesTags}
+          selectedTag={selectedTag}
+          handleAllTagSelection={() => {
+            setSelectedTag('');
+          }}
+          handleTagSelection={handleTagSelection}
+        />
+      </details>
       <ul className={styles.container}>
         {/* {notes.slice(0, paginate ? showMore : undefined) */}
         {notes

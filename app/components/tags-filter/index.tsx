@@ -2,7 +2,7 @@
 
 import type { MouseEvent } from 'react';
 import clsx from 'clsx';
-import styles from '@components/notes-list/notes-list.module.css';
+import filterStyles from '@components/tags-filter/tags-filter.module.css';
 
 export default function TagsFilter({
   allTags,
@@ -16,23 +16,23 @@ export default function TagsFilter({
   handleTagSelection: (e: MouseEvent<HTMLButtonElement>) => void;
 }) {
   return (
-    <ul className={styles.tagsPills}>
-      <li key="all" className={styles.tagPill}>
+    <ul className={filterStyles.tagsPills}>
+      <li key="all" className={filterStyles.tagPill}>
         <button
           onClick={handleAllTagSelection}
           type="button"
-          className={clsx({ [styles.activeBtn]: selectedTag === '' })}
+          className={clsx({ [filterStyles.activeBtn]: selectedTag === '' })}
         >
           All
         </button>
       </li>
       {allTags.map((tag: string) => {
         return (
-          <li key={tag} className={styles.tagPill}>
+          <li key={tag} className={filterStyles.tagPill}>
             <button
               onClick={handleTagSelection}
               type="button"
-              className={clsx({ [styles.activeBtn]: selectedTag === tag })}
+              className={clsx({ [filterStyles.activeBtn]: selectedTag === tag })}
             >
               {tag}
             </button>

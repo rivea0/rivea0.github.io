@@ -7,6 +7,7 @@ import type { Entry } from '@lib/types';
 import styles from './posts-list.module.css';
 import { getEntryTags } from '@lib/get-entry-tags';
 import TagsFilter from '@components/tags-filter';
+import filterStyles from '@components/tags-filter/tags-filter.module.css';
 
 type Props = {
   posts: Entry[];
@@ -26,7 +27,7 @@ export default function PostsList(props: Props) {
 
   return (
     <>
-      <details className={styles.filters}>
+      <details className={filterStyles.filters}>
         <summary>Apply filter</summary>
         <TagsFilter
           allTags={postsTags}

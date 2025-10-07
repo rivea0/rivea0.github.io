@@ -10,7 +10,7 @@
   --main-content: 48rem;
   --radius: 6px;
   --inline-radius: 5px;
-  --header-height: 48px;
+  --header-height: 42px;
 
   /* Typography */
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Roboto',

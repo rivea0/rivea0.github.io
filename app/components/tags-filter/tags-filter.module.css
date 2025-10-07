@@ -1,15 +1,20 @@
+.filters {
+  background-color: var(--bg);
+  text-decoration: underline var(--link);
+  padding: 0;
+  text-align: right;
+  border: none;
+}
+
+.filters > summary {
+  margin-bottom: .5rem;
+}
+
 .tagsPills {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 1rem;
-}
-
-.container {
-  max-width: var(--main-content);
-  /* remove ul margins */
-  margin: 0;
-  padding: 0;
 }
 
 .tagPill > button {

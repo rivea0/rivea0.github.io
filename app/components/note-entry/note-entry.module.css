@@ -32,7 +32,8 @@
 
 .tag {
   background-color: var(--bg2);
-  padding: 2px 4px;
+  padding: 2px;
+  border: 1px solid var(--light-gray);
   font-size: smaller;
   color: var(--gray);
 }
