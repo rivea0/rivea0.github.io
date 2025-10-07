@@ -1,6 +1,6 @@
 export default function withIcon(svgPath: string) {
   function Icon({
-    strokeWidth = 1.5,
+    strokeWidth = 1.75,
     color = 'currentColor',
     fillColor = 'none',
     viewBox = '0 0 24 24',
