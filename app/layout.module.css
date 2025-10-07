@@ -13,7 +13,9 @@
 .heading {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   margin-top: var(--header-height);
+  margin-bottom: calc(var(--header-height) / 2.5);
 }
 
 .headingText > * {

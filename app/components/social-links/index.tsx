@@ -28,8 +28,8 @@ export default function Socials() {
         icon={
           <GitHub
             fillColor={`var(--icon-generic-color)`}
-            width={22}
-            height={22}
+            width={20}
+            height={20}
             strokeWidth={0}
           />
         }
@@ -40,8 +40,8 @@ export default function Socials() {
         icon={
           <Mail
             color={`var(--icon-generic-color)`}
-            width={22}
-            height={22}
+            width={20}
+            height={20}
             strokeWidth={2}
           />
         }
@@ -53,8 +53,8 @@ export default function Socials() {
           <RSS
             color={`var(--icon-generic-color)`}
             strokeWidth={2.25}
-            width={22}
-            height={22}
+            width={20}
+            height={20}
           />
         }
         tooltip="RSS"
@@ -63,8 +63,8 @@ export default function Socials() {
         href="https://mastodon.social/@rivea0"
         icon={
           <Mastodon
-            width={20}
-            height={22}
+            width={18}
+            height={20}
             strokeWidth={0}
             fillColor={`var(--icon-generic-color)`}
             color={`var(--icon-generic-color)`}
