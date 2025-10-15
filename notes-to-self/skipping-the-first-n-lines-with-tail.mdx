@@ -1,0 +1,29 @@
+---
+title: "Skipping the first N lines with `tail`"
+tags: [Shell]
+description: "Skipping the first N lines with `tail`"
+slug: skipping-the-first-n-lines-with-tail
+postIndex: 23
+---
+
+Using the command `tail`, you usually get the last $N$ lines in a file:
+
+```
+tail -n <N> <filename>
+```
+
+We can also use it to skip the first $N$ lines with adding `+`:
+
+```
+tail -n +<N+1> <filename>
+```
+
+<Note>
+The number has to be `N+1`.
+</Note>
+
+For example, skipping the first line is easy:
+
+```
+tail -n+2 <filename>
+```
