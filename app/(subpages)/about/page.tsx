@@ -40,6 +40,11 @@ export default function Page() {
           <p><em>If you're interested in working with me, you can check out <Link href="/work-with-me">this page</Link>.</em></p>
         </div>
         <hr />
+        <div>
+          <p>For the AI usage statement, see <Link href="/ai">this page</Link>.</p>
+          <p>In short, none of the content on this website was made using generative AI. All of my articles and notes are written by me.</p>
+        </div>
+        <hr />
         <p><em>This site is built using <a href="https://nextjs.org">Next.js</a>, licensed under <Link href="https://github.com/rivea0/rivea0.github.io/blob/main/LICENSE">MIT</Link>.</em></p>
         <p><em><Link href="https://www.goatcounter.com">GoatCounter</Link> (which is <Link href="https://github.com/arp242/goatcounter">open source</Link>!) is used for privacy-friendly analytics.</em></p>
         <p><em>Blog content licensed under <Link href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</Link>.</em></p>
