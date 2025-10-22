@@ -4,6 +4,7 @@
   border: 1px solid var(--link);
   padding: 1rem 2rem 0 2rem;
   background-color: var(--bg2);
+  margin-top: 1rem;
 }
 
 .tags {
@@ -12,7 +13,7 @@
   margin-top: 1rem;
   position: absolute;
   z-index: 1;
-  top: 9rem;
+  top: 10rem;
   left: 23rem;
 }
 
