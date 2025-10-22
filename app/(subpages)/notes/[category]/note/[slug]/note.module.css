@@ -6,12 +6,6 @@
   background-color: var(--bg2);
 }
 
-.title h1 {
-  margin-top: 0.75rem;
-  color: #4c4f69;
-  font-size: 2rem;
-}
-
 .tags {
   display: flex;
   gap: 1rem;

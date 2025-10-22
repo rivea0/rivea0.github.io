@@ -22,6 +22,10 @@
   color: var(--fg);
 }
 
+.noteListTitle {
+  color: var(--gray);
+}
+
 @media screen and (max-width: 768px) {
   .noteList {
     grid-template-columns: repeat(1, 1fr);

@@ -6,6 +6,13 @@
   gap: 1rem;
 }
 
+.container > p {
+  grid-column-start: 1;
+  grid-column-end: 3;
+  color: var(--gray-alpha);
+  font-size: smaller;
+}
+
 .noteBlock {
   min-height: max-content;
   border: 1.25px solid var(--gray);
@@ -20,9 +27,7 @@
 
 .noteBlock > span {
   color: var(--fg);
-  /* text-transform: capitalize; */
 }
-
 
 
 @media screen and (max-width: 768px) {
