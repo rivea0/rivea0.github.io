@@ -8,13 +8,13 @@
   --small-gap: 2rem;
   --big-gap: 4rem;
   --main-content: 48rem;
-  --radius: 6px;
+  --radius: 4px;
   --inline-radius: 5px;
   --header-height: 42px;
 
   /* Typography */
-  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Roboto',
-    'Helvetica Neue', sans-serif;
+  /* --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Roboto',
+    'Helvetica Neue', sans-serif; */
   --font-mono: 'SFMono-Regular', 'Consolas', 'Liberation Mono', 'Menlo',
     monospace;
 
@@ -105,7 +105,7 @@ body {
 
 body {
   height: 100vh;
-  font-family: var(--font-sans);
+  /* font-family: var(--font-inter); */
   display: flex;
   flex-direction: column;
   position: relative;

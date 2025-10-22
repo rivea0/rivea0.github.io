@@ -1,0 +1,29 @@
+.noteListContainer {
+  grid-column-start: 1;
+  grid-column-end: 3;
+}
+
+.noteList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.noteList > a {
+  border: 1px solid var(--link);
+  padding: 1rem;
+  color: var(--gray);
+  height: 8rem;
+  border-radius: var(--radius);
+}
+
+.noteList > a:hover {
+  background-color: var(--bg2);
+  color: var(--fg);
+}
+
+@media screen and (max-width: 768px) {
+  .noteList {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}

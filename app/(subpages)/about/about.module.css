@@ -5,7 +5,7 @@
 }
 
 .profile {
-  border-radius: 4px;
+  border-radius: var(--radius);
 }
 
 .paragraphDiv > p {

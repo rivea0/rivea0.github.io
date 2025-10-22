@@ -10,7 +10,7 @@ import ThemeSwitcher from '@components/theme-switcher';
 
 const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-inter',
+  // variable: '--font-inter',
   weight: ['300', '500', '600', '700'],
   display: 'swap',
 });
@@ -21,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.className}`} suppressHydrationWarning>
       <body>
         <ThemeProvider>
           <GCScript
