@@ -1,8 +1,8 @@
-import getEntries from '@lib/get-entries';
+import { getPostEntries } from '@lib/get-entries';
 import BlockEntry from '@components/block-entry';
 
 export default function Page() {
-  const posts = getEntries('posts');
+  const posts = getPostEntries();
   return (
     <ul>
       {posts

@@ -15,16 +15,16 @@ const thirdPartyPosts: Entry[] = [
     isThirdParty: true,
     href: 'https://www.freecodecamp.org/news/recursive-types-in-typescript-a-brief-exploration',
   },
-]
+];
 
-export default function getEntries(dirName: 'posts' | 'notes-to-self') {
-  const entries = fs.readdirSync(`./${dirName}/`);
+export function getPostEntries() {
+  const entries = fs.readdirSync('./posts/');
   const entriesWithMetadata = entries
     .filter(
       (file) => path.extname(file) === '.md' || path.extname(file) === '.mdx'
     )
     .map((file) => {
-      const filePath = `./${dirName}/${file}`;
+      const filePath = `./posts/${file}`;
       const entryContent = fs.readFileSync(filePath, 'utf8');
       const { data, content } = matter(entryContent);
       if (data.published === false) {
@@ -36,6 +36,49 @@ export default function getEntries(dirName: 'posts' | 'notes-to-self') {
   return entriesWithMetadata
     .concat(thirdPartyPosts)
     .filter((entry) => entry !== null)
+    .sort(
+      (a, b) => {
+        if (a && b) {
+          if (a.date && b.date) {
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
+          } else {
+            return b.postIndex - a.postIndex;
+          }
+        } else {
+          return 0;
+        }
+      }
+      // a && b ? new Date(b.date).getTime() - new Date(a.date).getTime() : 0
+    ) as Entry[];
+}
+
+export function getNoteCategories() {
+  return fs.readdirSync(`./notes-to-self/`);
+}
+
+export function getNotesInCategory(category: string) {
+  const categories = getNoteCategories();
+  if (!categories.includes(category)) {
+    console.error('Note category does not exist');
+  }
+
+  const entries = fs.readdirSync(`./notes-to-self/${category}/`);
+  const entriesWithMetadata = entries
+    .filter(
+      (file) => path.extname(file) === '.md' || path.extname(file) === '.mdx'
+    )
+    .map((file) => {
+      const filePath = `./notes-to-self/${category}/${file}`;
+      const entryContent = fs.readFileSync(filePath, 'utf8');
+      const { data, content } = matter(entryContent);
+      if (data.published === false) {
+        return null;
+      }
+      return { ...data, body: content } as Entry;
+    });
+
+  return entriesWithMetadata
+    .filter((entry) => entry !== null)
     .sort((a, b) => {
       if (a && b) {
         if (a.date && b.date) {
@@ -46,7 +89,5 @@ export default function getEntries(dirName: 'posts' | 'notes-to-self') {
       } else {
         return 0;
       }
-    }
-      // a && b ? new Date(b.date).getTime() - new Date(a.date).getTime() : 0
-    ) as Entry[];
+    }) as Entry[];
 }
