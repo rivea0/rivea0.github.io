@@ -22,7 +22,7 @@
     "@types/mdx": "^2.0.6",
     "bright": "^0.8.4",
     "clsx": "^2.0.0",
-    "eslint-config-next": "^14.1.0",
+    "eslint-config-next": "^16.0.10",
     "gray-matter": "^4.0.3",
     "next": "^14.1.1",
     "next-goatcounter": "^1.0.5",
