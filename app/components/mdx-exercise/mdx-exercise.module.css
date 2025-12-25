@@ -12,7 +12,7 @@
 }
 
 .exerciseSection {
-  background-color: var(--lighter-gray);
+  background-color: var(--bg-2);
   padding: .5rem .75rem;
   display: flex;
   flex-direction: column;
@@ -55,7 +55,7 @@
   position: relative;
   margin-top: 1rem;
   padding: 7.25rem 0;
-  background-color: var(--light-gray);
+  background-color: var(--gray-2);
 }
 
 .mysteryBox {
@@ -75,7 +75,7 @@
 .showAnswerBtn {
   z-index: 20;
   font-size: larger;
-  background-color: var(--light-gray);
+  background-color: var(--gray-2);
   padding: .5rem .75rem;
 }
 

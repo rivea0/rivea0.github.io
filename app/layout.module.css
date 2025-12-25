@@ -1,7 +1,7 @@
 .wrapper {
   position: relative;
   height: 100%;
-  padding-bottom: var(--small-gap);
+  padding-bottom: var(--gap-double);
 }
 
 .main {
@@ -39,7 +39,7 @@
 }
 
 .footer {
-  margin-top: var(--small-gap);
+  margin-top: var(--gap-double);
   display: flex;
   justify-content: space-between;
 }

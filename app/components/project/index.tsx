@@ -30,7 +30,7 @@ export default function Project(props: Project) {
           ))}
           {framework &&
             framework.map((fw) => (
-              <li key={fw} className={styles.framework}>
+              <li key={fw}>
                 {fw}
               </li>
             ))}

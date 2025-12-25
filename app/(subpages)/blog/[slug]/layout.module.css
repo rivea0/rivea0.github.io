@@ -6,7 +6,7 @@
 
 .content {
   overflow: auto;
-  color: var(--gray-alpha);
+  color: var(--gray-1);
   font-weight: 500;
   margin-left: var(--gap-double);
 }

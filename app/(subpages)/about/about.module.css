@@ -31,7 +31,7 @@
 
 .secondaryDiv {
   margin-top: var(--gap-half);
-  color: var(--gray-alpha);
+  color: var(--gray);
   font-size: .25rem;
   margin-top: 2rem;
 }

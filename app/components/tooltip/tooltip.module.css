@@ -4,7 +4,7 @@
 
 .tooltip::after {
   display: block;
-  background-color: var(--lighter-gray);
+  background-color: var(--bg-2);
   border-radius: var(--radius);
   color: var(--fg);
   padding: var(--gap-half) var(--gap);

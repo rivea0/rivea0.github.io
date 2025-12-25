@@ -13,7 +13,7 @@
 }
 
 .footer {
-  margin-top: var(--small-gap);
+  margin-top: var(--gap-double);
   display: flex;
   justify-content: space-between;
 }
@@ -24,7 +24,9 @@
 
 .heading3 {
   margin-top: 4rem;
-  margin-bottom: -4px;
+  margin-bottom: 1rem;
+  text-decoration: underline;
+  text-decoration-color: var(--link);
 }
 
 .ul > li > a > h4 {

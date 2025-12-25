@@ -5,12 +5,12 @@
   margin-top: 1rem;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: .125rem solid var(--bg2);
+  border-bottom: .125rem solid var(--bg-2);
 }
 
 .nav a {
   text-decoration: none;
-  color: var(--nav-link);
+  color: var(--fg);
 }
 
 .nav a:hover {

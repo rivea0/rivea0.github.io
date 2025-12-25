@@ -49,13 +49,3 @@
     font-size: 1.1rem;
   }
 }
-
-/* .skeleton {
-  display: flex;
-  flex-direction: column;
-  padding: var(--gap);
-  border-radius: var(--radius);
-  background: var(--lightest-gray);
-  margin-bottom: var(--gap);
-  height: 150px;
-} */

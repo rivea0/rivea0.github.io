@@ -1,9 +1,9 @@
 .note {
   grid-column-start: 1;
   grid-column-end: 3;
-  border: 1px solid var(--link);
+  border: 2px solid var(--link);
   padding: 1rem 2rem 0 2rem;
-  background-color: var(--bg2);
+  background-color: var(--bg-2);
   margin-top: 1rem;
 }
 
@@ -19,11 +19,11 @@
 
 .tags > li {
   list-style: none;
-  background-color: var(--bg2);
+  background-color: var(--bg-2);
   color: var(--gray);
   padding: 2px 8px;
   font-size: 1rem;
-  border: 1px solid var(--link);
+  border: 2px solid var(--link);
 }
 
 @media screen and (max-width: 768px) {

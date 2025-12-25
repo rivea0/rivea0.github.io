@@ -17,7 +17,7 @@ export function CopyButton({ text }: { text: string }) {
         setTimeout(() => setCopied(false), 1200);
       }}
     >
-      {copied ? <Check /> : <Copy fillColor="var(--gray-alpha)" color="none" />}
+      {copied ? <Check /> : <Copy fillColor="var(--gray-1)" color="none" />}
     </button>
   );
 }

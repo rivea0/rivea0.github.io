@@ -10,16 +10,17 @@
 }
 
 .noteList > a {
-  border: 1px solid var(--link);
+  border: 2px solid var(--gray);
   padding: 1rem;
+  background-color: var(--bg-2);
   color: var(--gray);
   height: 8rem;
   border-radius: var(--radius);
 }
 
 .noteList > a:hover {
-  background-color: var(--bg2);
   color: var(--fg);
+  border: 2px solid var(--link);
 }
 
 .noteListTitle {

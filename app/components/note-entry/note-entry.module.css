@@ -31,9 +31,9 @@
 }
 
 .tag {
-  background-color: var(--bg2);
+  background-color: var(--bg-2);
   padding: 2px;
-  border: 1px solid var(--light-gray);
+  border: 1px solid var(--gray-2);
   font-size: smaller;
   color: var(--gray);
 }
@@ -44,13 +44,3 @@
     font-size: 1.1rem;
   }
 }
-
-/* .skeleton {
-  display: flex;
-  flex-direction: column;
-  padding: var(--gap);
-  border-radius: var(--radius);
-  background: var(--lightest-gray);
-  margin-bottom: var(--gap);
-  height: 150px;
-} */

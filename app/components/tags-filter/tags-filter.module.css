@@ -11,7 +11,7 @@
   margin-bottom: .5rem;
   align-self: end;
   border: 1.25px solid var(--link);
-  background-color: var(--bg2);
+  background-color: var(--bg-2);
   padding: .25rem .5rem;
   border-radius: .25rem;
 }
@@ -24,8 +24,8 @@
 }
 
 .tagPill > button {
-  background-color: var(--bg2);
-  border: 1px solid var(--light-gray);
+  background-color: var(--bg-2);
+  border: 1px solid var(--gray-2);
   padding: 4px 8px;
   border-radius: .25rem;
 }
@@ -40,5 +40,5 @@
 .tagPill > button.activeBtn {
   background-color: var(--link);
   color: var(--bg);
-  border: 1px solid var(--bg2);
+  border: 1px solid var(--bg-2);
 }
