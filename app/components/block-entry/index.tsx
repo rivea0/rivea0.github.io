@@ -2,17 +2,23 @@ import Link from '@components/link';
 import styles from './block-entry.module.css';
 import { convertMDWithInlineCodeToHTML } from '@lib/utils';
 import { ExternalLink } from '@components/icons';
+import { PostEntry } from '@lib/types';
 
-type Props = {
-  title: string;
-  href: string;
-  date?: Date;
+// type Props = {
+//   title: string;
+//   href: string;
+//   date?: Date;
+//   dateInfo?: string;
+//   isThirdParty?: boolean;
+// };
+
+type BlockEntryProps = Pick<PostEntry, 'title' | 'date' | 'isThirdParty'> & {
   dateInfo?: string;
-  thirdPartyPost?: boolean;
+  href: string;
 };
 
-export default function BlockEntry(props: Props) {
-  const { title, href, date, dateInfo, thirdPartyPost } = props;
+export default function BlockEntry(props: BlockEntryProps) {
+  const { title, date, dateInfo, isThirdParty, href } = props;
 
   return (
     <li className={styles.item}>
@@ -21,15 +27,15 @@ export default function BlockEntry(props: Props) {
         title={title}
         className={styles.link}
         underline={false}
-        external={thirdPartyPost}
+        external={isThirdParty}
       >
         {/* {type && <div className={styles.type}>{type}</div>} */}
         {date && (
           <div className={styles.wrapper}>
             {date && (
               <span className={styles.date}>
-                {dateInfo && dateInfo} {' '}
-                {date.toLocaleDateString('en-US', {
+                {dateInfo && dateInfo}{' '}
+                {new Date(date).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric',
@@ -45,7 +51,7 @@ export default function BlockEntry(props: Props) {
               __html: convertMDWithInlineCodeToHTML(title),
             }}
           ></h4>
-          {thirdPartyPost && <ExternalLink />}
+          {isThirdParty && <ExternalLink />}
         </div>
         {/* {description && <p className={styles.description}>{description}</p>} */}
       </Link>

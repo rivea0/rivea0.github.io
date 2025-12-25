@@ -16,18 +16,13 @@ export default function Page() {
             : -1;
         })
         .map((post) => {
-          const date = new Date(post.date).toLocaleDateString('en-US', {
-            month: 'numeric',
-            day: 'numeric',
-            year: 'numeric',
-          });
-
           return (
             <BlockEntry
               key={`post-item-${post.slug}`}
               href={`/blog/${post.slug}`}
               title={post.title}
-              date={new Date(date)}
+              date={post.date}
+              isThirdParty={false}
             />
           );
         })}

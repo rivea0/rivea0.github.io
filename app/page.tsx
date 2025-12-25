@@ -3,7 +3,6 @@ import styles from './page.module.css';
 import BlockEntry from '@components/block-entry';
 import { selectedPosts } from '@lib/constants';
 
-
 export default async function HomePage() {
   return (
     <>
@@ -42,9 +41,14 @@ export default async function HomePage() {
             return (
               <BlockEntry
                 key={`post-item-${post.slug}`}
-                href={`/blog/${post.slug}`}
                 title={post.title}
-                date={new Date(post.date)}
+                date={post.date}
+                isThirdParty={post.isThirdParty}
+                href={
+                  !post.isThirdParty
+                    ? `/blog/${post.slug}`
+                    : post.thirdPartyPostHref
+                }
               />
             );
           })}
