@@ -8,19 +8,16 @@ export interface Entry {
 }
 
 export interface PostEntry extends Entry {
-  postIndex?: number;
   isThirdParty: boolean;
-  thirdPartyPostHref?: string; // For third party posts
+  thirdPartyPostHref?: string;
 }
 
 export interface PostEntryData extends PostEntry {
-  previous: PostEntry,
-  next: PostEntry
+  previous: PostEntry;
+  next: PostEntry;
 }
 
-export interface NoteEntry extends Entry {
-
-}
+export interface NoteEntry extends Entry {}
 
 export type Project = {
   title: string;

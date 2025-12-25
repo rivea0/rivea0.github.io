@@ -4,14 +4,6 @@ import { convertMDWithInlineCodeToHTML } from '@lib/utils';
 import { ExternalLink } from '@components/icons';
 import { PostEntry } from '@lib/types';
 
-// type Props = {
-//   title: string;
-//   href: string;
-//   date?: Date;
-//   dateInfo?: string;
-//   isThirdParty?: boolean;
-// };
-
 type BlockEntryProps = Pick<PostEntry, 'title' | 'date' | 'isThirdParty'> & {
   dateInfo?: string;
   href: string;
@@ -29,7 +21,6 @@ export default function BlockEntry(props: BlockEntryProps) {
         underline={false}
         external={isThirdParty}
       >
-        {/* {type && <div className={styles.type}>{type}</div>} */}
         {date && (
           <div className={styles.wrapper}>
             {date && (
