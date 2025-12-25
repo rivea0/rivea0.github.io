@@ -1,0 +1,22 @@
+---
+title: Adding line breaks to a `content` string
+tags: [CSS]
+description: Adding a line break to the string value in content property
+slug: adding-line-breaks-to-content-string
+date: 2025-12-24
+---
+
+The [`content`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/content) property is mostly used to replace content, and it's usually used with the `::before` pseudo-element.
+
+The [string values](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/string) are represented as Unicode. 
+
+To add a new line after or within the string, we not only have to use the line feed character (`\A` or `\00000A`), but also set the `white-space` property.
+
+Something like this:
+
+```css
+footer::before {
+  content: 'Some content before footer\A';
+  white-space: break-spaces;
+}
+```

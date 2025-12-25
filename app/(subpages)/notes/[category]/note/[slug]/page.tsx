@@ -25,11 +25,20 @@ export async function generateStaticParams() {
   categories.forEach((category) => {
     let notes = getNotesInCategory(category);
     notes.forEach((note) => {
-      allNotes.push({ category: category, slug: note.slug });
+      allNotes.push({
+        category: category,
+        slug: note.slug,
+        date: note.date,
+      });
     });
   });
 
-  return allNotes;
+  return allNotes.sort((a, b) => {
+    return new Date(a.date).toLocaleTimeString() <
+      new Date(b.date).toLocaleTimeString()
+      ? 1
+      : -1;
+  });
 }
 
 export default async function Page({
@@ -70,15 +79,15 @@ export default async function Page({
           <li>{tags}</li>
         )}
       </ul>
-    <div className={`${firaCode.className} ${styles.note}`}>
-      <h1
-        className={styles.title}
-        dangerouslySetInnerHTML={{
-          __html: convertMDWithInlineCodeToHTML(title),
-        }}
-      ></h1>
-      <EntryContent mdxFunctionBody={mdxFunctionBody} />
-    </div>
+      <div className={`${firaCode.className} ${styles.note}`}>
+        <h1
+          className={styles.title}
+          dangerouslySetInnerHTML={{
+            __html: convertMDWithInlineCodeToHTML(title),
+          }}
+        ></h1>
+        <EntryContent mdxFunctionBody={mdxFunctionBody} />
+      </div>
     </>
   );
 }

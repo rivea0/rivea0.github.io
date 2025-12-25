@@ -3,7 +3,7 @@ title: Default exports can make tree-shaking harder for bundlers
 tags: [JavaScript]
 description: Default exports can make tree-shaking harder for bundlers
 slug: default-exports-can-make-tree-shaking-harder-for-bundlers
-postIndex: 11
+date: 2025-02-01
 ---
 
 > [...] a module could provide only a default export, which is an object where all the functionality is exposed as properties of such an object. When we import a default object, <mark>most module bundlers will consider the entire object being used</mark> and they won't be able to eliminate any unused code from the exported functionality.
