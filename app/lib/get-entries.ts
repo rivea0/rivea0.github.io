@@ -53,7 +53,9 @@ export function getPostEntries() {
 }
 
 export function getNoteCategories() {
-  return fs.readdirSync(`./notes-to-self/`);
+  return fs
+    .readdirSync(`./notes-to-self/`)
+    .filter((dir) => !dir.startsWith('.'));
 }
 
 export function getNotesInCategory(category: string) {
