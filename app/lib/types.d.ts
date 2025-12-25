@@ -19,8 +19,19 @@ export interface PostEntryData extends PostEntry {
 
 export interface NoteEntry extends Entry {}
 
-export type Project = {
-  title: string;
-  description: string;
-  href: string;
-};
+interface BaseProject {
+  title: string,
+  description: string | ReactNode,
+  more?: string | ReactNode,
+}
+
+export interface Project extends BaseProject {
+  codeHref: string,
+  demoHref?: string,
+  language: string[],
+  framework?: string[],
+}
+
+export interface WritingProject extends BaseProject {
+  links: { name: string; href: string }[];
+}

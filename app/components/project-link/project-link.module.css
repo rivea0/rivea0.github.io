@@ -1,0 +1,8 @@
+.link {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  color: var(--link);
+  text-decoration: none;
+}
+
