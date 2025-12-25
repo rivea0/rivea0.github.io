@@ -10,3 +10,7 @@ export function convertMDWithInlineCodeToHTML(text: string): string {
   // Replace markdown inline code with HTML code tags
   return escapedText.replace(/(`([^`\n]+)`)/g, '<code>$2</code>');
 }
+
+export function capitalizeFirstLetter(val: string) {
+  return val.charAt(0).toUpperCase() + val.slice(1);
+}

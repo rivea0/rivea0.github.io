@@ -11,6 +11,7 @@ import styles from './note.module.css';
 import { convertMDWithInlineCodeToHTML } from '@lib/utils';
 
 import '../../../../../../public/assets/katex/katex.min.css';
+import { NoteEntry } from '@lib/types';
 
 const firaCode = Fira_Code({
   subsets: ['latin'],
@@ -57,7 +58,13 @@ export default async function Page({
     }
   );
 
-  function getData({ category, slug }: { category: string; slug: string }) {
+  function getData({
+    category,
+    slug,
+  }: {
+    category: string;
+    slug: string;
+  }): NoteEntry {
     const notes = getNotesInCategory(category);
     const noteIndex = notes.findIndex((n) => n?.slug === slug);
     const note = notes[noteIndex];

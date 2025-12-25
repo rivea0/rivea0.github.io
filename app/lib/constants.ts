@@ -1,27 +1,37 @@
-export const selectedPosts = [
+import { PostEntry } from './types';
+
+export const selectedPosts: Pick<
+  PostEntry,
+  'title' | 'slug' | 'date' | 'isThirdParty' | 'thirdPartyPostHref'
+>[] = [
   {
     slug: 'notes-on-a-first-encounter-with-rust-ownership',
     title: "Notes on a first encounter with Rust's ownership",
     date: '2025-03-28',
+    isThirdParty: false,
   },
   {
     slug: 'the-curious-case-of-recursive-and-iterative-processes',
     title: 'The curious case of recursive and iterative processes',
     date: '2023-12-23',
+    isThirdParty: false,
   },
   {
     slug: 'a-reminder-to-use-single-quotes-when-writing-commit-messages',
     title: 'A reminder to use single quotes when writing commit messages',
     date: '2023-07-13',
+    isThirdParty: false,
   },
   {
     slug: 'a-quick-behind-the-scenes-of-greedy-and-lazy-matching',
     title: 'A Quick Behind the Scenes of Greedy and Lazy Matching',
     date: '2022-03-31',
+    isThirdParty: false,
   },
   {
     slug: 'custom-endswith-and-startswith-functions',
     title: 'Custom endsWith and startsWith Functions',
     date: '2022-02-22',
+    isThirdParty: false,
   },
 ];

@@ -1,9 +1,9 @@
 import matter from 'gray-matter';
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Entry } from './types';
+import type { NoteEntry, PostEntry } from './types';
 
-const thirdPartyPosts: Entry[] = [
+const thirdPartyPosts: PostEntry[] = [
   {
     title: 'Recursive Types in TypeScript: A Brief Exploration',
     description:
@@ -13,11 +13,11 @@ const thirdPartyPosts: Entry[] = [
     slug: '',
     tags: ['TypeScript'],
     isThirdParty: true,
-    href: 'https://www.freecodecamp.org/news/recursive-types-in-typescript-a-brief-exploration',
+    thirdPartyPostHref: 'https://www.freecodecamp.org/news/recursive-types-in-typescript-a-brief-exploration',
   },
 ];
 
-export function getPostEntries() {
+function getLocalPostEntires(): PostEntry[] {
   const entries = fs.readdirSync('./posts/');
   const entriesWithMetadata = entries
     .filter(
@@ -27,45 +27,38 @@ export function getPostEntries() {
       const filePath = `./posts/${file}`;
       const entryContent = fs.readFileSync(filePath, 'utf8');
       const { data, content } = matter(entryContent);
-      if (data.published === false) {
-        return null;
-      }
-      return { ...data, body: content } as Entry;
+
+      return { ...data, isThirdParty: false, body: content } as PostEntry;
     });
 
-  return entriesWithMetadata
-    .concat(thirdPartyPosts)
-    .filter((entry) => entry !== null)
-    .sort(
-      (a, b) => {
-        if (a && b) {
-          if (a.date && b.date) {
-            return new Date(b.date).getTime() - new Date(a.date).getTime();
-          } else {
-            return b.postIndex - a.postIndex;
-          }
-        } else {
-          return 0;
-        }
-      }
-      // a && b ? new Date(b.date).getTime() - new Date(a.date).getTime() : 0
-    ) as Entry[];
+  return entriesWithMetadata;
 }
 
-export function getNoteCategories() {
+export function getPostEntries(): PostEntry[] {
+  const localPostEntries = getLocalPostEntires();
+
+  return localPostEntries
+    .concat(thirdPartyPosts)
+    .filter((entry) => entry !== null)
+    .sort((a, b) =>
+      a && b ? new Date(b.date).getTime() - new Date(a.date).getTime() : 0
+    ) as PostEntry[];
+}
+
+export function getNoteCategories(): string[] {
   return fs
     .readdirSync(`./notes-to-self/`)
     .filter((dir) => !dir.startsWith('.'));
 }
 
-export function getNotesInCategory(category: string) {
+export function getNotesInCategory(category: string): NoteEntry[] {
   const categories = getNoteCategories();
   if (!categories.includes(category)) {
     console.error('Note category does not exist');
   }
 
   const entries = fs.readdirSync(`./notes-to-self/${category}/`);
-  const entriesWithMetadata = entries
+  const notesWithMetadata = entries
     .filter(
       (file) => path.extname(file) === '.md' || path.extname(file) === '.mdx'
     )
@@ -73,27 +66,12 @@ export function getNotesInCategory(category: string) {
       const filePath = `./notes-to-self/${category}/${file}`;
       const entryContent = fs.readFileSync(filePath, 'utf8');
       const { data, content } = matter(entryContent);
-      if (data.published === false) {
-        return null;
-      }
-      return { ...data, body: content } as Entry;
+      return { ...data, body: content } as NoteEntry;
     });
 
-  return entriesWithMetadata
+  return notesWithMetadata
     .filter((entry) => entry !== null)
-    .sort((a, b) => {
-      if (a && b) {
-        if (a.date && b.date) {
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
-        } else {
-          return b.postIndex - a.postIndex;
-        }
-      } else {
-        return 0;
-      }
-    }) as Entry[];
-}
-
-export function capitalizeFirstLetter(val: string) {
-    return val.charAt(0).toUpperCase() + val.slice(1);
+    .sort((a, b) =>
+      a && b ? new Date(b.date).getTime() - new Date(a.date).getTime() : 0
+    ) as NoteEntry[];
 }

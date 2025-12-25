@@ -1,8 +1,9 @@
 import { Suspense } from 'react';
 import LoaderIcon from '@components/loader-icon';
 import Link from '@components/link';
-import { capitalizeFirstLetter, getNoteCategories, getNotesInCategory } from '@lib/get-entries';
+import { getNoteCategories, getNotesInCategory } from '@lib/get-entries';
 import styles from './notes.module.css';
+import { capitalizeFirstLetter } from '@lib/utils';
 
 export default async function Notes() {
   const categories = getNoteCategories();

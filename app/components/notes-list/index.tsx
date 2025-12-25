@@ -1,71 +1,28 @@
-'use client';
+import { NoteEntry } from '@lib/types';
+import Link from '@components/link';
 
-import { useState } from 'react';
-import type { MouseEvent } from 'react';
-import type { Entry } from '@lib/types';
-import { getEntryTags } from '@lib/get-entry-tags';
-import NoteEntry from '@components/note-entry';
-import styles from '@components/posts-list/posts-list.module.css';
-import TagsFilter from '@components/tags-filter';
-import filterStyles from '@components/tags-filter/tags-filter.module.css';
-
-type Props = {
-  notes: Entry[];
-  paginate?: boolean;
-};
-
-export default function NotesList(props: Props) {
-  // const [showMore, setShowMore] = useState(4)
-  const [selectedTag, setSelectedTag] = useState('');
-
-  function handleTagSelection(e: MouseEvent<HTMLButtonElement>) {
-    setSelectedTag((e.target as HTMLButtonElement).textContent);
-  }
-
-  const { notes, paginate } = props;
-  const notesTags = getEntryTags(notes);
-
-  return (
-    <>
-      <details className={filterStyles.filters}>
-        <summary>Apply filter</summary>
-        <TagsFilter
-          allTags={notesTags}
-          selectedTag={selectedTag}
-          handleAllTagSelection={() => {
-            setSelectedTag('');
-          }}
-          handleTagSelection={handleTagSelection}
-        />
-      </details>
-      <ul className={styles.container}>
-        {/* {notes.slice(0, paginate ? showMore : undefined) */}
-        {notes
-          .filter((note) => {
-            if (selectedTag === '') return note;
-            return note.tags.includes(selectedTag) ? note : undefined;
-          })
-          .map((note) => {
-            return (
-              <NoteEntry
-                key={`note-item-${note.slug}`}
-                href={`/notes/${note.slug}`}
-                title={note.title}
-                tags={note.tags}
-              />
-            );
-          })}
-        {/* {paginate && showMore < posts.length && (
-          <button
-            onClick={() => {
-              setShowMore(showMore + 4)
-            }}
-            className={styles.button}
-          >
-            Show More
-          </button>
-        )} */}
-      </ul>
-    </>
-  );
+export default function NotesList({
+  notes,
+  category,
+}: {
+  notes: NoteEntry[];
+  category: string;
+}) {
+  return notes.map((note) => (
+    <Link key={note.slug} href={`/notes/${category}/note/${note.slug}`}>
+      <span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="var(--gray)"
+          viewBox="0 0 256 256"
+        >
+          <path d="M88,96a8,8,0,0,1,8-8h64a8,8,0,0,1,0,16H96A8,8,0,0,1,88,96Zm8,40h64a8,8,0,0,0,0-16H96a8,8,0,0,0,0,16Zm32,16H96a8,8,0,0,0,0,16h32a8,8,0,0,0,0-16ZM224,48V156.69A15.86,15.86,0,0,1,219.31,168L168,219.31A15.86,15.86,0,0,1,156.69,224H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48ZM48,208H152V160a8,8,0,0,1,8-8h48V48H48Zm120-40v28.7L196.69,168Z"></path>
+        </svg>
+        <br />
+        <span>{note.title}</span>
+      </span>
+    </Link>
+  ));
 }
