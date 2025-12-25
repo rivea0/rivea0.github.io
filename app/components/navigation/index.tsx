@@ -1,31 +1,26 @@
-import { Entry } from '@lib/types';
+import { PostEntry } from '@lib/types';
 import Link from '@components/link';
 import styles from './navigation.module.css';
 
-function getHref(entryObj: Entry, entryPathStr: 'blog' | 'notes') {
+function getHref(entryObj: PostEntry) {
   if (entryObj.isThirdParty) {
-    return entryObj.href
+    return entryObj.thirdPartyPostHref;
   }
-  return `/${entryPathStr}/${entryObj.slug}`
+  return `/blog/${entryObj.slug}`;
 }
 
 export default function Navigation({
   previous,
   next,
-  entryPath,
 }: {
-  previous?: Entry;
-  next?: Entry;
-  entryPath: 'blog' | 'notes';
+  previous?: PostEntry;
+  next?: PostEntry;
 }) {
   return (
     <div className={styles.navigation}>
       <div className={styles.previous}>
         {previous && (
-          <Link
-            href={getHref(previous, entryPath)}
-            external={previous.isThirdParty}
-          >
+          <Link href={getHref(previous)} external={previous.isThirdParty}>
             <div className={styles.title}>← Older</div>
             {previous.title}
           </Link>
@@ -33,10 +28,7 @@ export default function Navigation({
       </div>
       <div className={styles.next}>
         {next && (
-          <Link
-            href={getHref(next, entryPath)}
-            external={next.isThirdParty}
-          >
+          <Link href={getHref(next)} external={next.isThirdParty}>
             <div className={styles.title}>Newer →</div>
             {next.title}
           </Link>

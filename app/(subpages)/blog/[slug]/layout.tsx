@@ -3,6 +3,7 @@ import { getPostEntries } from '@lib/get-entries';
 import Navigation from '@components/navigation';
 import styles from './layout.module.css';
 import { convertMDWithInlineCodeToHTML } from '@lib/utils';
+import { PostEntryData } from '@lib/types';
 
 export async function generateStaticParams() {
   const posts = getPostEntries();
@@ -39,7 +40,7 @@ export const generateMetadata = async ({
   };
 };
 
-function getData({ slug }: { slug: string }) {
+function getData({ slug }: { slug: string }): PostEntryData {
   const posts = getPostEntries();
   const postIndex = posts.findIndex((p) => p?.slug === slug);
   const post = posts[postIndex];
@@ -88,7 +89,7 @@ export default function PostLayout({
         ></h1>
         {children}
       </article>
-      <Navigation previous={previous} next={next} entryPath="blog" />
+      <Navigation previous={previous} next={next} />
     </>
   );
 }
