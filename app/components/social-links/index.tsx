@@ -2,6 +2,7 @@ import Link from '@components/link';
 import { GitHub, Mail, RSS, Mastodon } from '@components/icons';
 import Tooltip from '@components/tooltip';
 import styles from './social-links.module.css';
+import Bluesky from '@components/icons/bluesky';
 
 type SocialButtonProps = {
   href: string;
@@ -72,6 +73,19 @@ export default function Socials() {
         }
         tooltip="Mastodon"
         rel="me"
+      />
+      <SocialButton
+        href="https://bsky.app/profile/rivea0.bsky.social"
+        icon={
+          <Bluesky
+            width={18}
+            height={20}
+            strokeWidth={0}
+            fillColor={`var(--icon-generic-color)`}
+            color={`var(--icon-generic-color)`}
+          />
+        }
+        tooltip="Bluesky"
       />
     </div>
   );
