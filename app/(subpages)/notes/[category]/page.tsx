@@ -1,7 +1,7 @@
 import { getNoteCategories, getNotesInCategory } from '@lib/get-entries';
 import { capitalizeFirstLetter } from '@lib/utils';
 import styles from './category.module.css';
-import NotesList from '@components/notes-list';
+import NoteBlock from '@components/note-block';
 
 export async function generateStaticParams() {
   const categories = getNoteCategories();
@@ -25,7 +25,9 @@ export default function Page({ params }: { params: { category: string } }) {
         )}
       </h1>
       <div className={styles.noteList}>
-        <NotesList notes={notes} category={category} />
+        {notes.map((note) => (
+          <NoteBlock key={note.title} note={note} category={category} />
+        ))}
       </div>
     </div>
   );

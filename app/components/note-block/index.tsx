@@ -1,14 +1,14 @@
 import { NoteEntry } from '@lib/types';
 import Link from '@components/link';
 
-export default function NotesList({
-  notes,
+export default function NoteBlock({
+  note,
   category,
 }: {
-  notes: NoteEntry[];
+  note: NoteEntry;
   category: string;
 }) {
-  return notes.map((note) => (
+  return (
     <Link key={note.slug} href={`/notes/${category}/note/${note.slug}`}>
       <span>
         <svg
@@ -24,5 +24,5 @@ export default function NotesList({
         <span>{note.title}</span>
       </span>
     </Link>
-  ));
+  );
 }
