@@ -19,6 +19,12 @@ export interface PostEntryData extends PostEntry {
 
 export interface NoteEntry extends Entry {}
 
+export interface GlossaryEntry {
+  title: string,
+  slug: string,
+  tags?: string[]
+}
+
 interface BaseProject {
   title: string,
   description: string | ReactNode,

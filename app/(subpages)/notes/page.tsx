@@ -18,7 +18,7 @@ export default async function Notes() {
 
   return (
     <Suspense fallback={<LoaderIcon />}>
-      <p><em>Total of {noteCount} notes</em></p>
+      <p><em>Total of {noteCount} entries</em></p>
       {categories
         .sort((a: string, b: string) => b.charCodeAt(0) - a.charCodeAt(0))
         .map((category) => {

@@ -11,7 +11,8 @@ import styles from './note.module.css';
 import { convertMDWithInlineCodeToHTML } from '@lib/utils';
 
 import '../../../../../../public/assets/katex/katex.min.css';
-import { NoteEntry } from '@lib/types';
+import { GlossaryEntry, NoteEntry } from '@lib/types';
+import Link from '@components/link';
 
 const firaCode = Fira_Code({
   subsets: ['latin'],
@@ -22,7 +23,7 @@ const firaCode = Fira_Code({
 
 export async function generateStaticParams() {
   const categories = getNoteCategories();
-  const allNotes = [];
+  const allNotes: { category: string; slug: string; date?: string }[] = [];
   categories.forEach((category) => {
     let notes = getNotesInCategory(category);
     notes.forEach((note) => {
@@ -64,7 +65,7 @@ export default async function Page({
   }: {
     category: string;
     slug: string;
-  }): NoteEntry {
+  }): NoteEntry | GlossaryEntry {
     const notes = getNotesInCategory(category);
     const noteIndex = notes.findIndex((n) => n?.slug === slug);
     const note = notes[noteIndex];
@@ -79,14 +80,21 @@ export default async function Page({
 
   return (
     <>
-      <ul className={styles.tags}>
-        {tags.length > 1 ? (
-          tags.map((tag) => <li key={tag}>{tag}</li>)
-        ) : (
-          <li>{tags}</li>
-        )}
-      </ul>
-      <div className={`${firaCode.className} ${styles.note}`}>
+      {/* Don't display tags for glossary entries for now */}
+      {params.category !== 'glossary' && (
+        <ul className={styles.tags}>
+          {tags.length > 1 ? (
+            tags.map((tag) => <li key={tag}>{tag}</li>)
+          ) : (
+            <li>{tags}</li>
+          )}
+        </ul>
+      )}
+      <div
+        className={`${firaCode.className} ${styles.note} ${
+          params.category === 'glossary' ? styles.glossaryEntry : ''
+        }`}
+      >
         <h1
           className={styles.title}
           dangerouslySetInnerHTML={{
@@ -94,6 +102,9 @@ export default async function Page({
           }}
         ></h1>
         <EntryContent mdxFunctionBody={mdxFunctionBody} />
+        {params.category === 'glossary' && (
+          <Link href="/notes/glossary">← Back to Glossary</Link>
+        )}
       </div>
     </>
   );

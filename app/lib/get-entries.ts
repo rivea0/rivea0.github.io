@@ -1,7 +1,7 @@
 import matter from 'gray-matter';
 import fs from 'node:fs';
 import path from 'node:path';
-import type { NoteEntry, PostEntry } from './types';
+import type { GlossaryEntry, NoteEntry, PostEntry } from './types';
 
 const thirdPartyPosts: PostEntry[] = [
   {
@@ -13,7 +13,8 @@ const thirdPartyPosts: PostEntry[] = [
     slug: '',
     tags: ['TypeScript'],
     isThirdParty: true,
-    thirdPartyPostHref: 'https://www.freecodecamp.org/news/recursive-types-in-typescript-a-brief-exploration',
+    thirdPartyPostHref:
+      'https://www.freecodecamp.org/news/recursive-types-in-typescript-a-brief-exploration',
   },
 ];
 
@@ -51,7 +52,9 @@ export function getNoteCategories(): string[] {
     .filter((dir) => !dir.startsWith('.'));
 }
 
-export function getNotesInCategory(category: string): NoteEntry[] {
+export function getNotesInCategory(
+  category: string
+): NoteEntry[] | GlossaryEntry[] {
   const categories = getNoteCategories();
   if (!categories.includes(category)) {
     console.error('Note category does not exist');
@@ -67,11 +70,15 @@ export function getNotesInCategory(category: string): NoteEntry[] {
       const entryContent = fs.readFileSync(filePath, 'utf8');
       const { data, content } = matter(entryContent);
       return { ...data, body: content } as NoteEntry;
-    });
+    })
+    .filter((entry) => entry !== null);
 
-  return notesWithMetadata
-    .filter((entry) => entry !== null)
-    .sort((a, b) =>
+  // Sort glossary entries alphabetically, other notes by date
+  if (category === 'glossary') {
+    return notesWithMetadata.sort() as GlossaryEntry[];
+  } else {
+    return notesWithMetadata.sort((a, b) =>
       a && b ? new Date(b.date).getTime() - new Date(a.date).getTime() : 0
     ) as NoteEntry[];
+  }
 }

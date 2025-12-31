@@ -2,9 +2,13 @@
   grid-column-start: 1;
   grid-column-end: 3;
   border: 2px solid var(--link);
-  padding: 1rem 2rem 0 2rem;
+  padding: 1rem 2rem;
   background-color: var(--bg-2);
   margin-top: 1rem;
+}
+
+.glossaryEntry > p  {
+  padding:  0 0 2rem 0;
 }
 
 .tags {
@@ -14,7 +18,7 @@
   position: absolute;
   z-index: 1;
   top: 10rem;
-  left: 23rem;
+  padding-left: 3.5rem;
 }
 
 .tags > li {
@@ -33,6 +37,5 @@
 
   .tags {
     flex-wrap: wrap;
-    left: 2rem;
   }
 }

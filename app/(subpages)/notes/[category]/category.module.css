@@ -9,16 +9,22 @@
   gap: 1.5rem;
 }
 
-.noteList > a {
+.noteList > a, .glossaryList > a {
   border: 2px solid var(--gray);
   padding: 1rem;
   background-color: var(--bg-2);
   color: var(--gray);
-  height: 8rem;
   border-radius: var(--radius);
 }
 
-.noteList > a:hover {
+.glossaryList > a {
+  border: 2px solid transparent;
+  color: var(--fg);
+  font-size: larger;
+  line-height: normal;
+}
+
+.noteList > a:hover, .glossaryList > a:hover {
   color: var(--fg);
   border: 2px solid var(--link);
 }
@@ -27,8 +33,29 @@
   color: var(--gray);
 }
 
+.glossaryList {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.noteList > a > span {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.glossaryList > a > span > svg {
+  margin-bottom: 2rem;
+}
+
+.glossaryDesc {
+  color: var(--gray);
+  margin-bottom: 2rem;
+}
+
 @media screen and (max-width: 768px) {
-  .noteList {
+  .noteList, .glossaryList {
     grid-template-columns: repeat(1, 1fr);
   }
 }
