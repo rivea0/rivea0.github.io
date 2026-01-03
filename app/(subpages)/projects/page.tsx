@@ -38,7 +38,7 @@ export default function Page() {
         {writingProjects.map((project) => {
           return (
             <li key={project.title}>
-              <p>{project.title}</p>
+              <p><em>{project.title}</em></p>
               <p>{project.description}</p>
               <div className={styles.links}>
                 {project.links.map((linkItem) => {
