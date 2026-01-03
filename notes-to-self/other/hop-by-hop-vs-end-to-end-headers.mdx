@@ -1,0 +1,15 @@
+---
+title: "Hop-by-hop vs. end-to-end headers"
+tags: [Miscellaneous]
+description: "Hop-by-hop vs. end-to-end headers"
+slug: hop-by-hop-vs-end-to-end-headers
+date: 2026-01-03
+---
+
+End-to-end headers are those that must be transmitted to the final receiver. Intermediate proxies must forward them without modification, and caches must store them.
+
+With end-to-end headers, data stays consistent from source to destination.
+
+Hop-by-hop headers are not forwarded by proxies, nor are they cached.
+In other words, data can change at different routers.
+Headers `Connection`, `Keep-Alive`, `Transfer-Encoding`, `TE`, `Trailer`, `Proxy-Authorization`, `Proxy-Authenticate`, `Upgrade` are hop-by-hop headers.
