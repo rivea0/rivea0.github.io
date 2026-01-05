@@ -4,9 +4,244 @@
         <description><![CDATA[My blog, projects, etc.]]></description>
         <link>https://rivea0.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 23 Jul 2025 06:32:03 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 05 Jan 2026 11:02:23 GMT</lastBuildDate>
         <atom:link href="https://rivea0.github.io/feed.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[en]]></language>
+        <item>
+            <title><![CDATA[Promise queues]]></title>
+            <description><![CDATA[<p>A promise queue is all about giving an order to functions that return promises:</p>
+<pre><code>queue.add(() =&gt; fetch(&lt;some-url&gt;));
+</code></pre>
+<Note>
+It's **not** the return value of `fetch` (which is going to be a promise) that is queued, rather, it's a function that returns a promise.
+</Note>
+
+<p>We cannot do something like <code>forEach</code> or even <code>Promise.all</code>:<br><mark>They will not run one by one in order, that is, a task will not wait for the previous one to finish in order to start:</mark></p>
+<pre><code>tasks.forEach(task =&gt; task());
+</code></pre>
+<p>For example, let&#39;s say we have a list of functions that return promises:</p>
+<pre><code class="language-ts">function delay(ms: number, value: string) {
+  return new Promise((resolve) =&gt; setTimeout(() =&gt; resolve(value), ms));
+}
+
+const promiseProducers = [
+  () =&gt; delay(1000, &#39;first&#39;),
+  () =&gt; delay(500, &#39;second&#39;),
+  () =&gt; delay(300, &#39;third&#39;),
+];
+</code></pre>
+<p>If we use something like this:</p>
+<pre><code class="language-ts">promiseProducers.forEach(p =&gt; p().then(console.log));
+</code></pre>
+<p>Of course, the third promise will resolve before the second one, and the second one will resolve before the first one. </p>
+<h4>Misconception of <code>Promise.all</code></h4>
+<p><code>Promise.all</code> is <strong>not</strong> a promise queue:</p>
+<pre><code class="language-js">Promise.all(tasks.map(task =&gt; task()));
+</code></pre>
+<p>Again, a task will not wait for the previous one to finish in order to start.</p>
+<h3>Brief refresher on the event loop</h3>
+<p>When it comes to the <a href="https://javascript.info/event-loop#event-loop" target="_blank" rel="noopener noreferrer">JavaScript event loop</a>, there are macrotasks (or, just tasks) and microtasks.</p>
+<p>Microtasks are usually created with promises - the function inside <code>.then()</code>, for example, goes to the microtask queue.<br>A microtask can also be created with the <code>queueMicrotask()</code> function.</p>
+<p>The JavaScript engine prioritizes the microtask queue. It means that even after executing a macrotask, it does not wait for the macrotask queue to finish, instead immediately looks at the microtask queue.</p>
+<p>So, something like this:</p>
+<pre><code class="language-js">setTimeout(() =&gt; console.log(&quot;timeout 1&quot;)); // macrotask
+setTimeout(() =&gt; console.log(&quot;timeout 2&quot;)); // macrotask
+
+Promise.resolve()
+  .then(() =&gt; console.log(&quot;promise 1&quot;)); // microtask
+
+Promise.resolve().then(() =&gt; { // microtask
+  console.log(&#39;promise 2&#39;);
+  setTimeout(() =&gt; console.log(&quot;timeout here&quot;)); // pushed to macrotask queue
+});
+
+console.log(&#39;code&#39;); // on the call stack
+</code></pre>
+<p>Logs:</p>
+<pre><code>code
+promise 1
+promise 2
+timeout 1
+timeout 2
+timeout here
+</code></pre>
+<h3>Why do we want a promise queue?</h3>
+<p>We might want each promise generating function to wait for the previous one to be settled before it starts executing, or define a limit for the number of &quot;concurrent&quot; executions.</p>
+<p>Reasons might be:</p>
+<ul>
+<li>Preserving order for something like API calls that depend on each other</li>
+<li>Processing files or database writes sequentially</li>
+<li>Rate-limiting</li>
+</ul>
+<hr>
+<p>A promise queue can be for executing promises either sequentially or concurrently.</p>
+<blockquote>
+<p>Note that JavaScript is <a href="https://developer.mozilla.org/en-US/docs/Glossary/Thread" target="_blank" rel="noopener noreferrer">single-threaded</a> by nature, so at a given instant, only one task will be executing, although control can shift between different promises, making execution of the promises appear concurrent. <a href="https://en.wikipedia.org/wiki/Parallel_computing" target="_blank" rel="noopener noreferrer">Parallel execution</a> in JavaScript can only be achieved through <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API" target="_blank" rel="noopener noreferrer">worker threads</a>.</p>
+</blockquote>
+<h3>Sequential execution</h3>
+<p>Something like this could work:</p>
+<pre><code class="language-ts">type PromiseGen = () =&gt; Promise&lt;any&gt;;
+
+class PQueue {
+  queue: {
+    task: PromiseGen;
+    resolve: (value: any) =&gt; void;
+    reject: (reason?: any) =&gt; void;
+  }[];
+  running: boolean;
+
+  constructor() {
+    this.queue = [];
+    this.running = false;
+  }
+
+  add(task: PromiseGen) {
+    return new Promise((resolve, reject) =&gt; {
+      this.queue.push({ task, resolve, reject });
+      this.runNext();
+    });
+  }
+
+  async runNext() {
+    if (this.running || this.queue.length === 0) {
+      return;
+    }
+
+    this.running = true;
+    const { task, resolve, reject } = this.queue.shift()!;
+
+    try {
+      const result = await task();
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    } finally {
+      this.running = false;
+      this.runNext();
+    }
+  }
+}
+
+const queue = new PQueue();
+
+function delay(ms: number, value: string) {
+  return new Promise((resolve) =&gt; setTimeout(() =&gt; resolve(value), ms));
+}
+
+queue.add(() =&gt; delay(1000, &#39;first&#39;)).then((value) =&gt; console.log(value));
+queue.add(() =&gt; delay(500, &#39;second&#39;)).then((value) =&gt; console.log(value));
+queue.add(() =&gt; delay(300, &#39;third&#39;)).then((value) =&gt; console.log(value));
+</code></pre>
+<p>Logs:</p>
+<pre><code>first
+second
+third
+</code></pre>
+<p>No matter what the timeout value in the delay function is, the functions are run in the order they are added to the queue.</p>
+<h3>&quot;Concurrent&quot; execution</h3>
+<p>The sequential queue we just wrote runs a maximum of one task at a time, and the next task starts only after the previous one finishes.</p>
+<p>In the case of &quot;concurrent&quot; execution, we want to define a number for the maximum amount of tasks to run at a time, and when one task finishes, the next one in the queue will start running.</p>
+<p>We can track the number of tasks that are currently running instead of tracking whether a task is running or not (like we do with <code>this.running</code>).</p>
+<Note>
+A new task will start only if the running count is less than the maximum amount given.
+</Note>
+
+<pre><code class="language-ts">type PromiseGen = () =&gt; Promise&lt;any&gt;;
+
+class PQueue {
+  maxConcurrent: number;
+  queue: {
+    task: PromiseGen;
+    resolve: (value: any) =&gt; void;
+    reject: (reason?: any) =&gt; void;
+  }[];
+  running: number;
+
+  constructor(maxConcurrent = 1) {
+    this.maxConcurrent = maxConcurrent;
+    this.queue = [];
+    this.running = 0;
+  }
+
+  add(task: () =&gt; Promise&lt;any&gt;) {
+    return new Promise((resolve, reject) =&gt; {
+      this.queue.push({ task, resolve, reject });
+      this.runNext();
+    });
+  }
+
+  async runNext() {
+    if (this.running &gt;= this.maxConcurrent || this.queue.length === 0) {
+      return;
+    }
+
+    const { task, resolve, reject } = this.queue.shift()!;
+    this.running++;
+
+    try {
+      const result = await task();
+      resolve(result);
+    } catch (err) {
+      reject(err);
+    } finally {
+      this.running--;
+      this.runNext();
+    }
+  }
+}
+
+const queue = new PQueue(2);
+
+function delay(ms: number, value: string) {
+  return new Promise((resolve) =&gt; setTimeout(() =&gt; resolve(value), ms));
+}
+
+queue.add(() =&gt; delay(1000, &#39;first&#39;).then((value) =&gt; console.log(value)));
+queue.add(() =&gt; delay(500, &#39;second&#39;).then((value) =&gt; console.log(value)));
+queue.add(() =&gt; delay(300, &#39;third&#39;).then((value) =&gt; console.log(value)));
+queue.add(() =&gt; delay(400, &#39;fourth&#39;).then((value) =&gt; console.log(value)));
+</code></pre>
+<p>Logs:</p>
+<pre><code>second
+third
+first
+fourth
+</code></pre>
+<p>Now, <code>running</code> is a number that holds the number of currently running tasks.<br>We also have <code>maxConcurrent</code> to hold the maximum number of tasks to run &quot;concurrently.&quot;</p>
+<p>The running order looks like this:</p>
+<ul>
+<li><code>() =&gt; delay(1000, &#39;first&#39;)</code> and <code>() =&gt; delay(500, &#39;second&#39;)</code> start immediately.</li>
+<li>The second finishes and third starts.</li>
+<li>The third finishes and fourth starts.</li>
+<li>First finishes.</li>
+<li>Fourth finishes.</li>
+</ul>
+<p>One practical use of it might look like this:</p>
+<pre><code class="language-js">const maxConcurrent = 4;
+const queue = new PQueue(maxConcurrent);
+
+for (let file of droppedFiles) {
+  let startUpload = () =&gt; {
+    return fetch(&#39;/upload-file&#39;, {
+      method: &#39;PUT&#39;,
+      headers: { &#39;content-type&#39;: &#39;binary/octet-stream&#39; },
+      body: file
+    });
+  }
+
+  queue.add(startUpload);
+}
+</code></pre>
+<p>More to read on promise queues:</p>
+<ul>
+<li><a href="https://blog.julik.nl/2025/05/a-tiny-promise-queue" target="_blank" rel="noopener noreferrer">&quot;UI algorithms: a tiny promise queue&quot;</a> by Julik Tarkhanov</li>
+</ul>
+]]></description>
+            <link>https://rivea0.github.io/blog/promise-queues</link>
+            <guid isPermaLink="false">https://rivea0.github.io/blog/promise-queues</guid>
+            <dc:creator><![CDATA[Eda Eren]]></dc:creator>
+            <pubDate>Mon, 05 Jan 2026 00:00:00 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[A short glimpse into web components and Lit]]></title>
             <description><![CDATA[<p>As with many topics, the first place I look for reference is the MDN docs, and they also have an extensive guide for <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components" target="_blank" rel="noopener noreferrer">Web Components</a>. For an introductory go-through though, I found another <a href="https://component-odyssey.com/articles/01-writing-components-that-work-in-any-framework" target="_blank" rel="noopener noreferrer">great introduction to get familiar with web components</a>, and took some notes.</p>

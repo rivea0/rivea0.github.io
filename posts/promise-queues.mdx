@@ -1,0 +1,289 @@
+---
+title: Promise queues
+tags: [TypeScript, JavaScript]
+description: A look at promise queues.
+slug: promise-queues
+date: 2026-01-05
+---
+
+A promise queue is all about giving an order to functions that return promises:
+
+```
+queue.add(() => fetch(<some-url>));
+```
+
+<Note>
+It's **not** the return value of `fetch` (which is going to be a promise) that is queued, rather, it's a function that returns a promise.
+</Note>
+
+We cannot do something like `forEach` or even `Promise.all`:
+<mark>They will not run one by one in order, that is, a task will not wait for the previous one to finish in order to start:</mark>
+
+```
+tasks.forEach(task => task());
+```
+
+For example, let's say we have a list of functions that return promises:
+
+```ts
+function delay(ms: number, value: string) {
+  return new Promise((resolve) => setTimeout(() => resolve(value), ms));
+}
+
+const promiseProducers = [
+  () => delay(1000, 'first'),
+  () => delay(500, 'second'),
+  () => delay(300, 'third'),
+];
+```
+
+If we use something like this:
+
+```ts
+promiseProducers.forEach(p => p().then(console.log));
+```
+
+Of course, the third promise will resolve before the second one, and the second one will resolve before the first one. 
+
+#### Misconception of `Promise.all`
+
+`Promise.all` is **not** a promise queue:
+
+
+```js
+Promise.all(tasks.map(task => task()));
+```
+
+Again, a task will not wait for the previous one to finish in order to start.
+
+### Brief refresher on the event loop
+
+When it comes to the [JavaScript event loop](https://javascript.info/event-loop#event-loop), there are macrotasks (or, just tasks) and microtasks.
+
+Microtasks are usually created with promises - the function inside `.then()`, for example, goes to the microtask queue.
+A microtask can also be created with the `queueMicrotask()` function.
+
+The JavaScript engine prioritizes the microtask queue. It means that even after executing a macrotask, it does not wait for the macrotask queue to finish, instead immediately looks at the microtask queue.
+
+So, something like this:
+
+```js
+setTimeout(() => console.log("timeout 1")); // macrotask
+setTimeout(() => console.log("timeout 2")); // macrotask
+
+Promise.resolve()
+  .then(() => console.log("promise 1")); // microtask
+
+Promise.resolve().then(() => { // microtask
+  console.log('promise 2');
+  setTimeout(() => console.log("timeout here")); // pushed to macrotask queue
+});
+
+console.log('code'); // on the call stack
+```
+
+Logs:
+
+```
+code
+promise 1
+promise 2
+timeout 1
+timeout 2
+timeout here
+```
+
+### Why do we want a promise queue?
+
+We might want each promise generating function to wait for the previous one to be settled before it starts executing, or define a limit for the number of "concurrent" executions.
+
+Reasons might be:
+- Preserving order for something like API calls that depend on each other
+- Processing files or database writes sequentially
+- Rate-limiting
+
+---
+
+A promise queue can be for executing promises either sequentially or concurrently.
+
+> Note that JavaScript is [single-threaded](https://developer.mozilla.org/en-US/docs/Glossary/Thread) by nature, so at a given instant, only one task will be executing, although control can shift between different promises, making execution of the promises appear concurrent. [Parallel execution](https://en.wikipedia.org/wiki/Parallel_computing) in JavaScript can only be achieved through [worker threads](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API).
+
+### Sequential execution
+
+Something like this could work:
+
+```ts
+type PromiseGen = () => Promise<any>;
+
+class PQueue {
+  queue: {
+    task: PromiseGen;
+    resolve: (value: any) => void;
+    reject: (reason?: any) => void;
+  }[];
+  running: boolean;
+
+  constructor() {
+    this.queue = [];
+    this.running = false;
+  }
+
+  add(task: PromiseGen) {
+    return new Promise((resolve, reject) => {
+      this.queue.push({ task, resolve, reject });
+      this.runNext();
+    });
+  }
+
+  async runNext() {
+    if (this.running || this.queue.length === 0) {
+      return;
+    }
+
+    this.running = true;
+    const { task, resolve, reject } = this.queue.shift()!;
+
+    try {
+      const result = await task();
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    } finally {
+      this.running = false;
+      this.runNext();
+    }
+  }
+}
+
+const queue = new PQueue();
+
+function delay(ms: number, value: string) {
+  return new Promise((resolve) => setTimeout(() => resolve(value), ms));
+}
+
+queue.add(() => delay(1000, 'first')).then((value) => console.log(value));
+queue.add(() => delay(500, 'second')).then((value) => console.log(value));
+queue.add(() => delay(300, 'third')).then((value) => console.log(value));
+```
+
+Logs:
+
+```
+first
+second
+third
+```
+
+No matter what the timeout value in the delay function is, the functions are run in the order they are added to the queue.
+
+### "Concurrent" execution
+
+The sequential queue we just wrote runs a maximum of one task at a time, and the next task starts only after the previous one finishes.
+
+In the case of "concurrent" execution, we want to define a number for the maximum amount of tasks to run at a time, and when one task finishes, the next one in the queue will start running.
+
+We can track the number of tasks that are currently running instead of tracking whether a task is running or not (like we do with `this.running`).
+
+<Note>
+A new task will start only if the running count is less than the maximum amount given.
+</Note>
+
+```ts
+type PromiseGen = () => Promise<any>;
+
+class PQueue {
+  maxConcurrent: number;
+  queue: {
+    task: PromiseGen;
+    resolve: (value: any) => void;
+    reject: (reason?: any) => void;
+  }[];
+  running: number;
+
+  constructor(maxConcurrent = 1) {
+    this.maxConcurrent = maxConcurrent;
+    this.queue = [];
+    this.running = 0;
+  }
+
+  add(task: () => Promise<any>) {
+    return new Promise((resolve, reject) => {
+      this.queue.push({ task, resolve, reject });
+      this.runNext();
+    });
+  }
+
+  async runNext() {
+    if (this.running >= this.maxConcurrent || this.queue.length === 0) {
+      return;
+    }
+
+    const { task, resolve, reject } = this.queue.shift()!;
+    this.running++;
+
+    try {
+      const result = await task();
+      resolve(result);
+    } catch (err) {
+      reject(err);
+    } finally {
+      this.running--;
+      this.runNext();
+    }
+  }
+}
+
+const queue = new PQueue(2);
+
+function delay(ms: number, value: string) {
+  return new Promise((resolve) => setTimeout(() => resolve(value), ms));
+}
+
+queue.add(() => delay(1000, 'first').then((value) => console.log(value)));
+queue.add(() => delay(500, 'second').then((value) => console.log(value)));
+queue.add(() => delay(300, 'third').then((value) => console.log(value)));
+queue.add(() => delay(400, 'fourth').then((value) => console.log(value)));
+```
+
+Logs:
+
+```
+second
+third
+first
+fourth
+```
+
+Now, `running` is a number that holds the number of currently running tasks.
+We also have `maxConcurrent` to hold the maximum number of tasks to run "concurrently."
+
+The running order looks like this:
+
+- `() => delay(1000, 'first')` and `() => delay(500, 'second')` start immediately.
+- The second finishes and third starts.
+- The third finishes and fourth starts.
+- First finishes.
+- Fourth finishes.
+
+One practical use of it might look like this:
+
+```js
+const maxConcurrent = 4;
+const queue = new PQueue(maxConcurrent);
+
+for (let file of droppedFiles) {
+  let startUpload = () => {
+    return fetch('/upload-file', {
+      method: 'PUT',
+      headers: { 'content-type': 'binary/octet-stream' },
+      body: file
+    });
+  }
+
+  queue.add(startUpload);
+}
+```
+
+More to read on promise queues:
+
+- ["UI algorithms: a tiny promise queue"](https://blog.julik.nl/2025/05/a-tiny-promise-queue) by Julik Tarkhanov
