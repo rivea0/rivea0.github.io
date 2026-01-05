@@ -135,7 +135,7 @@ h6 {
 
 hr {
   border: none;
-  border-bottom: 1px solid var(--light-gray);
+  border-bottom: 1px solid var(--gray-2);
   /* width: 50%; */
   padding: 16px 0;
   margin-bottom: 2rem;
