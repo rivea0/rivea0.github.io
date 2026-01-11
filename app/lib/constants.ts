@@ -47,7 +47,7 @@ export const writingProjects: WritingProject[] = [
     links: [
       {
         name: 'Website',
-        href: 'https://rivea0.github.io/bite-sized-math-for-cs',
+        href: 'https://bitesizedmath.netlify.app',
       },
       {
         name: 'Source',

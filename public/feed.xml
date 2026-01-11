@@ -11980,7 +11980,7 @@ def increment(y):
 </code></pre>
 <p>It&#39;s a beautiful recursive algorithm for incrementing natural numbers, taken from Steven Skiena’s <em>The Algorithm Design Manual</em>.</p>
 <p>But how do we know that it&#39;s correct?</p>
-<p>The book answers it, by using <a href="https://rivea0.github.io/bite-sized-math-for-cs/unit-01-proofs/induction/" target="_blank" rel="noopener noreferrer">induction</a>.</p>
+<p>The book answers it, by using <a href="https://bitesizedmath.netlify.app/unit-01-proofs/induction/" target="_blank" rel="noopener noreferrer">induction</a>.</p>
 <p>The <em>base case</em> is when $y$ equals $0$, and if that&#39;s the case, we return $1$. That is correct: $0 + 1 = 1$.</p>
 <p>Our <em>induction hypothesis</em> is that $\text{Increment}(n - 1)$ is $n$.<br>We assume that is the case, and go on to show that $\text{Increment}(n)$ holds as well, that is, $\text{Increment}(n) = n + 1$.</p>
 <p>When $y$ is an even number (when $y \text{ mod }  2 = 0$), we return $y + 1$ in the last line, so that&#39;s correct.</p>
