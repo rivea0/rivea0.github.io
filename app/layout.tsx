@@ -28,6 +28,8 @@ export default function RootLayout({
             siteUrl={`https://${siteConfig.GC}.goatcounter.com/count`}
           />
           <div className={styles.wrapper}>
+            <div className={styles.infoBanner}>
+              <p>This site has moved to <a href="https://edaeren.com/">edaeren.com</a>, and it will be discontinued.</p></div>
             <main className={styles.main}>
               <div className={styles.heading}>
                 <span className={styles.headingText}>

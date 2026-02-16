@@ -53,3 +53,12 @@
     margin-top: var(--gap-half);
   }
 }
+
+.infoBanner {
+  display: flex;
+  background-color: var(--gray-2);
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  padding: .25rem 1rem;
+}
